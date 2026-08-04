@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="icon" href="apex-logo.png" />
-<meta name="robots" content="noindex, nofollow" />
 
 <title>APEX Circuit — ระบบวางแผนและต้นทุน</title>
+<link rel="icon" type="image/png" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 :root{
@@ -48,7 +48,7 @@ body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:va
 
 /* ─── โครงหลัก ─── */
 .body{flex:1;display:flex;min-height:0}
-.side{width:266px;flex:none;background:#fff;border-right:1px solid var(--line-d);
+.side{width:308px;flex:none;background:#fff;border-right:1px solid var(--line-d);
   display:flex;flex-direction:column;z-index:20;box-shadow:1px 0 3px rgba(31,80,140,.04)}
 .side{transition:width .22s cubic-bezier(.4,0,.2,1)}
 .side.slim{width:64px}
@@ -72,8 +72,8 @@ body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:va
 
 .sfind{padding:10px 12px 9px;border-bottom:1px solid var(--line)}
 .sfind .w{position:relative}
-.sfind input{width:100%;padding:8px 11px 8px 32px;border:1px solid var(--line-d);border-radius:8px;
-  font-family:inherit;font-size:13px;outline:none;background:#fbfdff}
+.sfind input{width:100%;padding:9px 12px 9px 34px;border:1px solid var(--line-d);border-radius:8px;
+  font-family:inherit;font-size:14px;outline:none;background:#fbfdff}
 .sfind input:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16);background:#fff}
 .sfind .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mut);display:flex}
 .slang{padding:9px 12px 8px;border-bottom:1px solid var(--line)}
@@ -87,36 +87,52 @@ body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:va
 .side.slim .slang{padding:8px 0;display:flex;justify-content:center;border-bottom:none}
 .side.slim .slang button{width:42px;height:42px;padding:0;border-radius:12px}
 .side.slim .slang .lt{display:none}
-.smenu{flex:1;overflow-y:auto;overflow-x:hidden;padding:7px 9px 10px;scrollbar-width:none;-ms-overflow-style:none}
+.smenu{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px 16px;scrollbar-width:none;-ms-overflow-style:none}
 .smenu::-webkit-scrollbar{width:0;height:0;display:none}
-.grp{margin-bottom:2px}
-.gh{width:100%;display:flex;align-items:center;gap:9px;padding:7px 10px;border:none;background:transparent;
-  font-family:inherit;font-size:12px;font-weight:700;color:#5b7590;cursor:pointer;border-radius:9px;
+.grp{margin-bottom:12px}
+.gh{width:100%;display:flex;align-items:center;gap:11px;padding:10px 12px;border:none;background:transparent;
+  font-family:inherit;font-size:13.5px;font-weight:700;color:#5b7590;cursor:pointer;border-radius:9px;
   letter-spacing:.2px;transition:.15s}
 .gh:hover{background:#f5f9fd}
-.gh .gi{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex:none}
-.gh .gi svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gh .gi{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.gh .gi svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gh .gt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gh .cnt{margin-left:auto;font-weight:600;color:#a8b6c4;font-size:11px}
-.gh .car{width:13px;height:13px;stroke:#a8b6c4;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
+.gh .cnt{margin-left:auto;font-weight:600;color:#a8b6c4;font-size:12px}
+.gh .car{width:15px;height:15px;stroke:#a8b6c4;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
   transition:transform .18s;flex:none}
 .grp.closed .car{transform:rotate(-90deg)}
 .grp.closed .items{display:none}
-.items{padding:1px 0 4px 6px}
-.it{width:100%;display:flex;align-items:center;gap:9px;padding:6px 10px;border:none;background:transparent;
-  font-family:inherit;font-size:13px;color:#3a5773;cursor:pointer;border-radius:8px;text-align:left;
+.items{padding:4px 0 6px 8px}
+.it{width:100%;display:flex;align-items:center;gap:11px;padding:10px 12px;border:none;background:transparent;
+  margin-bottom:2px;
+  font-family:inherit;font-size:14.5px;color:#3a5773;cursor:pointer;border-radius:8px;text-align:left;
   line-height:1.4;transition:.15s;position:relative}
 .it:hover{background:#f5f9fd}
 .it.on{background:var(--p-blue);color:var(--blue);font-weight:600}
 .it.on::before{content:'';position:absolute;left:-6px;top:5px;bottom:5px;width:3px;border-radius:2px;background:var(--hdr)}
-.it .dot{width:7px;height:7px;border-radius:2px;flex:none}
+.it .dot{width:8px;height:8px;border-radius:2px;flex:none}
 .it .tx{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.it .fr{flex:none;font-size:10px;color:#a8b6c4;font-weight:600;letter-spacing:.2px}
+.it .fr{flex:none;font-size:11.5px;color:#a8b6c4;font-weight:600;letter-spacing:.2px}
 .it.soon{color:#b3c1cf;cursor:not-allowed}
 .it.soon:hover{background:transparent}
 .it.soon .dot{background:#dbe4ee!important}
 .it .sn{font-size:9.5px;background:#f0f4f8;color:#93a3b3;border-radius:8px;padding:1px 6px;
   font-weight:700;margin-top:2px;flex:none}
+/* ── submenu (Configuration) ── */
+.subgrp{margin-top:6px}
+.sh{width:100%;display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;background:transparent;
+  font-family:inherit;font-size:12px;font-weight:700;color:#7d92a8;cursor:pointer;border-radius:8px;
+  letter-spacing:.5px;text-transform:uppercase;transition:.15s}
+.sh:hover{background:#f5f9fd}
+.sh .gi2{width:24px;height:24px;border-radius:7px;background:#eef3f9;display:flex;align-items:center;
+  justify-content:center;flex:none}
+.sh .gi2 svg{width:14px;height:14px;stroke:#5b7590;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sh .cnt{margin-left:auto;font-weight:600;color:#a8b6c4;font-size:11.5px}
+.sh .car{width:14px;height:14px;stroke:#a8b6c4;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;
+  transition:transform .18s;flex:none}
+.subgrp.closed .car{transform:rotate(-90deg)}
+.subgrp.closed .items{display:none}
+.subgrp .items{margin-left:12px;padding:2px 0 2px 10px;border-left:2px solid var(--line)}
 .sfoot{padding:9px 13px;border-top:1px solid var(--line);font-size:10.5px;color:var(--mut);line-height:1.5}
 
 /* ─── พื้นที่แสดงผล ─── */
@@ -300,39 +316,40 @@ const NAV_UNUSED=[['Administrator','<circle cx="12" cy="8" r="3.5"/><path d="M5 
  ['Purchase','<path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/>']];
 
 /* ══════ เมนูระบบ ══════ */
-const M=(f,n,fr,ic,col,d,tags)=>({f,n,fr,ic,col,d,tags});
+/* sub:'cfg' = หน้าตั้งค่า — แสดงเป็น submenu "Configuration" ใต้กลุ่ม */
+const M=(f,n,fr,ic,col,d,tags,sub)=>({f,n,fr,ic,col,d,tags,sub});
 const GROUPS=[
  {g:'Planning', ic:IC.plan, col:'#0e8ca8', nav:'Planning', items:[
-   M('APEX_MPS_Planning.html','กระดานวางแผนสินค้าสำเร็จรูป','FR-1',IC.board,'#0e8ca8',
+   M('APEX_MPS_Planning.html','MPS Planning Board','FR-1',IC.board,'#0e8ca8',
      'ตารางแผนผลิต FG รายวัน-สัปดาห์-เดือน ยุบขยายกลุ่มคอลัมน์ และคลิกเซลล์ดูใบสั่งผลิตกับออเดอร์ที่อยู่เบื้องหลัง',
      ['zoom 3 ระดับ','คลิกเซลล์ดูที่มา']),
-   M('APEX_MRP_Advanced.html','กระดานวางแผนวัตถุดิบ (MRP)','FR-2',IC.grid,'#1f6fc4',
+   M('APEX_MRP_Advanced.html','MRP Planning Board','FR-2',IC.grid,'#1f6fc4',
      'วัตถุดิบ 402 รายการ ยกตัวที่มีปัญหาขึ้นก่อน กางดูไทม์ไลน์รายตัวได้ครบ Planned Order · Expiring Stock · ยอดคงเหลือสุทธิ',
      ['402 รายการ','ไทม์ไลน์ในตัว']),
-   M('APEX_Planning_Parameter_Mockup.html','ตั้งค่าพารามิเตอร์การวางแผน','FR-9',IC.gear,'#5b7590',
+   M('APEX_Planning_Parameter_Mockup.html','Planning Parameters','FR-9',IC.gear,'#5b7590',
      'MOQ · Lead Time · Safety Stock · Firm Zone รายวัตถุดิบ แก้ในตารางได้ทันที พร้อมตรวจค่าน่าสงสัย 7 เกณฑ์',
-     ['แก้ในตาราง','นำเข้า Excel']),
-   M('APEX_Priority_Freeze_Mockup.html','จัดลำดับและล็อกแผน','FR-6',IC.gear,'#0e8ca8',
+     ['แก้ในตาราง','นำเข้า Excel'],'cfg'),
+   M('APEX_Priority_Freeze_Mockup.html','Plan Priority & Freeze','FR-6',IC.gear,'#0e8ca8',
      'การจองวัตถุดิบรายใบสั่งผลิต ล็อกช่วงเวลาไม่ให้แผนขยับ และตรวจสอบย้อนกลับได้ว่า lot ไหนเป็นของออเดอร์ใคร',
-     ['Freeze Window','ผูก Lot · FEFO']),
-   M('APEX_Substitute_Material_Mockup.html','วัตถุดิบทดแทน','FR-3',IC.swap,'#7a4fd3',
+     ['Freeze Window','ผูก Lot · FEFO'],'cfg'),
+   M('APEX_Substitute_Material_Mockup.html','Substitute Material','FR-3',IC.swap,'#7a4fd3',
      'กำหนดตัวแทนของวัตถุดิบหลัก ลำดับ อัตราแปลง และเงื่อนไขอนุมัติ พร้อมจับคู่ของขาดกับตัวแทนอัตโนมัติ',
-     ['21 คู่','จับคู่อัตโนมัติ']),
-   M('APEX_Idle_Material_Dashboard.html','วัตถุดิบที่ไม่มีใครจอง','FR-7',IC.money,'#c25f1e',
+     ['21 คู่','จับคู่อัตโนมัติ'],'cfg'),
+   M('APEX_Idle_Material_Dashboard.html','Idle Material Dashboard','FR-7',IC.money,'#c25f1e',
      'เงินจมในคลัง แยกตามกลุ่มวัตถุดิบและอายุที่ค้าง พร้อมข้อเสนอว่าควรทำอะไรกับแต่ละรายการ',
      ['มูลค่าเงินจม','แยกตามอายุ']),
-   M('APEX_Expiry_FEFO_Mockup.html','บริหารวัตถุดิบใกล้หมดอายุ (FEFO)','FR-4',IC.clock,'#b25012',
+   M('APEX_Expiry_FEFO_Mockup.html','Expiry Management (FEFO)','FR-4',IC.clock,'#b25012',
      'ติดตามวันหมดอายุราย Lot เฉพาะ item ควบคุม Batch จ่ายแบบ FEFO เตือนล่วงหน้า และแยกกลุ่มของหมดอายุรอตัดจำหน่าย',
      ['ราย Lot','FEFO']),
-   M('APEX_Plan_History.html','ประวัติการรันแผน','FR-5',IC.hist,'#7a4fd3',
+   M('APEX_Plan_History.html','Plan Run History','FR-5',IC.hist,'#7a4fd3',
      'เก็บทุกรอบที่รันแผน เทียบรอบล่าสุดกับรอบก่อนหน้า และวัดความเสถียรของแผน',
      ['Snapshot ทุกรอบ','Plan Stability']),
 ]},
  {g:'Purchase', ic:IC.track, col:'#c99400', nav:'Purchase', items:[
-   M('APEX_Purchase_Traceability_Mockup.html','ที่มาของการสั่งซื้อ','FR-8',IC.track,'#c99400',
+   M('APEX_Purchase_Traceability_Mockup.html','Purchase Traceability','FR-8',IC.track,'#c99400',
      'ตรวจสอบย้อนกลับทุกใบสั่งซื้อว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร ในรูปแผนผังความสัมพันธ์',
      ['แผนผัง 4 ชั้น','ที่มาของจำนวน']),
-   M('APEX_Document_Relationship_Map.html','แผนผังความสัมพันธ์เอกสาร','FR-8',IC.track,'#b07800',
+   M('APEX_Document_Relationship_Map.html','Document Relationship Map','FR-8',IC.track,'#b07800',
      'เห็นสายเอกสารครบทั้งเส้นของวัตถุดิบหนึ่งตัว — ออเดอร์ลูกค้า → แผนผลิต → ใบสั่งผลิต → PR/PO → รับเข้าคลัง',
      ['สายเดียวครบทุกชั้น','คลิกเน้นเฉพาะสาย']),
 ]},
@@ -345,8 +362,8 @@ const GROUPS=[
      ['6 driver','เทียบ Scenario']),
  ]},
  {g:'ยังไม่ได้ทำ', ic:IC.clock, col:'#a8b6c4', nav:null, soon:true, menu:false, items:[
-   M(null,'กำหนดกำลังการผลิต','FR-10',IC.cap,'#a8b6c4','กำลังผลิตรายศูนย์งาน เทียบกับภาระงานที่วางแผนไว้',[]),
-   M(null,'รายงานและการส่งออก','FR-11',IC.rep,'#a8b6c4','ชุดรายงานมาตรฐานและการส่งออกเป็น Excel / PDF',[]),
+   M(null,'Capacity Planning','FR-10',IC.cap,'#a8b6c4','กำลังผลิตรายศูนย์งาน เทียบกับภาระงานที่วางแผนไว้',[]),
+   M(null,'Reports & Export','FR-11',IC.rep,'#a8b6c4','ชุดรายงานมาตรฐานและการส่งออกเป็น Excel / PDF',[]),
  ]},
 ];
 const ALL=GROUPS.flatMap(x=>x.items);
@@ -358,23 +375,33 @@ function renderNav(){}
 const navOf=f=>{const gr=GROUPS.find(x=>x.items.some(i=>i.f===f));return gr?gr.nav:null;};
 function renderMenu(){
   const q=fq.toLowerCase();
+  const itBtn=i=>i.f
+    ? `<button class="it ${CUR===i.f?'on':''}" onclick="openScreen('${i.f}')" title="${i.n}">
+         <span class="dot" style="background:${i.col}"></span>
+         <span class="tx">${i.n}</span>
+         ${i.fr!=='—'?`<span class="fr">${i.fr}</span>`:''}</button>`
+    : `<span class="it soon"><span class="dot"></span>
+         <span class="tx">${i.n}<span class="fr">${i.fr}</span></span>
+         <span class="sn">รอทำ</span></span>`;
   g('smenu').innerHTML=GROUPS.map(gr=>{
     if(gr.menu===false) return '';
     const items=gr.items.filter(i=>!q||(i.n+' '+i.fr).toLowerCase().includes(q));
     if(!items.length) return '';
+    const main=items.filter(i=>!i.sub), cfg=items.filter(i=>i.sub);
+    const ck=gr.g+'/cfg';
     return `<div class="grp ${CLOSED.has(gr.g)&&!q?'closed':''}">
       <button class="gh ${gr.items.some(i=>i.f===CUR)?'hasCur':''}" onclick="togGrp('${gr.g}')" title="${gr.g}">
         <span class="gi" style="background:${gr.col}">${gr.ic}</span>
         <span class="gt">${gr.g}</span><span class="cnt">${items.length}</span>
         <svg class="car" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="items">${items.map(i=>i.f
-        ? `<button class="it ${CUR===i.f?'on':''}" onclick="openScreen('${i.f}')" title="${i.n}">
-             <span class="dot" style="background:${i.col}"></span>
-             <span class="tx">${i.n}</span>
-             ${i.fr!=='—'?`<span class="fr">${i.fr}</span>`:''}</button>`
-        : `<span class="it soon"><span class="dot"></span>
-             <span class="tx">${i.n}<span class="fr">${i.fr}</span></span>
-             <span class="sn">รอทำ</span></span>`).join('')}</div></div>`;
+      <div class="items">${main.map(itBtn).join('')}
+        ${cfg.length?`<div class="subgrp ${CLOSED.has(ck)&&!q?'closed':''}">
+          <button class="sh" onclick="togGrp('${ck}')" title="Configuration">
+            <span class="gi2">${IC.gear}</span>
+            <span class="gt">Configuration</span><span class="cnt">${cfg.length}</span>
+            <svg class="car" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="items">${cfg.map(itBtn).join('')}</div></div>`:''}
+      </div></div>`;
   }).join('') || `<div style="padding:26px 14px;text-align:center;color:var(--mut);font-size:12.5px">ไม่พบเมนูที่ค้นหา</div>`;
   g('sfoot').innerHTML=`MRP รอบล่าสุด <b style="color:var(--blue)">03-08-2026 06:00</b><br>
     วัตถุดิบ 402 · สินค้า 24 · ข้อมูลจำลอง`;
@@ -439,35 +466,28 @@ renderNav(); renderMenu(); renderHome(); crumb(null);
 <script>window.APEX_I18N_NO_BTN=true;/* หน้ารวมใช้ปุ่มภาษาในเมนูแทนปุ่มลอย */</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "APEX Circuit — ระบบวางแผนและต้นทุน": "APEX Circuit — Planning & Costing System",
-"กระดานวางแผนสินค้าสำเร็จรูป": "Finished Goods Planning Board",
 "ตารางแผนผลิต FG รายวัน-สัปดาห์-เดือน ยุบขยายกลุ่มคอลัมน์ และคลิกเซลล์ดูใบสั่งผลิตกับออเดอร์ที่อยู่เบื้องหลัง": "Daily / weekly / monthly FG production schedule with collapsible column groups — click any cell to see the work orders and sales orders behind it",
 "zoom 3 ระดับ": "3 zoom levels",
 "คลิกเซลล์ดูที่มา": "Cell drill-down",
-"กระดานวางแผนวัตถุดิบ (MRP)": "Material Planning Board (MRP)",
 "วัตถุดิบ 402 รายการ ยกตัวที่มีปัญหาขึ้นก่อน กางดูไทม์ไลน์รายตัวได้ครบ Planned Order · Expiring Stock · ยอดคงเหลือสุทธิ": "402 materials, problem items surfaced first — expand any item for its full timeline: Planned Orders · Expiring Stock · Projected On-hand",
 "402 รายการ": "402 items",
 "ไทม์ไลน์ในตัว": "Built-in timeline",
-"ตั้งค่าพารามิเตอร์การวางแผน": "Planning Parameter Settings",
 "MOQ · Lead Time · Safety Stock · Firm Zone รายวัตถุดิบ แก้ในตารางได้ทันที พร้อมตรวจค่าน่าสงสัย 7 เกณฑ์": "MOQ · Lead Time · Safety Stock · Firm Zone per material — edit directly in the grid, with 7 sanity checks for suspicious values",
 "แก้ในตาราง": "Inline editing",
 "นำเข้า Excel": "Excel import",
-"จัดลำดับและล็อกแผน": "Priority & Plan Freeze",
-"การจองวัตถุดิบรายใบสั่งผลิต ล็อกช่วงเวลาไม่ให้แผนขยับ และตรวจสอบย้อนกลับได้ว่า lot ไหนเป็นของออเดอร์ใคร": "Material reservations per work order, freeze windows that lock the plan, and lot-level tracing back to each customer order",
+"การจองวัตถุดิบรายใบสั่งผลิต ล็อกช่วงเวลาไม่ให้แผนขยับ และตรวจสอบย้อนกลับได้ว่า lot ไหนเป็นของออเดอร์ใคร": "Material reservations per work order, freeze windows that lock the plan, and lot-level traceability back to each customer order",
 "ผูก Lot · FEFO": "Lot pegging · FEFO",
-"วัตถุดิบทดแทน": "Substitute Materials",
 "กำหนดตัวแทนของวัตถุดิบหลัก ลำดับ อัตราแปลง และเงื่อนไขอนุมัติ พร้อมจับคู่ของขาดกับตัวแทนอัตโนมัติ": "Define substitutes for primary materials — priority, conversion ratio and approval rules — with automatic matching of shortages to substitutes",
 "21 คู่": "21 pairs",
 "จับคู่อัตโนมัติ": "Auto matching",
-"วัตถุดิบที่ไม่มีใครจอง": "Idle (Unreserved) Materials",
 "เงินจมในคลัง แยกตามกลุ่มวัตถุดิบและอายุที่ค้าง พร้อมข้อเสนอว่าควรทำอะไรกับแต่ละรายการ": "Capital tied up in inventory, broken down by material group and aging, with a recommended action for every item",
 "มูลค่าเงินจม": "Tied-up value",
 "แยกตามอายุ": "Aging buckets",
-"ที่มาของการสั่งซื้อ": "Purchase Traceability",
 "ตรวจสอบย้อนกลับทุกใบสั่งซื้อว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร ในรูปแผนผังความสัมพันธ์": "Trace every purchase order back to its work order and customer, and see how each quantity was calculated — shown as a relationship diagram",
-"ประวัติการรันแผน": "Plan Run History",
+"ติดตามวันหมดอายุราย Lot เฉพาะ item ควบคุม Batch จ่ายแบบ FEFO เตือนล่วงหน้า และแยกกลุ่มของหมดอายุรอตัดจำหน่าย": "Track expiry dates per lot for batch-controlled items, issue by FEFO, get early warnings, and separate expired stock pending write-off",
+"ราย Lot": "Per lot",
 "เก็บทุกรอบที่รันแผน เทียบรอบล่าสุดกับรอบก่อนหน้า และวัดความเสถียรของแผน": "Stores every plan run, compares the latest run against the previous one, and measures plan stability",
 "Snapshot ทุกรอบ": "Snapshot every run",
-"แผนผังความสัมพันธ์เอกสาร": "Document Relationship Map",
 "เห็นสายเอกสารครบทั้งเส้นของวัตถุดิบหนึ่งตัว — ออเดอร์ลูกค้า → แผนผลิต → ใบสั่งผลิต → PR/PO → รับเข้าคลัง": "See the entire document chain of one material — customer order → production plan → work order → PR/PO → goods receipt",
 "สายเดียวครบทุกชั้น": "Full chain in one view",
 "คลิกเน้นเฉพาะสาย": "Click to highlight a chain",
@@ -478,12 +498,8 @@ renderNav(); renderMenu(); renderHome(); crumb(null);
 "จำลองว่าถ้าราคาวัตถุดิบหรือค่าแรงขยับ ต้นทุนและกำไรขั้นต้นจะเป็นอย่างไร พร้อมราคาแนะนำและจุดคุ้มทุน": "Simulate how cost and gross margin respond when material prices or labor rates move — with suggested pricing and break-even points",
 "เทียบ Scenario": "Scenario compare",
 "ยังไม่ได้ทำ": "Coming Soon",
-"บริหารวัตถุดิบใกล้หมดอายุ": "Expiring Material Management",
 "จัดการ FEFO แจ้งเตือนล่วงหน้า และตัดจ่ายของที่หมดอายุ — เฉพาะ item ที่ควบคุม Batch เท่านั้น (item ไม่ควบคุม Batch ไม่มีวันหมดอายุ)": "FEFO handling, advance alerts and write-off of expired stock — batch-controlled items only (non-batch items never expire)",
-"กำหนดลำดับความสำคัญและช่วงเวลาที่ระบบห้ามขยับแผนเอง": "Define priorities and time windows where the system must not move the plan on its own",
-"กำหนดกำลังการผลิต": "Capacity Settings",
 "กำลังผลิตรายศูนย์งาน เทียบกับภาระงานที่วางแผนไว้": "Capacity per work center versus planned load",
-"รายงานและการส่งออก": "Reports & Export",
 "ชุดรายงานมาตรฐานและการส่งออกเป็น Excel / PDF": "Standard report set with Excel / PDF export",
 "รอทำ": "Planned",
 "ไม่พบเมนูที่ค้นหา": "No menu matches your search",
