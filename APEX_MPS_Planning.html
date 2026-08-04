@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Actual (MPS) — APEX Circuit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4;
+  --th:#5b9fe0; --line:#edf2f8; --line-d:#d7e2ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* ═══ CHROME ═══ */
+#app{min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--hdr);display:flex;align-items:stretch;height:76px;flex:none;position:sticky;top:0;z-index:100}
+.logo-tab{background:#fff;border-radius:0 0 26px 0;width:212px;display:flex;align-items:center;justify-content:center;flex:none}
+.logo-tab svg{height:46px}
+.apexlogo{height:44px;width:auto;display:block}
+
+nav{display:flex;align-items:center;gap:4px;padding:0 10px;flex:1;min-width:0;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+.mi{display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;font-size:12.5px;
+    padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:.94;cursor:pointer;transition:.2s;text-decoration:none}
+.mi:hover{background:rgba(255,255,255,.12)}
+.mi svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mi.active{background:rgba(255,255,255,.22);opacity:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#fff;padding-right:24px;flex:none}
+.user svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.user b{font-size:14.5px;font-weight:600;display:block;line-height:1.3}
+.user span{font-size:12px;opacity:.85}
+.strip{background:var(--strip);color:#2b567c;font-size:12.5px;text-align:right;padding:5px 24px;flex:none}
+.content{flex:1;padding:18px 22px 70px}
+footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padding:14px;flex:none}
+
+/* ═══ PAGE ═══ */
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:20px 24px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:22px}
+.page-title{font-size:23px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:13px;color:var(--mut);margin-top:3px}
+.actions{display:flex;align-items:center;gap:9px;flex:none}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:20px;
+     border:1.5px solid var(--line-d);background:#fff;font-family:inherit;font-size:13.5px;
+     font-weight:500;color:var(--ink);cursor:pointer;transition:.15s}
+.btn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.1)}
+.btn i{width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+       font-size:11px;font-style:normal;color:#fff;flex:none}
+.btn-run i,.btn-plan i{background:#22a45d}.btn-clear i{background:#e5a50a}
+.icon-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;cursor:pointer;
+          display:inline-flex;align-items:center;justify-content:center;color:var(--mut);transition:.15s}
+.icon-btn:hover{background:#eef4fb;color:var(--blue)}
+
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 20px}
+.f{display:flex;flex-direction:column;gap:5px}
+.f label{font-size:13.5px;font-weight:600;color:var(--ink)}
+.ctrl{position:relative;display:flex;align-items:center}
+.ctrl input,.ctrl select{width:100%;padding:8px 11px;border:1px solid var(--line-d);border-radius:5px;
+  font-family:inherit;font-size:13.5px;color:var(--ink);background:#fff;outline:none;transition:.15s}
+.ctrl input:focus,.ctrl select:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.18)}
+.ctrl input[readonly]{background:#f7f9fc;color:var(--mut)}
+.ctrl select{appearance:none;padding-right:32px;cursor:pointer}
+.ctrl .caret{position:absolute;right:11px;pointer-events:none;color:var(--mut);font-size:11px}
+.ctrl .ico{position:absolute;right:8px;display:flex;gap:2px}
+.ctrl .ico button{width:26px;height:26px;border:none;background:transparent;cursor:pointer;color:var(--mut);
+                  border-radius:4px;display:flex;align-items:center;justify-content:center}
+.ctrl .ico button:hover{background:#eef4fb;color:var(--blue)}
+.ctrl-2{display:flex;gap:8px;align-items:center}
+.ctrl-2 .ctrl{flex:1}
+.checks{display:flex;align-items:center;gap:26px;padding-top:26px}
+.chk{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px}
+.chk input{width:17px;height:17px;accent-color:var(--hdr);cursor:pointer}
+
+/* ═══ ZOOM BAR ═══ */
+.zoombar{display:flex;align-items:center;justify-content:space-between;gap:16px;
+         margin-top:20px;padding:11px 14px;background:#f5f9fd;border:1px solid var(--line-d);
+         border-radius:7px;flex-wrap:wrap}
+.zb-left{display:flex;align-items:center;gap:11px;font-size:13px;color:var(--ink)}
+.zb-left b{color:var(--blue);font-weight:600}
+.zb-left .sep{color:#c3d3e2}
+.zb-right{display:flex;align-items:center;gap:12px}
+.zlabel{font-size:12.5px;color:var(--mut);font-weight:600}
+.zoom{display:inline-flex;background:#e4eef8;border-radius:22px;padding:3px;gap:2px}
+.z{border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;
+   color:#4a6b86;padding:6px 18px;border-radius:18px;cursor:pointer;transition:.18s;
+   display:inline-flex;align-items:center;gap:6px}
+.z:hover{background:rgba(255,255,255,.7)}
+.z.active{background:var(--hdr);color:#fff;box-shadow:0 1px 4px rgba(31,80,140,.22)}
+.z svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.nav-arrows{display:inline-flex;gap:4px}
+.na{width:30px;height:30px;border-radius:50%;border:1px solid var(--line-d);background:#fff;
+    cursor:pointer;color:#4a6b86;display:inline-flex;align-items:center;justify-content:center;transition:.15s}
+.na:hover{border-color:#9dbdd9;color:var(--blue);background:#f0f7fd}
+.na svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.na-today{width:auto;padding:0 13px;border-radius:15px;font-family:inherit;font-size:12.5px;font-weight:600}
+
+/* ═══ TABLE ═══ */
+.tbl-wrap{margin-top:12px;border:1px solid var(--line-d);border-radius:6px;overflow:auto;max-height:600px}
+table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:13.5px}
+thead th{background:var(--th);color:#fff;font-weight:600;padding:10px 12px;text-align:center;
+  white-space:nowrap;position:sticky;top:0;z-index:20;border-right:1px solid rgba(255,255,255,.18);
+  vertical-align:middle}
+thead th:last-child{border-right:none}
+thead th .th-main{font-size:13px;line-height:1.3}
+thead th .th-sub{font-size:11px;font-weight:400;opacity:.85;display:block;margin-top:1px}
+thead th.wk{min-width:96px}
+thead th.mo{min-width:118px}
+thead th.dy{min-width:78px}
+thead th.now{background:#4f9de6;box-shadow:inset 0 -3px 0 #ffd66b}
+thead th.wkend{background:#7cb6e9}
+
+.fz{position:sticky;background:#fff;z-index:10}
+thead .fz{z-index:30;background:var(--th)}
+.fz-last{box-shadow:2px 0 4px rgba(31,80,140,.09)}
+.al-l{text-align:left!important}
+.al-c{text-align:center!important}
+/* toggle ซ่อน/แสดงกลุ่มคอลัมน์ Unit · Min · Max */
+.gtog{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;
+      border-radius:4px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.2);
+      color:#fff;font-size:14px;font-weight:700;line-height:1;cursor:pointer;transition:.15s;
+      font-family:inherit;padding:0;margin-right:7px;vertical-align:-3px}
+.gtog:hover{background:rgba(255,255,255,.42)}
+th.gcol{padding:8px 4px} th.gcol .gtog{margin-right:0}
+td.gcol{background:#f9fbfd}
+
+tbody td{padding:11px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;
+         border-right:1px solid var(--line)}
+tbody td:last-child{border-right:none}
+td.wkend-c{background:#fafcfe}
+tr.grp td{background:#fbfcfe;border-bottom:1px solid var(--line-d);padding:9px 12px;vertical-align:top}
+tr.grp .fz{background:#fbfcfe}
+tr.grp .code{color:var(--blue);font-weight:700;text-align:left;font-size:13.5px}
+tr.grp .code small{display:block;font-weight:400;color:var(--mut);font-size:11px;margin-top:2px}
+tr.grp .nm{text-align:left;font-weight:600;color:#2b3a4a;font-size:13.5px;line-height:1.4}
+tr.grp .nm small{display:block;font-weight:400;color:var(--mut);font-size:11px;margin-top:2px}
+.exp{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+     border-radius:4px;cursor:pointer;color:var(--blue);transition:.2s}
+.exp:hover{background:#e2eefb}
+.exp svg{width:15px;height:15px;transition:transform .2s}
+.exp.closed svg{transform:rotate(-90deg)}
+tr.sub td{background:#fff}
+tr.sub .lbl{text-align:left;padding-left:24px;color:#455a6e}
+tr.sub:hover td{background:#fafcfe}
+tr.sub:hover .fz{background:#fafcfe}
+
+.v-in{color:var(--blue);font-weight:600;background:var(--p-blue)!important}
+.v-out{color:var(--red);font-weight:600;background:var(--p-red)!important}
+.v-net{color:var(--green);font-weight:600;background:var(--p-green)!important}
+.v-net-lo{color:#a06a00;font-weight:600;background:#fdf7e2!important}
+.v-net-neg{color:var(--red);font-weight:700;background:var(--p-red)!important}
+.v-open{color:#5a6b7d;background:#f2f5f8!important}
+tr.row-net td{background:var(--p-green)}
+tr.row-net .fz{background:var(--p-green)}
+tr.row-net .lbl{color:#22684a;font-weight:600}
+
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px;vertical-align:1px}
+.tag-sh{background:#fdeceb;color:#b32b2b}
+.tag-ok{background:#e9f8f0;color:#1a7a42}
+.tag-lo{background:#fdf7e2;color:#8a6a00}
+
+.legend{display:flex;gap:20px;margin-top:14px;font-size:12.5px;color:var(--mut);flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* ═══ DIALOG (คลิกที่เซลล์เพื่อดูรายละเอียด) ═══ */
+td.clk{cursor:pointer}
+td.clk:hover{outline:2px solid #7fb3e0;outline-offset:-2px}
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.38);z-index:200;display:flex;
+      align-items:flex-start;justify-content:center;padding:56px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:8px;box-shadow:0 14px 44px rgba(15,40,80,.3);
+     width:58%;min-width:660px;max-width:1040px;overflow:hidden;animation:pop .16s ease-out}
+.dlg.wide{width:74%;max-width:1240px}
+@keyframes pop{from{transform:translateY(-10px);opacity:0}to{transform:none;opacity:1}}
+.dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;
+        justify-content:space-between;gap:16px}
+.dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
+.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:transparent;border:none;color:#fff;font-size:21px;line-height:1;cursor:pointer;
+       padding:1px 7px;border-radius:4px;font-family:inherit}
+.dlg-x:hover{background:rgba(255,255,255,.24)}
+.dlg-bd{padding:15px 18px;max-height:64vh;overflow:auto}
+.dlg-ft{padding:10px 18px;border-top:1px solid var(--line);background:#fbfdff;
+        display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;color:var(--mut)}
+.dtb{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:8px 10px;
+        border-bottom:1px solid var(--line-d);white-space:nowrap}
+.dtb td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;color:var(--ink)}
+.dtb tr:hover td{background:#fafcfe}
+.dtb th,.dtb td{text-align:left}
+.dtb .num,.dtb th.num{text-align:right;font-variant-numeric:tabular-nums}
+.dtb .c,.dtb th.c{text-align:center}
+.sotb th,.sotb td{text-align:left}
+.dtb tfoot td{background:#f5f9fd;font-weight:700;border-top:1px solid var(--line-d)}
+.obj{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10.5px;font-weight:700}
+.obj-wo{background:#e9f3fd;color:#1f6fc4}
+.obj-so{background:#fdeceb;color:#b32b2b}
+.dbtn{border:1.5px solid var(--line-d);background:#fff;border-radius:16px;padding:4px 13px;
+      font-family:inherit;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
+.dbtn:hover{border-color:#9dbdd9;background:#f2f8fd}
+.so-card{border:1px solid #dde5f2;border-radius:8px;overflow:hidden;margin-bottom:10px}
+.so-hd{background:#0f3f8c;color:#fff;padding:9px 14px;font-size:12.5px;font-weight:600;
+       display:flex;justify-content:space-between;gap:14px}
+.wo-wrap{background:#fbfcff}
+.st-ok{color:#1a7a42;font-weight:700}
+.st-prog{color:#a06a00;font-weight:700}
+.st-over{color:#c62828;font-weight:700}
+.sumbar{display:flex;gap:30px;padding:11px 16px;background:#f5f9fd;border-radius:7px;
+        margin-top:12px;font-size:12.5px}
+.sumbar b{display:block;color:var(--blue);font-size:15px;margin-top:2px}
+
+@media(max-width:1250px){.filters{grid-template-columns:repeat(2,1fr)}.checks{padding-top:8px}}
+
+/* ══ ใบสั่งงาน (อ้างอิงหน้าจอ Work Order ของ Beside) ══ */
+.dlg.full{width:96%;max-width:1560px}
+.dlg.full .dlg-bd{max-height:74vh}
+.dlg.full .dlg-bd{position:relative;padding:0;max-height:none;overflow:hidden}
+.wo-scroll{height:74vh;overflow:auto;padding:16px 18px}
+.wo-scrim{position:absolute;inset:0;background:rgba(20,40,70,.14);opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:30}
+/* หัวตารางในกล่องต้องไม่ลอยข้ามแผงข้าง */
+.dlg .dtb thead th{position:static;z-index:auto}
+.wo-scroll .dtb thead th{position:sticky;top:-16px;z-index:2}
+.wo-scrim.on{opacity:1;pointer-events:auto}
+.wo-sidebtn{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.16);color:#fff;
+  border-radius:8px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:.15s;white-space:nowrap}
+.wo-sidebtn:hover{background:rgba(255,255,255,.3)}
+.wo-sidebtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wo-sidebtn .n{background:#fff;color:var(--blue);border-radius:9px;padding:0 6px;font-size:10.5px}
+.wo-card{border:1px solid #e5ecf4;border-radius:12px;padding:15px 17px;margin-bottom:13px;background:#fff;
+  box-shadow:0 1px 2px rgba(31,80,140,.04)}
+.wo-card h3{font-size:13px;font-weight:700;color:#3a5773;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.wo-card h3 .bdg{width:21px;height:21px;border-radius:50%;background:var(--hdr);color:#fff;
+  font-size:11.5px;display:flex;align-items:center;justify-content:center;flex:none}
+.wo-card h3 .rt{margin-left:auto;display:flex;gap:7px;align-items:center}
+.wo-f{display:grid;grid-template-columns:repeat(4,1fr);gap:11px 13px}
+.wo-f.c3{grid-template-columns:repeat(3,1fr)}
+.fld label{display:block;font-size:11.5px;color:#6b829b;margin-bottom:5px;font-weight:600;letter-spacing:.1px}
+.fld label .rq{color:var(--red);margin-left:2px}
+.fld input,.fld select{width:100%;height:34px;padding:0 11px;border:1px solid #dfe7f0;border-radius:9px;
+  font-family:inherit;font-size:12.5px;color:var(--ink);outline:none;background:#fff;
+  transition:border-color .15s,box-shadow .15s,background .15s}
+.fld input:hover,.fld select:hover{border-color:#c2d5e8}
+.fld input:focus,.fld select:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+.fld input[readonly]{background:#f6f9fc;color:#5b7590;border-color:#e6edf4;cursor:default}
+.fld input[readonly]:hover{border-color:#e6edf4}
+.fld select{appearance:none;-webkit-appearance:none;padding-right:30px;cursor:pointer;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237d8ea0' stroke-width='1.7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;background-size:10px}
+.fld input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.fld input[type=date],.fld input[type=datetime-local]{font-variant-numeric:tabular-nums}
+.fld .ig{display:flex;gap:6px}
+.fld .ig input{flex:1;min-width:0}
+.igb{border:1px solid #dfe7f0;background:#f7fafd;border-radius:9px;width:34px;height:34px;flex:none;
+  cursor:pointer;color:#7d95ad;font-size:13px;font-family:inherit;transition:.15s;
+  display:flex;align-items:center;justify-content:center}
+.igb:hover{background:var(--p-blue);border-color:#9dbdd9;color:var(--blue)}
+.igb:active{transform:scale(.94)}
+.selbtn{display:flex;flex-wrap:wrap;gap:6px}
+.pb{border:1px solid #dfe7f0;background:#fff;border-radius:9px;padding:6px 14px;
+  font-family:inherit;font-size:12px;font-weight:600;color:#5b7590;cursor:pointer;transition:.15s}
+.pb:hover{border-color:#9dbdd9;background:#f7fbff}
+.pb.on{background:var(--hdr);border-color:var(--hdr);color:#fff;box-shadow:0 2px 6px -2px rgba(79,157,230,.7)}
+.flow-container{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:11px;
+  padding-top:11px;border-top:1px dashed var(--line-d);font-size:12.5px}
+.fchip{border:1.5px solid #bcdcf7;background:var(--p-blue);color:var(--blue);border-radius:15px;
+  padding:3px 12px;font-weight:600;cursor:pointer;font-size:12px}
+.fchip.on{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.farw{color:#a8b6c4}
+.wo-alloc{background:#f7fafd;border:1px solid #e5ecf4;border-radius:9px;padding:8px 13px;
+  margin-top:10px;display:flex;align-items:center;gap:12px;font-size:12.5px;flex-wrap:wrap}
+.wo-alloc .hint{margin-left:auto;color:var(--mut);font-size:11.5px}
+.wo-mc{border:1px solid #dfe7f0;border-radius:11px;margin-bottom:11px;overflow:hidden}
+.wo-mc .mh{background:#f5f8fb;padding:8px 13px;display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:600;color:#3a5773}
+.wo-mc .mh .lk{background:#fef3c7;color:#8a6a00;border-radius:11px;padding:1px 9px;font-size:10.5px;font-weight:700}
+.wo-mc .mh .del{margin-left:auto;border:none;background:transparent;color:#b0616a;cursor:pointer;
+  font-family:inherit;font-size:12px;padding:2px 8px;border-radius:5px}
+.wo-mc .mh .del:hover{background:#fdf0f0}
+.wo-mc .mb{padding:12px 13px}
+.wo-shift{background:#f6f9fc;border-top:1px dashed var(--line-d);padding:7px 13px;
+  display:flex;align-items:center;gap:10px;font-size:12px;color:#5b7590}
+.wo-shift button{margin-left:auto;border:1px solid var(--line-d);background:#fff;border-radius:6px;
+  padding:3px 11px;font-family:inherit;font-size:11.5px;color:#4a6b86;cursor:pointer}
+.wo-shift button:hover{border-color:#9dbdd9;background:var(--p-blue)}
+.wo-empty{border:1.5px dashed var(--line-d);border-radius:8px;padding:24px;text-align:center;
+  color:var(--mut);font-size:12.5px}
+.wo-side{position:absolute;top:0;right:0;bottom:0;width:50%;min-width:470px;max-width:94%;background:#fff;z-index:31;
+  border-left:1px solid var(--line-d);box-shadow:-10px 0 28px -12px rgba(15,40,80,.32);
+  display:flex;flex-direction:column;transform:translateX(100%);
+  transition:transform .24s cubic-bezier(.4,0,.2,1)}
+.wo-side.open{transform:none}
+.wo-sclose{position:absolute;top:9px;right:10px;z-index:2;width:24px;height:24px;border-radius:7px;
+  border:none;background:transparent;color:#8ba4bd;cursor:pointer;font-size:17px;font-family:inherit;line-height:1}
+.wo-sclose:hover{background:var(--p-blue);color:var(--blue)}
+.wo-tabs{display:flex;border-bottom:1px solid var(--line-d);background:#fbfdff;padding-right:34px}
+.wo-tabs button{flex:1;border:none;background:transparent;font-family:inherit;font-size:12px;
+  padding:11px 6px;color:var(--mut);cursor:pointer;border-bottom:2.5px solid transparent}
+.wo-tabs button.on{color:var(--blue);font-weight:700;background:#fff;border-bottom-color:var(--hdr)}
+.wo-side .sb{padding:12px 13px;flex:1;overflow:auto}
+.wo-side .sb .lb{font-size:11.5px;color:#5b7590;font-weight:600;margin-bottom:4px}
+.sotb{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:10px;table-layout:fixed}
+.sotb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:7px 8px;
+  border-bottom:1px solid var(--line-d);white-space:nowrap}
+.sotb td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.sotb tbody tr:hover td{background:#fafcfe}
+.sotb .r{text-align:right;font-variant-numeric:tabular-nums}
+.pvw{border:1px solid var(--line-d);border-radius:8px;margin-bottom:9px;overflow:hidden}
+.pvw .h{background:#f5f8fb;padding:7px 11px;font-size:12px;font-weight:700;color:#3a5773;
+  display:flex;align-items:center;gap:8px}
+.pvw .h .wc{margin-left:auto;background:#e5f9fe;color:#0b6f87;border-radius:10px;padding:1px 8px;font-size:10.5px}
+.pvw .r{padding:7px 11px;font-size:11.5px;color:#4a6b86;display:flex;justify-content:space-between;gap:10px;
+  border-bottom:1px solid var(--line)}
+.pvw .r:last-child{border-bottom:none}
+.pvw .r b{color:var(--ink);font-variant-numeric:tabular-nums}
+.wo-ft-l{font-size:12px;color:var(--mut)}
+.wbtn{border:1px solid #dfe7f0;background:#fff;border-radius:9px;padding:7px 16px;
+  font-family:inherit;font-size:12.5px;font-weight:600;color:#4a6b86;cursor:pointer;transition:.15s;
+  display:inline-flex;align-items:center;gap:6px}
+.wbtn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.12)}
+.wbtn.pri{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.wbtn.pri:hover{background:#3d8ad6}
+.wtoast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;z-index:400;
+  background:#0f3f8c;color:#fff;border-radius:9px;padding:10px 18px;font-size:13px;
+  box-shadow:0 8px 22px -6px rgba(15,40,80,.45);max-width:660px;line-height:1.55}
+.wtoast.warn{background:#a06a00}
+.wtoast.ok{background:#1a7a42}
+td.v-net.clk,td.v-net-lo.clk,td.v-net-neg.clk{cursor:pointer}
+td.v-net.clk:hover,td.v-net-lo.clk:hover,td.v-net-neg.clk:hover{outline:2px solid var(--hdr);outline-offset:-2px}
+
+/* ══ เก็บรายละเอียดความสวยงามทั้งโปรแกรม ══ */
+::selection{background:#cfe6fa;color:#1a3a5c}
+:focus-visible{outline:2px solid #7FB3E0;outline-offset:2px;border-radius:6px}
+button,select,input,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#bcd0e2;background-clip:content-box}
+/* ปุ่มและช่องกรอกให้สูงเท่ากันและมุมนุ่มขึ้น */
+.btn{border-radius:20px;transition:border-color .15s,box-shadow .15s,background .15s,color .15s}
+.btn:active{transform:translateY(.5px)}
+.sel,.inp{border-radius:8px;border-color:#dfe7f0;transition:border-color .15s,box-shadow .15s}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.chip{letter-spacing:.1px}
+/* ตัวเลขทุกที่ใช้ความกว้างเท่ากัน อ่านเป็นคอลัมน์ได้ */
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ══ ประวัติการรันแผน — เปิดเป็นกล่องซ้อน ══ */
+.hist-mask{position:fixed;inset:0;background:rgba(18,40,72,.42);z-index:260;display:flex;
+  align-items:center;justify-content:center;padding:26px}
+.hist-win{background:#fff;border-radius:12px;width:94%;height:92%;max-width:1560px;overflow:hidden;
+  box-shadow:0 18px 50px -12px rgba(15,40,80,.42);display:flex;flex-direction:column}
+.hist-hd{background:var(--th);color:#fff;padding:11px 18px;display:flex;align-items:center;gap:14px;flex:none}
+.hist-hd h3{font-size:15px;font-weight:600}
+.hist-hd small{font-weight:400;opacity:.9;font-size:12px}
+.hist-hd .x{margin-left:auto;background:transparent;border:none;color:#fff;font-size:21px;line-height:1;
+  cursor:pointer;padding:2px 8px;border-radius:5px;font-family:inherit}
+.hist-hd .x:hover{background:rgba(255,255,255,.24)}
+.hist-win iframe{flex:1;width:100%;border:none;background:#fff}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed #app{min-height:100vh}
+html.embed .content{padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo-tab"><img class="apexlogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAABRMElEQVR42u19d5xdVbX/d+29zzm3Tu9pk95DSEKowkRAmiIqiQoqggWelfcs+GwzEStPfYiioiJFEJzQTIDQwkyAhABppPc6yfSZO3Nnbjnn7L1+f5w7EGKQ93s1ifebz/ncySn7tHXWXnut714LyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888vgfAjPTO2yXjcySmcX/wrUIZlbvdE3/iKAjH9JJdWNE5u3ua2jb//S9H32ePN4GjY0sT7Z76u/nsrcTrMZGlinms/tdPrtzkOf8T11DfX2Tampi5fr76jV3LWUeHMb/S1r3RIECgAULSDPzOAAOAP7vPEH2Hdc4x9wLcHO/9hF/H6MJ54h1jg0CCYZt0il/cjLNbRnO9JJLZNs2u3CJYbPrpUsY4UtZAtIgk2XOMGCObO6/2uvmepetRMRZ3l0NFJ6bSLWdURyNPtzYyJKZJQBDRPyPLIDEzPTa2oMf3rLWuS/Zr6RnNLQOnokkAkkCCQCkAWgYdmFYA0yQAIQQUCSgpAARwRgD3/dhwBAgQBIEGCQ0AAMhNYgIDIYxGr4xkCQghQDAIGIIwYAAGBqGNRg+BAyEpGBfUGA75F6z1gytCZoIhgkwAqlU1tjKFrZlB+czBr5hMBF8rZHO6gFAgFhSJByKMgsQCwgEyskYA2MYTIAUAj4A1xBAEpYdwkAyAyksCCGO6nYBYfdA2R4KCyqap08pXSvD/Ofxk6xoHGgHcG1Lb/ufR5RUbQCA1avZmj0b5khhzNmKCoA+2btxYubQ2vX72j939dqCtsMRY4U4J3GAlBJSCQhJEEKDiGHZBNtSAAMEgpIClmLYFkFKA6EAIQChJEgQHMdByLFgKYBJQyhASYKSEkQEEgKWVJAysAKEZEjFkBZghwClACE0BPkQFkEJBSUEiBmGgw9F+4FwGRbQBjBagn1F2mNoH+xrIJNxYTSBQWAi8g3gZT1ozfCyPrMhsCF4rod0xoXnaWifkfUMfM8g6xmktUGWJboSg+js7gVIgqQ6otMgEFlQtgsBg2EVI6mmohiOneBx4wu8c84tsyeOL98241T1qgW9HJB/JqLMkQOjfzStSMwcWvXa9l1fv35XTdthG05MkW05ABGkEJBKQkgAbGC0RiRiI+TYsG2FSDgMRYBlayjLQFgawmYoQZCWCtpQEtFIBETBC1ICsKWCZVkQEiAiFBaEYFsSWqYhVCoQfEkIRyyEHAWQARFDKoKQKtA6DHBOAI0OtDYzYJhhDMH3GJ7L0Jkw3CyQzRhoQ2+oqd6ePgwm02AmaA34voHWgJvNIuu5SKVdpFKDcF0Lg/0OfANktEaGLbR2GHT19ME3BhBHjelYAWwBRoF90vANgLQU6AXjME49pRwXXzodc04vR7RQrDv93MjyQoHtwL67iUZnAkHsGQUU/xDo+A1R5UvMLIlIn6w2ICllFfb2JHR7u+DQgIJlOyACpFBQUkJZCkoq2JYCZ7PwpA9lCwxYadgWwbIAy2KQrcHCBcMFSQOSDMsSULaEFAJkFGxSsKQFJQjheBiWEuju0VDKgFUCpFJQQsCxrEArilz3TAJKSkgnp2IBsGEQAE9rGF8DxsAYA20Y2tfwfILxCuFlA83m+wzBADPBeAa+p6H94HjPNeR6Glkvi6znw/UC7ZgeJHR1M4wBMkbD0xEe7HPgDSRyZp54GxMw9ytssriKJUqgqIQ2vN5u1r2+yRSGImLyKfLUuosqT627YBgmjK/94qDPt0Uk7gLubjf+J9q1kv5RDZ6UGlC9vmnfA1vWha7s7PShHBsi1x0SABIiZ0MxwAZSMAQxCAbMPiQBJBhCCkAIGGFgENh7JDiw47QGMwBWUJAQIrAfpUUQbGDYg6YsAA0IAxIGSgT7EVFgSxJBCAKkABPhSI+aMQbsa4icWcBM0D7D1wzNDE8z2GewIYCD9hQpEBO0IWjNyKSz8A1giOB6PjQIStlBt8waWhOYJRwrBkEO0ikXRgNHd5YMgMEgKXG4rRWvb3gde7dEMNhfikHd50tYSiIOgOGi3QgkTXVZCc09c4x87wfH4JSZRdvGT8IthWG6KxhJs0ADsPAktQUp569Cf8a/mYSIZj0fvh/0VQYGbI7cmYOBBIDALDeQAoAR0DmF6hsBBuAPvRgDABIw9hv/F7k3ZeBDmFwbBLAwgTUOQCDQOgKA4OBAP7fNDF15ThMKAxjtQwgBO2e/Gh1cv4GBEXhjcDG0P4yAEBakEBAwQiqUGoB8rToMEJa2iSEn+xpgASFJQ4PRIXIXoT3AHCUWhiBE8B2YQc/HwcMHKzrb6MPLl7WIwaSNNWtacWi/7yfTLEJwRDTkIJMZRBYpUxRnPu2MUfLS903H7LMiu0+Zaf8krOj3ANDErNAMzJtH/knpiP5HR3d/92csy7IMsjdq7W/QrvMCKSejPc2GfKuoINTfn+hsryob9ex/IhIyor0XRb5n/nXHDu+jWzYOYvWqvXipaSsfPNhnQmKYCFk15Osskv6AceDx3HOj8trrT8O0mQW/P2UKfkFEm0/iSAgTM+SaNf+/ArnmiL9n/x/fyppjXMeadzhmNmbPhn/kqDPDh563UHCKQLwM4KLcqLSPmc/QGrMOHcbX+5IgDZDrA8wAQYOhTVGxLaIxrC0uwash4HofaJHwf2yRteQIYRzWlcIPuzoxM9GenfHEX/fg4QfWoWVvRAvEhUUVBISQ4U7Dcr9+/4Ix1sWXjex+3/uqv0ohuEUOPdDYyGL+fPDJ4KL5h9GAuegDDbk5hv5/+HCymMiuqKkJbQEAj/mD2sP0Q4eg2GRv2LCuy2zY2N/rhGniYCqFLVvaMNBTCc9luH4W2vgA+SBixOIWKqvDmDVnIsBpjBpVgJkzIxAKL5WW4da4AzEAdMeJnmcGATy9qw9f3rkr+cnly/aKh+7bgN1bwiarK4QlakCcQJYP67HjlLzqmpH47D9NRVkp3kVELw35C090l80/ZBfMzOJI7cHMlQBmb9+V/E6yJ3zGhnUD2LqtH8uXb8eOXW2QKoqBTJpd7WtbxQRSFfDgguEB8HOLAeABSLMFm5VlBEGjtroap8waJd51/hicfq4FoQZXTZ4S/bEDbCSiPbnzj+xM4mt7dqQ/+/TSXfYdt7/sdbZNUkooskjA072cxk7vkvMn46b6szJnvyv6YNeA+8svXWdvbWw8sTUh/QMIGxERu9xxroVie2Cge2M8XtW+vzU5dWRVrCzl4tJtWwbP3Lix/V0rX9qIVU39pr2lAr1ply0qIA0FIxiamAwESabcQCp45wKAAkNQMPIAEbTRYDAU2YBhEIW1Rj9HCtswa25cXHL5LDF2XLzroouiOwEs3tPduhguML66Wh7s8b6/f493+R0/bceSxWv8TDosFRWQkFlk/D2YPNXBN779flx4WVGqLD4wmijecfQHlRfA4wiN3CgX0ALtcvvnJIp/6rv7TzNmXMr18an2Dv9bSx7bieeeOIRVK3bpVLYIDkZKgSikTINlDzzjsqsl+wwEziQNAT8X9CNWkJAIwogaGgYsHJRBIIosAIYQStqA8aG5Fz56YDDgT51Sri69YjjmXTS244xzCrrCAv/uEP2hqakpVFdXd+prm3Drqyv75v504TPc3upAkEMEDc+k2IPr39xwsXXdDSX3VFUu+tSiBfMxv/HEjKDQiabJ/jPH1jOLhUQmme49PxQqUnt2Zx5svG9nwQP3rdYHdoVEFqUIq7iUHAdYwRiXU2g1FpKmtFJbZVUWystLUFFViGhUYFRtBQqLHBTGQhDE0NrAy7poPXwIA6kM9u8KY+fOBLq6E2htTXgZZiERo4goIGVFiCHhZpMsVcpU11jygvcV6qs/W3t4zLiKz1dFVNPuls7qmuGxKhvhsff8edvtf77ntcgLzxitUCWVKAazhTQf0N/46lnymk+Xf3ziZLrvyitZNp6AQkhDLxf4z4yC/yuj1f/o6HkNgNmYM4c8ZhZr1uBvqGNLlkAvXHjsLqixkWWO7TPqUAceee2l7Kxf3fokVq9qh+dVwKFxYIoiY7qYkDIaPWZYlbROP2cM5pwxDNGijFc9Qm2YOb3SYkKHEOgsK8CcFOMJC3jFaEghwdqF0b5/SjSiPtRyEMb1IFo7U7GBQb/6uWfWYsNrnWg9aHCgJa0lamSIKqCkhO9rzmIb1U7uwAfmz8blV07ddNr0ItM20PnjYfGKB5j5/Je2dD72qx9uiD324Aat9DgpaBh89MDnbu9fb7rAuuaG0nvGjqZPzp/fKBsb559QQnjCaECiwOXxn9GazFy+ep158Ym/7px4609f9lKDJarQKiNj4vB1Bhl06mikT551ziiccV4Fps0swNRpFUvHjcTDA8AlMWDdINraYlR953/0WoMIDZcBuDxhcGXrAW/qS817hm9c3yGee/wgDu4Oax9hOFQhFTlImxbOYgu//wNTxA1fPjM966yCDCzz50wmUxwJRX5ycC9++sCdr174u39/xc2kKm1LhOGZMAR5/je+VaeuvCZ8z5SJ4pNamyEWzQkhhMTMlEwmy5ji/ywtxNIuwBw8Q2GCsd1b7kQMRSqAIZ/8kduzWWAwx++wg8gZjAAYBqAsSPlgeCAhIExgPZlc2ESAYDiIqAQRBgGlJPlGsO1gGqTuJJh2AQcmCxgXuqwM0gfujMVo/ZAxzszU0ABauJBMayfPe+aZ1ofv/PWagi3r02JgME6WLIUxMWiOsS0303veG0Xde4bxxCnxR8+pK28OAduI6FkAqK+H+MpX+kt2d3f7p46u7auvD9plZtHc/NZAcGcneMGCY5MGckyXs7vT7k2b1nde/MJTg+LZp/bhtVd7fBsVUgsmpkHAuKakUuLbPzhXvG9+6ZOhePqHpRRZwcyzdx/EY7+8ZePwe37/inbdWmlRMTyThiXgfeffKqwL3k+/nzluwmfvuGO1df31c7wTRAD3hjZt4Z1PPJQe3pewACtglAgGYDgQriP0JOcWccRqpkBiGQZCCIQiYQgSsEhASgEWGhAeiDKQyke0MARlESQLEBixaBS2UiAOwoKAgDYCqVQGqVQWrm+QHEhCGwbYQiZpY6DXQWZQY+xEYNyM9A3vfe/kO5qaWNXVvfn1M3Ph97+3f8sD966r2bk7YyRGCiljyOhWOKLXP23ucPWBD4/VF1xW/dep4/ELInrhiDslZkii/3zoa8i0IcIbUeOVKxvDZ545//QDLZi47tX+ebt2Jj78xztewb69ETBCiMhKDOoBiPAO/+vfOl3N/8TYe6aNsj7JDDAfCK9dM+K3d9y+/hN33vWyDtEwKSkO3yiW8ef8737/Pf7Hrj67rrqMXq2vZ7FwIXGuFzhuR8gKqEVX10bnrts3+T2dhSxtQ0OiRURv9idD0kfBektISCkhFEEowLIMlK2hHAEnZMO2LFhCwQ7ZCIUkImEJO8SIRATsqI9w2ELIBqQFVJaHEI04cGwB2wrO19/nI9nvor/PoLu3H/0DfdTTAe7rLEBH6yA6WjTadaeuKe4X9/zl/H9SCnfMm0e6qYklc2f4YFvZH+sXbrnk97dusfsSFsesakHCQtY/zJWVvf4/fXm2den7a5OTp9iXRnKOXaBeMDeIRQAvINJE8P9rZgNxzkmYG5GzPIsoDaA5t9zR3cevTZtZcuNf7modtuix13Qya8tCNYwS6YRq+PZzftvhw9ds2e+WDR9h3UpEz5HANU8/l0ZHV/vVjy1Z7UdokrLEKOpPTpR/uG2Pmn3q3KeZ+WIAry1cCB5yuh+vQqhyNotvWeGA6WFpAAJMAJE4xogFECJHDFUSQgqQVFBOBlaoH8oSEIogFSCVhu0YOI6A7QBOSCAUZlgOIxRmOI6GUoxQxEc4JuFYCo7jACyQ8TJwfReWl4GTzcDy02w7EdiyAJbMwlJZWLqQFBUIpWJVuUvlurp9asf+2m0P/Xlfza23LIWbqoQQBppakcn269PrCuQ3F37IqjvXXhwCbiGiFY2NLIdCW0QL/8de1AIindOK1NwMMW9egyktpJ8x8x3jx49/se6isTNv+vqf0NW1FwWRSgxkJqjf/XqnTqf4sq98910XM3MdEb10yXvC1zzdlJ7nU2bE04vbjRAjRYxOEYd27/NvvaWpqKKi7qFpk5wRfdxXqpAeT0SrjlchVACyETv+q6uumfmDvbtTsEMKhkSOi0VvUYDEgV0oclIbULUAUgqkGKCKgGolFKTMQoR64CgN2xYQwgMRYFkSIceCbStAMJgZ4YiBZRlIqcGchfYNomGG7xn42sBxwigtE0hXxpAeFUM6ZaG31yCdKkR1dRiWrR/zfQKzERu34k9PPZas+eE3X/UIY5USIE19EHbSfO6GS+XVnx3ePX6qfVuY6HtDttn/JtkzpxU5FzrB6tWrLSIa6Of+Cy8ojH/2j2NO/8odv24qWvZoF4VFDWUxWd5zd7vbP7DM+vYP6n6cYv5GhOilueeEPn5tqm7RmjWNpX2H+thRirQplsue3K7/PGN94a6DPF6i7QMRFP2IueO9AJ5ibpREC44rYisBQHt7e2z/ntCPjO/EXG0AKEJu8CDMWwfK8g0SMAMqmJshJAKhBQJKPgCCB9hpWARIRZA01IMPEaMoGOAww8tmoTUHTGghYLQPrXVOu1pQRICQ8LWC70pkM4A2hi3Jwme1/5Szu7ocyM69h8u3P/Voy5offnuV6UuUEsglZoPqcmOu/qexYsHHJz00cRx+bBOtyQ0Kjosw1pE+ziynf9zWFbrpK599iZ9YstHYNFa6Ooq02WI+ff0UceO3T+Pa4fZlMaKl+3p5x1/u7Bjzs5tfQGagQGpdCEF9ZtqspPjnb5y+e/6Vw89I6+52BfMVW1XcytykiOadVHSu4wK92f0NyWzihZ/evqJv9PC7vDCeMjHxCofpUS6PPuT9+tYB7krwBT7vvz7pHaxbzWzlBPD4cbTXs2hqYjV/fqNk5vEvvpL965dvfI0L7D+4RXIZx+UqVrjP/+K/rOV9fext6esr7XL5gX6P+eJLl7CNuzlG67hYbWSL7vE/euXLZud2/vde3lp7PL87NfQFNjdD7tix5n/ELzj7v4upteZoAthsrMjsFMXOqIbf3rnujLvv2FjQ0lKmbTGMmH1UlRTor908VS24OtpbWoANfZ7Vl87S/jlx8o63LAW0kEzj1EZqbJxvurL75Jy5xV7YmfNkXyddunjRbjbGI0eMlb//5S5/zLix6qPXFXxhR9vBz88cMWLTp66f8+V9O18p273ThTAFpHi0eP7pdv7IVbjx8gmTfsXMtGgRxNu5iPL4T3ZbuUnew1ev5U0X1K1kiXtNoVjPUdrAcdXo//iHWzjDfGWauRY4/tNiDH0UfdxSmnAPzGVmZ82Wwe5rb7ifge/65dFVrNBkZkx92TQu7u8aZP7xS52d8UMD/Gz99zv9gsjzfow2cZxeZMLD7ic/skevW5d+iAhoamKVl5r/RqxezRYAtCb4pzffnGDgXjcml3IBrWIbj3k/+V4PH2jlh48SWHEi5WfJTWCfvm53e9dFl93PRZGHdXloHYfEY/z+9zdxt8fcw3xLN/NF2w8zz5613A/T8xwTz7CNJ7my4AFz3937DTPPGrr/4+0eT9gUEXPmkNfv8jmvvpz+1H13N/sWRZQQHpK8Q394QY36wILi+sKyxPbOTP+kIXsvcLMc/yGqI4WFiDbOHFMx76s3XdJWWt2PhLvfEDt44ZmD5rc/3eb7Lj5N8MaVlOOH775khB+KDACGIchCez+8ta9qtBzAVUTEixYhrwX/O7qo9btaKwZ4oOqVzYnVn7x2Iws85Efl82zjPn3KhGX6qadSu5j3fyuRPbCImYtONM13JDYx2wCQZv7cnX9McjzyiGuJp7iQXuAp4//gv7K9n/uZn+ni/u8eTjBPHPWUa2MJx+WLTHhOTx3TbJYudbdmmaczs6ivP760oDgBhVDEooCN6AdXv9I26+EHd2pJIyQbG7FYxtz0veliyqnh36ZB+wpt/XEiSuTcLSckdX0q4DUyyxDwx3PPj3V+/GPTFZusARXgwL5iLLpznxkcQET77pbqQnz7qmvGWRZcFhyBQEzs2T/I27YlJ/UNYDIRmbo65BMj/VeEr76eBTNP3LA/uf/cugc0YZmJii0ssNj7xMdeMWu3HVrM/KbBfTLk5BvKXsbMpy9+PMEThjd7EazgCFbwxBGPea+s9ZiZpwHAqlcyTe+asVLHabm26UW26Snz7nlP6i17/deYuSz3/Oh4fLkUBOBZcOAnC2Zxv83CzGL1arZWrx7yqTEd0YZcvZqtnL9taNYvvfn71qWpiVUgNMc8z1tyGDKzSDBfePdDB9ixbvVC9AqHaBUPK1vkP/RoQjPzTAB4cscO578q7P9bvsKczXfMBJZDtuDQR7V7D//6+wu7OYJn/AJax3HxqH/T17ea/e38u1w7td/+6g62cTtH7afYxhM8rPJPvOzFDDPzxCPbPC664CH7KOiiKBcPJW/o/2+3EJGZM4e8OXPIC0JZxEe0oefMIW9O0E6O0TUUgvrbtubNIz9gnRzzPG90nfv2wSYis29vx3nPPbGTfb8KDIksJ/TF75tEYyZZDxEFtKxLJ0x4S863+vr6oSyl6p1cEkNxUwpit+qoRRyxnzqG0Kr/wEJH7k9ETET+scyE4PkRiMj3vO5LxoxGw9wzi+488/QpUrPSRJXyrw9t18k+fKYr7X4MQMfo8WZ1zQgfvu4xTITBpIN1q7cbAH3Hm/YbetDMzE5O801m5puYeSQz27n19hFLKPd7Zm6/mzzmD+TWhZnZ9pkXDG1j5jlv084b67LMn3SZP3uM7RYzFyYSiRJmpoKa9g8w878d2hG+9rUXekmzI8JCIhZp1VdfN01MmBR5OqdpxVuFr0ktXLjQ5F6yP5RdoL6+/piagIhM14F1w9hrO3/omCMW09TEqr6exZFUrdz/zTH2P9bCR+7PvKHY9/2P793bFBrSvMxM9fUsBrItp372js9YnNk7SYjIHwf8/dPnniUWXfS+Yeyi24AUDh7I0DOPHzSk7XcRUWrGabUbTjtjunG1ryMyikxKm44WLdIuziMibm5uPm40oEqmk+8+3DJw+b2/33dV62Hjw/aLqqorwocPtn+LPU6DACMYgiSIAF+75BmPoyFZOqy6XEol0Z9Koi+R7AjYoJqLy+IVhYUxWALoaO/wM67pYWYympkhYHLeAAUCfEZhaVEFQ6C9tfdmGICNQCqZNTNOjeHyD9Wu9X31CyJ65o7Vqx/64KjKYSuf9Wt27Ta+TVGVMV36yitH2zUjvCVRWHc3HcXhy2kzn5lHALgi0MLotm35wMKFC/8mVe/Bg3BGjMBYAB8EUMDMkwPTATon2E8T0U4AGPC7P3NYdt97P8Z7CwMi7HgAFx+x77HgAvgTEaVzdtu8rEbEkRhdW1vnE9EDQEDdWriQdEMDz77js796BLD+LIDfxWXtMmaO1U7I7pswQdTu3pkwzJJeXdklzqkbMREAps1w1px55tTrHl7UAsEWBBzesSGJXTtRz8zPLloUaMLjYWCmwiF7ZGdnz4d/c+vm8kP7CUZ6SGV8L+7YcalUPLDaCIICmhUJQFoCMD5gdnu2I2GHhAqHwxVEBCEYnu4wUgptK4FQyLKYqUJrH55nYEygoAwDpBlGGyQH9mvXN5BCVfieRjqTRk9PEh//5FhMmGKtnTVn9DOJRNfcwsLSPa+s1Rcsb97KQJGQCLEV7sXFF787M3GU1dDntv5wfMb8G4DuoQdMRGbp0i0ffGbprh/VVI+akEkpaJ3EM0+1fG2wt+vK9145Y099fb1oaGgAAA4XpKZu3JR4YjAZrshmFaJOBCR8GPbhhAkHDrS2LFvWW3/WeUUmJA8tX7/I5YULyNxx946xK15MPB9y7OGuRyB5JJc8sD4C0q5GNCa+uG5d9w0vr+x+uCBSWtnfD7h+EhXV1vX7W9xCn62VY4k2PPb47suWPdPxK2FsR1nWN61QP5Y+vW0WEb1v90HW77m4ln6x4wW2yKYNaw+b1kMzpjDzCGWJX//xrtbPjR5ZOfXggYyxUIq2w/3YsG77lulTJ/Zv3txMCxbMOy68AspWzt3Ll2/5mZ8u9JKDQCSkKG4pIYzwyRcMKUAIaFnGAEwGxgcsSWRbQlhCQmqpTVbCsoVUSiIUksKxpAjSQZIPEmyMLwRc4WkGQ8BoA+358DwPklnaguBmtWEtdDLRiT4Nz806NmxhMbNIprqHA5nODesTFZ3tTGGMZJdT5rRpRTIStn4LtH680C69sdC2/xUAmpshAfjJJC94/rl9f/mXL/4Wfd1VnpBlYHRTaVX3qXfd/9U1zPx5AA/sBOwJRNlt23jsn+5aWfKHO57JROR0xTrCoDRAHgwDTlgMP+2McXf29pyGaTOH/duCBcO/zswTN29zm770qb9Wr3u5M+uEC4TmTJDXkIPEnABAAsimPbruc6dMu+6zZzb//EePq2efOeAWRkaLlJsww0Z58rbffbxh9lxc0tLKP3/8sYNfavjX+0n61YY5baKFvbTwlivf2+fx5ax016TpkWh5caSqs9fH9j1dZu/uvrLWZMlXfa/99ieXlS6ZMrly6u4DbTqM4aKjvQ2HD+0tASYWNDc39x83GlD7HFqxctOuyaeE52r0wAoLSJK51GwBI5qFgLQCAirAgRaUBCUElApo9wYG6XRGW5YKElpKASkhSoqKFZHAYDKJvr5BbTsMZgFlNLRvYOWSS/pMcIyWsVhcFJQzCntcq6ZWIhQSMjeQeaSjjy/pajNT9h9K+g5VKXCXP/vMsVw1zFmUQXYKm46/hsVwAEBdXcC360/ikqceP6D3tVTpMCbYBgUAKtCza0P2tVd7i6adUlC+1IE442DQZQoLNZ5frHoHiziDKsUI5XrU4N79AZf3L+nxly59nL5df+HX9rfwWS6wSruisL1NeSlUOX6mGtpYwTFvkKI9CMHMWtD2TdahEbX2U9NmTr3u8cd7RdIrUT5H8frWTd6GDZnKc89x/BWbEVv18oDsSlR4EaqyBrmN3/+uaaK6auTPmdKO66f2TJgWHpw6M171QlOCbSoTr69rxbmHQ++vntj30+mzi+tqatOQ6BWKhsmOLs+UV06bB+Cjy5cvvB1okLkb+78VQCLKrN90oP4LXxvzL22t/b5hXxEkGCbIOAoAQsB2JCxbIEjNx5TL0gwBEINZ2Kq6urp4WiYbsPgtCQwMpJHoyjxHYA5Fhk2pqCgclkkzJBGYg/km2gQCbYcF+vqT6OlJP+t6xkQcJtuRz1UMq3hg0ya2p06Fv20nirduSjkZJs+mPlhyN867aAqNneiODtPo3wD4zVtNOpZPPjk4ev2rvgzRXAAhACEQjQSzJVa+1MsTp1X2LZgX1k1NwZy7dBauQRREo0GIBhOoYEMzGNBQIkyKKq207+GWm5dn55713rNrhmHN3paezaVFNadt4TbjkBCKLGgQNPuGAuVHgSFpuKS0RFgxtMz/2EQsXbyH1m/shaOKIc0ode+9TXzhFVc8uO/QnrLnnt3KITFCGRgIVuYDV50ip5+DaJGKLGpLux+ccZo1tmZMN4VekGDtYOvGhHEHIwSMK1GRzszw8QNcEEpJL9MLD8V8aE+R6erFmONpFKwAYOa0kU8BeOo/4K86C8DZAJ4jonVHbXMAnIFAZnM+v3CKKPJabnsVgIkA5SbVDXkDjvQKxONAvIaIfne0I3bqVHBrB2p7+9IANGU4w9VVZRSPxweEEAcbGxvlzPnz1QSibPDNCGZm/d1vbxx34EA/mBWx7EFGawiuhKAI7dw9QPtbuqb1M5/32J9eXw0ARoI0BUTZIMGGBQ2G7QwQawsZ34JEN6SIos/NyIce3q4nzp4IK+LbWeOBQfA4CcdJweMuRAss4Xk+tEcQQsJLe255bVF1Z2+ycNTo+Ccv++D0e17b8IyWxpbCRGjr5lY8+9TAlDWv9aK1VSNmW0i6LXrOqWXW6In2s6UOnttxuGtK1tVPl4Qsf/yYESWxSCKeTAJ7du42icQplUCssMapmHfXA5vdkrIOq6MlzS7S3Nk7IPuTsYk5E4WOGwEM3BF1As1vs1dd8NPQ0PwqUPcq0Iz6+iYFAFOn1vHmzc1EwYtffiwvfm57G4C2d7qg+vomVV/fpJqbgc9/vo7nz4cZoszf/8iBG/buOwDAEi48PmXmbGkptb88bi0L3C+B8O3YscOZMGFCtj/tf+qH3z1Y3D0otFSeYLsTYUvBT0dhdEht2tDmK6f2K0CmasSIU1Yc4YcBEAhM1vTztJkF9InPzuke7CPzyJ8Plb++cTMTDyODKPbuHpRdXRC2NaTjGEak4VI/f+gTU2jKzMrXHWewoqwwWg0ZImXghOK9B43k38Yc2t7Y2H/D6BEFp+9vSWhHjJLsCfz45qdNehAkRQWl/RSUneRzL5rk1Y7Bo0T00OrVbM2ZQ1sA3P3LX+1aUVCgz+pM9vthZNXObYdS8+rG/0s/95dvez0yOGpkR9HhliQkJNLpDHyDzHGnAQN3xN+ZjLP8P0wUOFZVIj3kJ2to+Ptf3aJFwIIFb7pQli9/M5TGzMU//eXr3NrSx5JqoDmJ4lKB2jGRzjfnAYPr6+vFhAkTsn2cOqu7Tf/htVUHOOsrRC0iYQ9g6qzR2L0lg+42gqcj5oXnN5izz5v27Lx5o/xjhcoZCYybbvgz/1TqFgCPJ3qzn9yyVSihFSAK0dXlorcnlSIlPEiZE1wF10uZ08+eLL/widDNKeBKAq7MAN8pBuxulKwif9/YQd5T1LI7fttHrjnjgR98/xFX0SgpdRG6WtMCOgQ2Njx08tTxBersecUYVob7co5wf2gi1YoV6XA03gKNAXLTQnd3cMHhLjOptiKzsrg4rkMhkSUYW0DA8zx4/vGVjOC/zSGZc3noo5eh7QsXBpGFv7e8DWNXAkBK4yPsFY1M9Id8JSxB6DPDR/dnR1RgIRHxUJC9oaHBdjnxUAHC4aVPbt22Y3svHJRi0Mtg0qSxuOT9k0wo1g4FgxBiatu6PtHdJj7NzFEAMGZodjzDsIEkhzpbB+n17cnqZ15Lfmbd6r0WmQJSIoaIraRwBlFW7bxfheRYz3MhoYg4DMsqk3/45Qv4wk3bH/riP6/+yOdvfFVd//Gm71zz6Ve+fu9v1y3yOHYLYGHCWDw96+zIupphZSpjEkYbgvFDMMYBQcKCMpdcfArmnFXxWwDZRYtARMSbNwfzWQrjqr20bBAKLoQ/0vR3VqL1oPoRUN49aiTeqyzuFxAkILmnpxfd3f047jTg8RaTPpZ7QBvo1KAHAw9hFdXFRcNVd1dqDRE1A/Wiri4Y0Q2is1gYoTIaV217PVHT3jlIYRlFRndiZO0wvOvc4eKh+yI4jAwclNCOzf1Ys/LQqWfOGP6G8L8x4Z41BJVg2+sebrzmeT58cJAGe0bBFiXQxsVgZhsVlDmIFsiJvb0OhCQosolIgk0BNq/vwutr9rIQEkRhAnTE+Gxi4VOEzhYt79UHZg3ItDX71JJHLrnk7FPv+sN2zWxyE/8ZBtrUVFbK8RMqdw+P2V8mIncoFDh1anCZiR7rZ6OHD7v4ZaTYgKA9AZ0G5/bdWFhsRQI9QEFtleOMlH/cUXOIiO+4Y7V1xx2rrRzrWQCA8SAyaQ+AhK8NlCVQWl5KRx7HzBRtKG+PyLIrWvfjkkRraQE4ZlgxAAujx5Rh2hQ0jxk1mg0YTIxMqlTv2xGhPh/vampqUgTQULSUABArJDrj2PBKnLoPD4POREHGhkAGhcUJ/e6Lq3R5AWAyWWQ9D1lOw2MXvi8AXQOB6QQzjlhXAqYKStSasFXFxNCWjHw5QvZ9RYW4OeQIVrCGiLMY+he2wrqyqiCdBT4HAEcnZwrFQMUlRXBgw4Mrdm7bjngRrshNp7WmTJ6gLTvMPks2HjN7Quc14N8hAQAIEVHq6G0DA0j7XpCf3/V9+L4LS1p/00YDGsDM8cWLU2u3b3MvBULsmyzikRJs2dSL7ze0zzrckqSwLIAxINcUou2wihzaj+/NmzfvzLU72YLIDeIhIBVDEWB0DEHXnIVnNDJo9T5w4UTroounQgLPhqzQ+SaX0MY3PhwZRlZbMAgD6AXQAzBBQ5L2q1laFUlC2HeU7Nq2V4988aXX4QIIUQGG8qFIKLGrZY+3bk3ZtPPfO7yqvb09dvDgWwvrSQcgK9CaEkSZbAaWg3k5AfRJ9Uor1Ea2zzIcdshS2YK8AL4N++RQx74Z2VTJE0sfTd2eznSb8eOrRVGZXDWilp4nwpmpVBa5WAxIEMJh+y3trFkDtXDhQu8r/9rweVfwZa9s2e7Zdo2ldRbsEZ59fD+WLUWBkgqCBDRrCBTLtasP8I7d0TNcdm/a22E+n0wmISCUEARmA4gkZKgH7EUNdJEoLe3G/I+ebp1/afFr1QXWkjDw81Tf4LZoKDQMyBqGEEJlMXGch6phaaTTSUQiETjKwWB/ShZXdPnx0ISlA57KdiXRte4Vd/b2rR2+wDjFrAGZBbEAkQQ4bC1e9Kr7oY+Uf2n0hMihOZX0y9XM1p5FgYtWhQBhaRhoMCyQILAxA0N2xDkXu+kxU8YoY4Q/YWKtKirAEzlHPecFMIdclimTSZV/5Te3vlTzclPyB/AIVyw4FR/46JjbADwvCCN8TwcEHuQK2LwNW6+vF+Hnl+0x0BlABkkIWBsoUoARMMYHcRJSEMgUYs/ufrNuTac474KR78uk8btwLHqzAWuQUK5ux6jRWbz3gxO4MF4ovIGImT5jUt95FxTfW1KMxohNK5lZ6axPggQBgolseLoDH/nUafjYp4f3pjLJCLTwIo6dSg+mBpQVaghrfXrY6vrTirXWA/f8YRWyblSEqQgaPTDcCSACi4tgoxS7du2w7r97g/zXhtOiTU17Q7OBbLI86IqVBEyuDBoBgPRAxKx9FgAGz541dRJm4UhTpetI70ReAI+Al4nG9u70edWGwYyDkRx/Zp81/lQeBICsh1WhcOhSgIyCFMSMwUGXjxq8eMxc9PIKfX3zs4cEyUKSQgGa4ZksNDIguDBwtQKLiFIkKIyMLhavvpiijuswVlpwPDdIOp4xWTA8TJ9eqW/+8UzpeniIfNxYGoEholYgSK0BQIeEyhVPNAADnvZMQVFcFBeqh0sLi8+ygbYw8GKmNDw7BDzb7rv/XIxR529el5jy+isZhDCGFIXhow+jxzsYSGokD2dhUSUGvWrz2nKWezbjo3V1tb9pbn4z4ZGvgawbvEpFAswuQCYadMjEALqP5kUezQLKC+DQw0SCQlGfohS3JCpYqbRltA9mppZOtDmOA8CCJYVM9PToESNmzmTmC4jouTVrGiwEaeoHt25yCw7u9mBbcRjfANrHlAmjTaxAQPtJlJZH5P49u7B3915YshIKRWjdn8WhloxfOzakHTsKIAyGBBBiRxQBHnocO/vdAid0KBA8tmbPhs4JvSBhwegcA4azUFZUPLPkEAb75ae7O/chZNlTIuHIuxNdfRg7xX76quvGv5LK4PdLH+ngdGY4bFFIGdOHklLghs9fgu1b2nDPb/ZBYhjCGCXWr23Fyhc7p5w6p1zPm0d+U31AhtVZkPYiACwQDIfCEr7Pr+ZCkXRsgmveBnxroCVHHCgriv2CpPt+n1koEPYfbEckXvkpIeib7Sk2peUxAAQFgud7nB4YcICSOADMng1/+/Z1w9q7Om/auKklDcNhgRDSvsSUiYRf3jNeFJcC8TCgYV5c8mB0+I8beHTfIHMISWpp2Ystm52qcZPnfK63uw+AkjaF4bE2sSJfJvqwY1RFaGt9PauGhkDw3uonktDsAvDBCAgXzz21G88s3aG1m87V9yQjocSHP14+4+rrJvzx0UcO7t+4ce8oiYlM5BJoK8ZO03zF/GKz4oV+8cSjLdTXFoMUtZTxHPNic6uYfW749iy3jGrr2fV5buAtzz8PP9PvQFEULneb4SPHyMF++4EhRtDxXtrruHLDFFSpnQaEoKw0iUOHB3xQRUXK8KeiISTC8QyAQQRV4BTcwcBDM/SwJ0yoSvT1FJx1YI9for1iLXWchEiaGafFePR4XDVxHGbXDsOZE2vluWMnFDZNmVrJGSS1UnH0Jx1sWJVS8FCudRpEmiQZSPJASMGyEM9plGPOLWYYMCVBlAFRDNorgOeWQLvlUopakrJWKDlSWXK0cAerjUnLWzesHhjV1p6FEiBjuhCLduPyK6bQiErIuWePoNlnlrBP+6EoA0UF4uWXDtDhg/gEo+Jx09+ym4g4VmA+d6ilBy5rYviQSkNZwTXG48d/CubjahCS6jffGTu2Foxd2kdGpVzBXR2S2zsweVRF/x3xomSirMAvyCRT7CKCHVt7cbhjeDpn//nMXPL6q92TXnnxoJ/lQja6hUPWPjNz7nA7zVjvEG0dOufsubHqs86VtPyVVt/zK+DBwtqVPdi1WbOl0sTciqwOgTHo6yxxshe31RQTNzYee0JPvFD5JPo08yAzFwwFcIac6EMMDXaR4ZBdRS83ae+FpT0izVn2eQ+y6DBzJ1SIuXPG7WTgGyMqxQOXXTw3svTRh7wevZ0k4kj2HNKPPPgyps648KyJY+r+3WU+5+ABvPfggVbtQYuwIq6trTLjRuO8XuaXion2rV7N1pIlzVxXV/dfeUPv1Ie9w7F1f9NOZ2cdL1hA+njpghkAIhGxtLyy8NO2I0U2m4WPEHZuHaBZc4t6UdE3e9bcmqLqYXu9HVsHLEKYDrb0YseujZ8dVjnjmSETJ5lKRidMLkDVQAie6UbFyBBmzYm61aXgpiZWw4ZB3n9/g1dTiZ/NmCPPqzs9FvHSBINahApb4bnA1Kk1mD7RwOFh0Caspk4aj5jEPgCYP//Y9yBD6bLxE4rl4TaFSCTQmsQChoKBOHHgWQzZEYydJNDampKGkzhndhEICgOJUbj8vdUYPjz0qxDR4jTzZXXzRjx55fvrwtu2MOJRFz5FVTKzA7GiCz+wcU972fQxlUWd3ewkunt9gWIIB6qqCr3FxVjc67oFCU4UFxH1BqHQvAZ8Z3uAdeXEibUiEt9k0m4G4Cj2bB1ApidiA91PZVJlnTUjCkq3be1lAYsOH+rlnq7yucxcRIQ+AInqWnH52e8upFQaSKdtnjJ7Mp0yo/ZAAdG2IU3Z2NgoiWjZU0+t/9CXbprzrk2reRUJJbtTfaawoBfjx4Vw8cUjUFM5CYMDbTxtWphqSrEhd5nHMuIZYuCD/3zTed/89BdQbJihSBOZINMsg1kqImhOr3qh4wfnXVBUV15uXTBp0jlm7eo9/97elu3N9EfpzPNKeHytbMolzWw+0Manf+y6U8c0PXHIxAq7KYsilI0swuHWA/jTHY8lbrvtS6ufb1rVkvJTNQYVfmlJgdXZ3Xk7UfWSlesODBs9pvjH63d0Otm0KNEZ20DnElUfbUDQ3/4pJKBkwNnM+B5Y+0ERcxm4vwxrsPFhWMC2Q5A5nxgbQAflogOicS5qZdsEaWlADOji4rD0svjr+Nryu44XATSNjSxDFh7RHn90WE3JeR3dKR0RJXLXpnbuTZR+eAAzHxoxAqnRYwvKgS5jkxSbth30E92zRwC4CIzGRYvgL1gwasnRjX/x+jfDdQCwYMECnXN+/w0P8uc/f+dQ4duseya3vDO+icXHWv3TX/+Nc34jgI1vcx345/rP/duOre01fYNZJngYP7YCkVjhBuZN9p6W4lKpYx958qHNBcuf34VIqBrwCcYM0YnNEV/PW78lgoGQgJQMZQFCGUjJkFJASIDIgIhh21ZQ1JsJvg7izGxyNZRZQmsD3/dgjAkEFgbMLqIFSSz48Nx3j68t//NxIYDBNMVGuWDBgs7XXvRay0sLIDhpwo5j7dy30/T2jp0YQ1jIQtw1Y/bwBtAOwxQVnqnC5nWM3XUoxBji8iamxkaWm29vpuaczVFXV4eGhjpztPuBiEx9fb3YsmUqTekopyELpaEBaG4Olrq6N02Yhoa6v1t7I9BaDQw0/J0IQwPV19eJLVM7edGC+QZooPnzG2hKR3C9DXVAXe48uXIToqEBorm5GcGlNKPi81P5c+Xzad488rdu6Dtt2wYhLBSbDHowYeoIvuKKkREicnt7uT+bwu92vU43rnne8eNxWzGnA5oD0VsUOYGC6RdCYig7s5AEKRmOTVAWYDsqt45gSYJQhIKCGEKhCDxPw/M0UoNZpDJZGBOU3vA1QXuA57lwXR8CcWRScS6oGKRLLw33H1dd8NSp8zUz0+GdWFJZVvIRQS3SNx5cLyNWvPSqmfe+91wlIth8yqllmbKiAtXTa8PCMNH8bA8++omam5j5biJyj253+fKFb2v/HMshO2/ekccO/fHONtSbkYW/uyMfdU5etOjN/ectf+vhuY/G5C4hOKCZRW7C/Mzf/L67ZMdmMooKKMIJnHn2CKquhpvxDl3hqAMbur2RsJSvBo1y7QGHmQZyM/MAkHlD8wkiCKkAxZBCBMnpGSAWcFkjZIcgWEIYA6WC6ghKSmQzBtlMCqwBzzfwNUCwwb4P39XwfIb2g0ls7CsIC2AeZN8bgK9T8rgSwM2bwQsWEDPzsqoRnmEMCs93odkye/ZkRWtr9qppY53ZThitp84ZN3LZc52mQMXE3j0d3qHD6THTELsWwB25TAMnbR7k5mYIZsaBFpy+f4coTw5KP0JaTpjiyeGjvQFAvaw1T/dU6DIVxjNnno8bJ08bFwGXgVEbCNaQMBODh1YIgAOuBwQH5G5BBEEMBYIgAguGkAJCBEWFmDV8wwhIGAwWBCNzWVU0YIwBGxOQOHwNSIO0l0C0sAijasPiuBLAhgagoYEJQNnMOTERD/vw0xo+QrRtYwZ796ai08Y6PGosllz9qXFfWvrsOg0aCdfNyj/f9wImzrjwJma+82QWvkBDB/e3+FHvn559YidsWCLFbeasumpZPYz+SET7gGDEDgAeJy9SCNX1JT3NHBbHGkIZBAnph36FOaKHNoDyASGGJqgdcZB4qzfZ5BLbD60a8tIKAQgfcI1BlqtMeWlYaA/PEdHxMz3gCOo9Pfdc387Tpj/BESzWEXqSY9ZD3u2/TfHBPv4VM9e8sMp/ZOKYx3QIT+pisYKriv7o/vXxfpNl/kwu+5N1MmTFOhr1zKK+vl5kmWcs/FZHd0loqS5Vy0xp/C6v8cFuw8wXMTPt2MFOEzep4zEj6nHphhliQbcl2yo12s6rqqn67pSpFfe9vnE7h+Vw9HkZPP1kC8ZMHF88Yh4dXvps720XXTLtA7+5fYfPiIu+RA2ee3ovjZ44wlm4sMQsXAhzMmq/hbmB1IWXf+ixFSt6S7KZsM7iMF902mg1bUbJBgAv5mrkvcEZbGxslPPnzxdr1gRVR//vEVxHLo5ujhftFwTWuf0xj1uYmUt+tHArR/FHLhYvs8CzunrYEvOrO3peTjG/a19H5rJHFydNWcEDbpSWcZReMhNqH9OPLOnb35Hh8SneOSLBXHwyCd9Q2rz+fv7Zd7+1QsfoQa+IXuOQvNf7/R1dpjvBHx4ajZ9I93W8qGjDzKShv08mthnAnOmnDls9ZepwZEzGhKlAtB7a6+/Z035Gyz7cVFsRemLmnNjOyz5UbmV4i7bIo/37BJ55tH9kqgsvCIyYUQh4J0IX9B8UPxpKm/fyC+kbFv/ZEYprpeEBTJ1UoS++opTgDCZOxDs7Ll7QkCq2qWZ1alDMI6Jnps2IL7/k8jlskPQBA0EV4qEHXzEvv9gbSTP/pbAM95x/ydTe6kpJGe5mm+Li8cfWea+tSFWlUs6NRDSwKFeO9kQWRGamxsZgksDBg3zpX+7fltl78DDblgDJNv3Ra05xpML1JaHoy7lMqiel+fG/1s0MPXRmnnXvvb08ovxxI/G8CdFLDPxO3/gvm7m9n9uZmXa08C9u+vp2Bu71yuVmjmOZnjlhsb/okbYdzDxpKLXtyYCBrH/tk0sMl8ce8Ivk01yKl/X7zl/JzS+mGpmDkhUn48Dr/8rWIWYOv/RKcs/ZZz/JwF+1Q6s5JJ7hsuLfe08u7/fTzA8zN8ply3nVBWev5iiW+4XiNQ7hT97HPvIyr33dfwQA2hOJsS53zT3RXlDuGdDW/ftrmHlk48N7/zRn5sOehWVuqfWqqY4u0b//dWuKmUediLbf8WYDvqU7XrMGiojSY6Y7d71/wWhEQq52OQWDGHp6Y+rO29bB9fDBPv/yO2eegZVXfXpUR0VZFzzuZBIRteQvHd7jDw5+YP16/khFYWKUlwnyRgOQJ4IQDhW63nzwYPGoYZXXrd6YfOHX/77mY6+vt0SBHGllvIy59ovDxbxLyj5GRPubmprU8TLH46TA6lyXkmD+912trGfNfiRLeISJlrPAQ1xV+Vu+8972DDNzG/fM2LKF7/zWV1r8QvwxG5V/YQuL9bDCR8x3/3XzoY4OnhW4I04cDTHkFWDmsRs38Z5PfHwZK9zmlzkrWeEJc87ZzbxtJ/cw84jGRpa5ikp0Ii7H5QtozHUn7Sn37H5m/s4P13Jh/EEj0MSKHmZb3s5nn7XYf30r684M/5KZL9yxg/myC5/gQnm/CYnn2cYTPK66kf90d5I7OvhHANCX6RjPzEXHqdkhjhK+MVu38f4bPrWTQ/IBvyy8imP0gpkw/onsE02pvu5sdsmO/2IlgOMBx2XpplxlcUFEK3o03/2+y6fMf/axPvvVVzOK4RBRFVau3C9++4vt+M4tExd0cGZJ1ajQ41d/as7U7VtXjN7XApAswd7WXlP/rUaj7I9+o6WN02Enkezo6FjMzH0IIqDHRQGbIS/AUOJzZh6zebf//G9v2zDyjjs36ZCYJOFb8PiQ9+3vftA+82zcJ2Rrsqh81JQtW7gtUgbwYMAtGBxqNPdHNApEIgBSwNBs/8HBYIehXyB67AuLHtXYURuiiAJRIBoByo9sKRqc90i8sW0Q6AAgqVvGIiZy3NYOIyKzaRPbJZKube/h1Td+te5X1378j57rTrBgagCUY9GibTxibKH5zJeqKrpN4osf/XBF70Dm7N5b6rfy3v29EIJEyyFLNHzzCf2lr52z8LL3Va0uqxlMENFuApj/7zWfWrRoEV8x/91zPM/1b/kB1jHzjDWb8Ndf/WzdqAfv3u9HxWQlKAFWm/wf/2S+fdZ5+GvY6ljf2hr6wB9uX/PioV0VdixWSGR1Q9oupBJQiqGUhqMYobBAJOQEvD4ysCwLliUQZD80gDAw6AYzgTWgPQPP83O5vAmaGZ5r4HoG2hj4BmAtQVAQLAAmuBlGNqvBTCATFBmXyoI2DK19sGGADRwVRmoghYKyLnzoqlGdM2ZGXzsRDHIFAHv2o/GHN6+94s47N/phMccy7CHLG8z0GXHxmS+cuv2Ln6mdvAiLxOWYf8niJWbJt77QrPceSAkSBSRMPwoiPWb+R+Z6X795klNcZX5UKOU3D3Z1DR9eWnr4/zokNOAf+owt/XldXSN/vnO7WfWLW/bIJxZvMSRqBAyzh7X65z+9SH34mtpnKssw30P3pNWv2g813PTqiOeauyARQUmJRijEKCktRiQiUVwUQWlJBI4F2EqhqIxRVqlhWQrxaAS2I2DZEpo1sq6LdNaF5/pIpz3092WgPQX4DlxXIj3oI5Xy4GoNzzNwswbal2ANsBZID3pIp4LknMYgEFhf51Ko+GBmCGNgqxgGk2mUVrXia985p/Wjn5gw4kRw0DIR+cNH4buf/fwMOmWaJbXZx4p8WFQoNm7oNvf+7sC4J5/Frnlm/vcOoffAuReKv3znJ3PlmFFRGJMFRATJVKG464/rnS9cuwzPPtZ3DTO/HIuHbhrStP9Tzuoj6hofWeBGNDWxOpxIzG4d7JoblTXPdfWPxAP37132+U89I5Ys3m0cOU4II+BEtuHbDWeoyz5Su6iyDFcQUb9NZa+6KZ1MJPo8g2zWg/EGBzKetBxPSstzs9oTQnqA8Bw75JWUlHnRSMyzHceLhCOeY1teJGR7xYUxr6gwboqL4lxaUsThaJitkOJ4LMaxaJTtkMPhcIjdrOe7ruuxgSGAJVFO9xEzGxYQWgnlEQktlGBpK3bCIY5EwhwOhzgcDrNth3zLcjzbCrtS2l5hUZwAhE4ox2Vbwv32oj91fOvmm161UqkSYchQBh4M+zj7rGI0/NsM75yzogN96D1PZotrX1hqHvz+t5vsdZu3U0gUSGIHzA5Gjozx5788k869qOQPM6fiViLaPGSDNTT8903eHsp5c/T3VF8PWriQjMvuGRrWFU3LWz/UtLRn3KONr6Blv4EQldB+RIedPvpq/ZTU575W9Xqxiq1IeL2tRVb5bQCwfOXmtkceOFS+diUQDhfAtzpQXB5GcVERlGKEbMBSGsVFUZQWFcGwDyYPsUgUJcVRsMmABaMvmUA6nYYGMDiYDYilWYLn+nCzHjxXIx4pgGFCTyKBwYwL4xPYC+Z8aC1QEClGOBzDQCqDvuQAgjIcBK01PN8Ha4OieBTRSBEGB9IorezA++aP2H/Re0b9/oQRwKYmVvPmkX+gle9+9MHENd/52nN+VpcpRVFo9CNjdpl57x6Ln//iAp48DR8KEf2VmUf8+eHDa+79w8vlzU8d9B05UTFXImv6mXFYn3/xOPXui6j9Q1dP+faY8uhqIlqfExJRX5+j5wOiDtD/v4OVIYYPc0+hMXa9xmDclr++HlhomFn2pvGRbZtw2eZNqY/+4pYl2LktoW0VE4JC5MPjkbWKvvGd83HBJcV3lZQd7jImprUY+FkcNb0kSB/uaPthMhmp7Oo0rLUgbbIQloCU9hsOXmINSwrInMFrgICfl7OyPc/lSFReFI1ZwzIZA7KcgKyaq64mAEhF6OtJPao1eiNx54pw1CpxswwiAaM1Io5CX6+3Npvm9U5MnVpYaJ2aynKQJAkAG4OQDfT0ZJ5lHweZYSoqjci4PYsnjit88YSKDGwGrKmAv3cfHvzpD/fN/83vl/kxGqcgsvCRQFYnzbzzZot/unFyx4eucEYRUaalj5/fs83DQ/dvn/eb2571BU6ViorJcC/SSOiCUL+86LLJmPeeqlTdu0c8OHkcfnV0Avaj/YhvNzUTABYBmLJ5s1y0qNN88ztTP6Ao+kMhUj0ANhCVf6arj288uA9feP659rGPP7YNr67s9kOqXIINpdwe1vD8d50zWt3w5cmrrrwy9gsAj/amui4qjpQtzY2Q/1vrezBzKYASBEx9epsB4c7cvtUAYkfsO/R7gIiyuUT1I49qi4Mmgjb+pu0TLUxHRNzRweO7erD+B/UvhBr/socFRYVCBIYUXJPBWadW4ROfH7v56k+Vfa9vwO+qiqnM2i345NYdLZ/52Xc3Yfd2oYVlCTdLBFPJGZPSceuges9lwzFtemGmdkzZ63POKH69ogblZQW4G8DzRDTw/3+92esAu7ajF7ta9rifXPPq4bKXV24asWOrU7R+TdZzIUVUlkupgP7sXj2m1hI3fPFiOv3M0LYzz8TUo7vvI4WPmdWaNWtozZp3vo7Zx6ABrlkTrJ8zZ473TsfX17OoqVkjr7/+7fe9447V1t/bDoDuuGO1GrqePXv2mPnz55sTLnidmzOrk8wX7t2CxQu/tslZ/OQaVjRCECIQ1ArfEE+dVkrf+P7pOKPOvnN4IX4HZEp8hD62Zr17weJHOysfuP95tOzzNPQwCstSITjFWdNnLKnkiOFlmD7LwqwzbMw6sxChWHJZJFb8E0GWEILN+DGlx3SiHjjch2wG2LM1K7WOaOEkbxlI9s/cvNbgleUJHNqfRneXwUBWGklhwZzlFFLGQq957wdHWVd/YmZ23nui98fCA099dMHSRxob54MEaTYs/qd8lrloBP2H/JTMouHtB4r8Dm0d8/pPSPbEkD2YSPKF2zZhyS0/WOEseXynKXAmCc9PwjdAhvuNExrwv/CV8+13X1D96FnnyAv6/f5bbYq8PtCjzlu98vBnXnpuV+jZx7uxvcXXAiwiIk7EFvusDVECwh6AHU7zqFEFqnb0KIwcOQyWbVA1rBBCMEqKg6AKcZCIY9/+A/A1o7sDOLB/EAf3DWD/gT6TGYgzQ5GPJGzhkWds0mBTVtAnZpwWx9XXzsXp7yp/qGYkGuJEm9Pp1tpQqOrgP0J894Sl7+RqZXhdCb5w11Y8/qufrbIeeGittjBJKYrDkIJnXHhYb+aeM1xce/1s793nV7UPr0ZRIrP3yprQ6EMH9+Orr65IzH55Rfe0pmU7sWn7gO+CRAiWEGRDCAVmwDPa+HANwJDQAFxImBzxjt8w+oeSRBJs+IiAUCgZsVy23H4wuoyLA7q0MIwrrzzbOuOcssGJU2N/PvO0yGMAniUir4lZzTvJJ1adFAJ4pBAmEnzhocN48p67X1F/+l2Ll0hEpUAVkYiQEfuRNntMcQnEu+um4otfmYVpMyP3lIbpk0Pt7NzDv2k9lLlu/66Q/fjjLWhqeg19/QnO+n0A4hzCOFikgtKLQgK5QLqhN0VQgmCMYQPDPjwY+AjDhodBrZFAeaklTjt9tJx3/mRMnmFhwtTQtjHVuJaIVh3ttjm2+yYvgMd1dzzounMzWevrK5v1h779jUbs2mrBmAoIYQDKAMbA5awZMSyBCy4anb3kktNfn3FK+GdjxmMDEe1g5sosMGfbDnytu9uct35DC15/fR1a9xG2ryuEgILvG2SyHnyX4LqGda7eXSCEZOKhiJSCEA4LxGM+4kVZzJozHONnRDF9ThmKisyG2lGhn5dGkQXoL0Tg3KQh4G3Svp2sGGLCnBQM2sZGlkNFbg528sc3vNb7vQfu2V667InWcN9AiXBEsWAOUlT5pgVZ7MeUqWV41/mjcfF7x2L4qNLVFSPNimjocNaHyhKqLkqlUJlOJ01vD9CyS+n+3qyzdcs+amsd7A87oYqQI8tc18D3fRih4TgWHGF3E5AtKIrw2WfXUlmZOqQ1/lAxEhQtxkCZTfcb86ZN3sgQ89+k0A+5eXRDA6ihAUPVLE9KoRz62Ogk+poIg52ViHozgJpnOg7jCxs34LbvfeclrF7d5huUUJiqpSANQ/0Y1K3ayB5RXV1CF18yG+e+pxynnh1FSak5VGCLhijw+CAGEQUJIFIA4ACQjHqIf2bAeB+3BI9PZdABIRBTilxh1hVBfBjAgFLBw9V5iujboqenp7C4uPgkE0D0FRq49wz0u9cWFKxM9A/M/+K69cl/eeXF9hGLG/di/fpB+IgyYJEQDgRZcHUGBhlTGGdTPTzEU0+1rSmnWJg8qSI1a26lkJbcPbJULJLAo4EQoioDnE/AIQdYkRt/GLzJWZJHaC0CYB3hkD2WRiMAnPZwAwPpiIV7AFQAuM4DHreATUec42SABSANdH8NKF140kxiOdpJO5Sig5mjiQSuX7kyO+elF9Z95Pmn22jr1rTuzyoAVTJKpWAwNPvwoaHRasJygIYND9GYcWFUVMVcpazWOXPGxJ2QUMZo1/f9lLC0JZUOSwUQaSgFKcHEbFhIAVsKkHbBOgtmCVAIJARIAhBBXQ9hESwZJLEoLSmNEwED/X1JkLHLy4uctrZW1sYMECSICcZoaI+hzVuDFmwYJlcpRPsadATRzBiTKz4uQFJAShnQphAGdEEg/czBQgZsOMdTIxhtgoAcB8mKDAd5Xt6wfAVy35QfpF4zGsw+DPiNYjvBTgrCEIhtFmSxHUknJ05Wn5t5WsHck2oW1dFhqqMTFTHznI2b/IdWrhgY9eKLe7B8+Xp0tIQNY7hRiAlLFggmDVf3wOVuZiQRhaBYxMkdb0DCQCpASg0hDWxHQSmCsgVsRRCSIKSGE5YIOwLhkIK0MpDCIOTYsMMCVgiwQwKRmEAoLBAOheFYId+2JRXEHMkwyGRcT/vG8j2G52mQkdAa8H0D7ROMZvi+j4zrIuu6QZIgDrYbDUAzDDOMDpZ0NotUOhUIEmloPwaTrskJXzB2N2yCwjwmp651wPEDC/haQ2sd0Kty+f/eKAvNAsycywMYtIMc+SegeQsQBAQLZLL9qBjRhS987fSWq64+fYQ6mQTw6FHkUOy0uRmyuRmGiFYz8ymjxxd98j2XzpqzeUvp/HWrB5y1r7li07o2HDywy2RBrGBzCCwsFAhJCn5aMDNB5yrcSxKwLQXbtsEmBI8AWDZUKAQVUiBosG/gS4LPEkoloOw0orEootEQpCI4IYFoxILjKBQWARU1lpIKCNsOExG0T5abAafSHtysBnwJzzMIBJLhez4yng876yHjetAGQZo0D9BaQbs+fM+AScCDAYV8hCwTCCiAbFYg68dgDMCGoI0GaRNkunqjor0HgMAESGkgyUAJAzZHpNKCAFjBcE5gtc7VS8EbTnogyLjFBlDoZEWGLFlkMXP8pBLAvyOUPhDMNSGivvb2pjtHj5hw/8gRo1adfxEKXnk1MWrv9pJzM4Nm8pbNGu0HHRzY14J9uw4Y7RnOuj5l4TNDQMCGZIeMG2LmoKCNAcP3s/D9DJSrQJYP2zNwtISGQNb3YVsK8AXcLCMWdSAphAxL+GkLggbgFLRBCYWsDEMIGQhaViKTJfguAKNyyR4JvsvwfYLrE7RWIC2RzbgBk9kX0JrBvoTWBN9l8rIMVzN8Zhgf7LOA72t4phdGC4AljGEwDDxoaKPJaAP2cyYrA5oZMAbaMLMRoCCjZa57VjAG0EYzGwNj3mrmDkWK2BgMZDs4OpghMnEHgHfSC+CRmJ9LATKAgWj7wCDi4XbPksTzTq+8gZljAK7uS+OijWuNbjkcG1MQnzJrz84u7N89gPb2LgwkMyCEYLRAyAnDth0IIYKXQwRBgLQVhAKUo6EchmMxyJKwSEAQQ1AW0QgjEgk0CpGA5Xhws1mwZAhpwfg+fG2gfYb2KaBHKQOlCMIxsExAm7cNg6QCSCLm+vB9Dd8jsFYglgATMmkPftbAz30oBIAUBcJoDIKPaCiCA7jEyLhZQBuQZxC4r3L2HwApFYgJnq9zkxoCAWUmKKUCzXmEABLeTNBujAs2cQwbVop4PLMFQ1XG/tEx5Mw+yp60AMzsGkyfn+oOP2uAT0TD7oTkAPXu2un9bNQo69KiIpyVSEAbhkQuta20BKRtAAoMe8AAUkCYQAP4XrCOBEPmBhJsBDQbKEiE7DB8DWgfMNrA0zqwy8iFlICyGBAGvusFNhspSClBSkKAYHRQFsISAjCU3bu3/yfZrHSFA2GynqkeHp0yrMa6KpGCYcOCc4LFzFCKYIgyew/0/iTrGc/ygKD4FEAEchk8ZVLlDSREdPPrXT8jAjFbDACObVvjJsRvEpJDnmsg3jLlnDlkE/X0eE87lnhPOIwltbWp+xoafjX4DymAR8xHpVw3bXLrRHNzsO54rzCUD8X9YwipAIBFi4J15eXN1NwMTN3SyZg/H+XlzYTmXB7zuqEj6/DOhV3+HuqOse4/315nZycfbYiUlze/7XtvBjD1b455E5s3lxPqjr3P5vJyqvu711LH5ZubqXNqHc+f/48VeswjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOP4xn/D9+VfnFGx20DAAAAAElFTkSuQmCC" alt="APEX Circuit" /></div>
+    <nav>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5"/><circle cx="18.5" cy="6" r="2.5"/></svg>Administrator</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
+    </nav>
+    <div class="user">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div><b>อาทิตย์ สุดชาติ</b><span>Production Planner</span></div>
+    </div>
+  </header>
+
+  <div class="strip">Tuesday, July 28, 2026 (apex production)</div>
+
+  <div class="content">
+    <div class="card">
+
+      <div class="page-head">
+        <div>
+          <div class="page-title">Actual (MPS)</div>
+          <div class="page-sub">Master Production Schedule · แผนผลิต FG เทียบ Sales Order / Forecast · A1 · A2 · A3</div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="openHistory()" title="ดูประวัติการรันแผนย้อนหลัง">
+            <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 8v4.5l3 1.8"/></svg>
+            ประวัติการรันแผน</button>
+          <button class="btn btn-run"><i>✓</i> RUN</button>
+          <button class="btn btn-plan"><i>▸</i> Planning</button>
+          <button class="btn btn-clear"><i>↺</i> Clear</button>
+          <button class="icon-btn" title="History">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="f"><label>Item Type</label>
+          <div class="ctrl"><select><option>FG | Finish Goods</option><option>SEMI | Semi-Finished</option></select><span class="caret">▾</span></div>
+        </div>
+        <div class="f"><label>Item group</label>
+          <div class="ctrl"><select><option>PCB | Printed Circuit Board</option><option>All Groups</option></select><span class="caret">▾</span></div>
+        </div>
+        <div class="f"><label>Item</label>
+          <div class="ctrl"><input value="5 รายการ" readonly />
+            <span class="ico">
+              <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+              <button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+            </span>
+          </div>
+        </div>
+        <div class="f"><label>Customer</label>
+          <div class="ctrl-2">
+            <div class="ctrl"><input value="" placeholder="รหัส" /></div>
+            <div class="ctrl"><input value="ทั้งหมด" />
+              <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button></span>
+            </div>
+          </div>
+        </div>
+        <div class="f"><label>Start</label>
+          <div class="ctrl"><input id="fStart" value="28-07-2026" readonly />
+            <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></span>
+          </div>
+        </div>
+        <div class="f"><label>End Date</label>
+          <div class="ctrl"><input id="fEnd" value="10-08-2026" readonly />
+            <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></span>
+          </div>
+        </div>
+        <div class="checks" style="grid-column:span 2">
+          <label class="chk"><input type="checkbox" checked /> Sales Order</label>
+          <label class="chk"><input type="checkbox" checked /> Sale Forecast</label>
+        </div>
+      </div>
+
+      <!-- ═══ ZOOM BAR ═══ -->
+      <div class="zoombar">
+        <div class="zb-left">
+          <span>ช่วงที่แสดง</span>
+          <b id="rangeTxt">—</b>
+          <span class="sep">|</span>
+          <span id="bucketTxt">—</span>
+        </div>
+        <div class="zb-right">
+          <div class="nav-arrows">
+            <button class="na" id="prevBtn" title="ย้อนกลับ">
+              <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="na na-today" id="todayBtn">วันนี้</button>
+            <button class="na" id="nextBtn" title="ถัดไป">
+              <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+          <span class="zlabel">มุมมอง</span>
+          <div class="zoom" id="zoom">
+            <button class="z active" data-m="day">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>วัน</button>
+            <button class="z" data-m="week">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v11M15 10v11"/></svg>สัปดาห์</button>
+            <button class="z" data-m="month">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M12 10v11"/></svg>เดือน</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr id="thead"></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="legend">
+        <span><i style="background:var(--p-blue);border:1px solid #b9d8f5"></i> Projected Inbound (แผนผลิตเข้าคลัง)</span>
+        <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> Projected Outbound (ส่งมอบลูกค้า)</span>
+        <span><i style="background:var(--p-green);border:1px solid #c3e8d3"></i> Net Balance ≥ Min</span>
+        <span><i style="background:#fdf7e2;border:1px solid #ecdba6"></i> ต่ำกว่า Min</span>
+        <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> ติดลบ / Stock-out</span>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
+</div>
+<div id="dlgRoot"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   APEX MPS — Finished Goods
+   ══════════════════════════════════════════════════════════════ */
+const TODAY  = new Date(2026, 6, 28);          // 28 Jul 2026
+const ORIGIN = new Date(2026, 6, 28);          // จุดเริ่ม horizon
+const HORIZON = 200;                            // จำนวนวันที่ generate ไว้
+
+// daily = ปริมาณส่งมอบเฉลี่ยต่อ "วันปฏิทิน"
+// lotQty / lotEvery = ขนาด lot ผลิต และรอบการผลิต (วัน)
+const ITEMS = [
+  { code:'W054Q-062A',  name:'PCB HITACHI ASTEMO 2L Normal', spec:'1 BRD : 6 PNL : 3 PCS · HASL', unit:'PCS', pnl:6, pcs:3,
+    plant:'A1', cust:'HITACHI ASTEMO', min:500,  max:5000, opening:1200,
+    daily:520,  lotEvery:7,  lotQty:3800, lotOffset:0 },
+
+  { code:'A048T-168BJ', name:'PCB SEMCO 4L Gold HDI', spec:'1 BRD : 16 PNL : 4 PCS · Laser Via · Gold', unit:'PCS', pnl:16, pcs:4,
+    plant:'A3', cust:'SEMCO', min:300,  max:3000, opening:450,
+    daily:215,  lotEvery:6,  lotQty:1300, lotOffset:1 },
+
+  { code:'A188D-023A',  name:'PCB NIDEC 6L Silver Coating', spec:'1 BRD : 6 PNL : 1 PCS · Immersion Silver', unit:'PCS', pnl:6, pcs:1,
+    plant:'A2', cust:'NIDEC', min:400,  max:4000, opening:0,
+    daily:290,  lotEvery:5,  lotQty:1500, lotOffset:0 },
+
+  { code:'G120A-017A',  name:'PCB SEMCO 4L Normal', spec:'1 BRD : 13 PNL : 4 PCS · HASL', unit:'PCS', pnl:13, pcs:4,
+    plant:'A1', cust:'SEMCO', min:600,  max:6000, opening:2100,
+    daily:480,  lotEvery:8,  lotQty:3900, lotOffset:2 },
+
+  { code:'K129B-036A',  name:'PCB Western Digital 2L Tin', spec:'1 BRD : 8 PNL : 2 PCS · Immersion Tin', unit:'PCS', pnl:8, pcs:2,
+    plant:'A1', cust:'WESTERN DIGITAL', min:800,  max:8000, opening:600,
+    daily:640,  lotEvery:6,  lotQty:3700, lotOffset:0 },
+];
+
+/* ── date helpers ─────────────────────────────────────────── */
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const addDays = (b,n) => new Date(b.getFullYear(), b.getMonth(), b.getDate()+n);
+const dIdx    = d => Math.round((d - ORIGIN)/86400000);
+const yy      = d => String(d.getFullYear()).slice(-2);
+const fmtDay  = d => `${d.getDate()}-${d.getMonth()+1}-${yy(d)}`;
+const fmtShort= d => `${d.getDate()} ${MON[d.getMonth()]}`;
+const fmtFull = d => `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`;
+function isoWeek(d){
+  const t = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  t.setDate(t.getDate() + 4 - (t.getDay()||7));
+  const y0 = new Date(t.getFullYear(),0,1);
+  return Math.ceil((((t-y0)/86400000)+1)/7);
+}
+
+/* ── series generator ─────────────────────────────────────── */
+function hash(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619);} return h>>>0; }
+function series(it){
+  let s = hash(it.code);
+  const rnd = () => { s = (Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; };
+  const inb = new Array(HORIZON).fill(0);
+  const outb= new Array(HORIZON).fill(0);
+  for(let i=0;i<HORIZON;i++){
+    const w = addDays(ORIGIN,i).getDay();               // 0=Sun 6=Sat
+    const f = w===0 ? 0 : (w===6 ? 0.636 : 1.273);      // รวมทั้งสัปดาห์ = 7 × daily
+    if(f) outb[i] = -Math.round(it.daily * f * (0.82 + rnd()*0.36));
+    if(i >= it.lotOffset && (i - it.lotOffset) % it.lotEvery === 0) inb[i] = it.lotQty;
+  }
+  return { inb, outb };
+}
+ITEMS.forEach(it => { const s = series(it); it.inb = s.inb; it.outb = s.outb;
+  // net balance รายวันสะสม
+  it.net = []; let r = it.opening;
+  for(let i=0;i<HORIZON;i++){ r += it.inb[i] + it.outb[i]; it.net.push(r); }
+});
+
+/* ── zoom / buckets ───────────────────────────────────────── */
+const VIEW = { day:{cols:14, cls:'dy'}, week:{cols:12, cls:'wk'}, month:{cols:6, cls:'mo'} };
+let mode = 'day';
+let anchor = 0;          // index วันเริ่มของหน้าจอ
+
+function buckets(){
+  const out = [], n = VIEW[mode].cols;
+  let i = anchor;
+  if(mode === 'day'){
+    for(let k=0;k<n && i<HORIZON;k++,i++){
+      const d = addDays(ORIGIN,i);
+      out.push({ from:i, to:i, main:fmtDay(d), sub:DOW[d.getDay()], wkend:d.getDay()===0 });
+    }
+  } else if(mode === 'week'){
+    while(out.length<n && i<HORIZON){
+      const d = addDays(ORIGIN,i);
+      const to = Math.min(i + ((7 - d.getDay()) % 7), HORIZON-1);   // ถึงวันอาทิตย์
+      out.push({ from:i, to, main:'W'+isoWeek(d),
+                 sub:`${fmtShort(addDays(ORIGIN,i))}–${fmtShort(addDays(ORIGIN,to))}` });
+      i = to + 1;
+    }
+  } else {
+    while(out.length<n && i<HORIZON){
+      const d = addDays(ORIGIN,i);
+      const last = new Date(d.getFullYear(), d.getMonth()+1, 0);
+      const to = Math.min(i + Math.round((last-d)/86400000), HORIZON-1);
+      out.push({ from:i, to, main:`${MON[d.getMonth()]} ${yy(d)}`, sub:`${to-i+1} วัน` });
+      i = to + 1;
+    }
+  }
+  return out;
+}
+
+/* ── render ───────────────────────────────────────────────── */
+const sum  = (arr,b) => { let t=0; for(let i=b.from;i<=b.to;i++) t += arr[i]; return t; };
+const nf   = n => n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nz   = n => n===0 ? '' : nf(n);
+const tIdx = dIdx(TODAY);
+
+/* ── column engine (frozen columns + collapsible group) ────── */
+let gOpen = true;                        // เปิด/ปิดกลุ่ม Unit · Min · Max
+function COLS(){
+  const a=[{k:'sel',w:44},{k:'code',w:146},{k:'name',w:250}];
+  const g= gOpen ? [{k:'unit',w:58},{k:'min',w:80},{k:'max',w:80}] : [{k:'gcol',w:38}];
+  const z=[{k:'open',w:92}];
+  const all=[...a,...g,...z]; let L=0;
+  all.forEach(c=>{ c.left=L; L+=c.w; });
+  const o={}; all.forEach(c=>o[c.k]=c); return o;
+}
+const sty = c => `left:${c.left}px;width:${c.w}px;min-width:${c.w}px`;
+const TD = (c,html='',cls='') =>
+  `<td class="fz ${c.k==='open'?'fz-last':''} ${c.k==='gcol'?'gcol':''} ${cls}" style="${sty(c)}">${html}</td>`;
+const TH = (c,html='',cls='') =>
+  `<th class="fz ${c.k==='open'?'fz-last':''} ${c.k==='gcol'?'gcol':''} ${cls}" style="${sty(c)}">${html}</th>`;
+// เซลล์ผสาน Item Code + Item Name สำหรับแถวย่อย
+const TD2 = (c1,c2,html,cls='') =>
+  `<td colspan="2" class="fz ${cls}" style="left:${c1.left}px;width:${c1.w+c2.w}px;min-width:${c1.w+c2.w}px">${html}</td>`;
+
+function render(){
+  const B = buckets(), cls = VIEW[mode].cls;
+  const C = COLS();
+
+  /* header */
+  const gHead = gOpen
+    ? TH(C.unit,`<button class="gtog" onclick="toggleGroup()" title="ซ่อนคอลัมน์ Unit · Min · Max">−</button>Unit`,'al-c')
+      + TH(C.min,'Min') + TH(C.max,'Max')
+    : TH(C.gcol,`<button class="gtog" onclick="toggleGroup()" title="แสดง Unit · Min · Max">+</button>`,'al-c');
+
+  const allOff = collapsed.size === ITEMS.length;
+  document.getElementById('thead').innerHTML =
+      TH(C.sel,`<button class="gtog" onclick="toggleAll()" title="${allOff?'ขยายทุกรายการ':'ยุบทุกรายการ'}">${allOff?'+':'−'}</button>`,'al-c')
+    + TH(C.code,'Item Code','al-l')
+    + TH(C.name,'Item Name','al-l')
+    + gHead
+    + TH(C.open,'Opening')
+    + B.map(b=>{
+      const isNow = tIdx>=b.from && tIdx<=b.to;
+      return `<th class="${cls}${isNow?' now':''}${b.wkend?' wkend':''}">
+        <div class="th-main">${b.main}</div><span class="th-sub">${b.sub}</span></th>`;
+    }).join('');
+
+  /* range caption */
+  const s = addDays(ORIGIN, B[0].from), e = addDays(ORIGIN, B[B.length-1].to);
+  document.getElementById('rangeTxt').textContent = `${fmtFull(s)} – ${fmtFull(e)}`;
+  document.getElementById('bucketTxt').textContent =
+    `${B.length} คอลัมน์ · ${B[B.length-1].to - B[0].from + 1} วัน`;
+  document.getElementById('fStart').value =
+    `${String(s.getDate()).padStart(2,'0')}-${String(s.getMonth()+1).padStart(2,'0')}-${s.getFullYear()}`;
+  document.getElementById('fEnd').value =
+    `${String(e.getDate()).padStart(2,'0')}-${String(e.getMonth()+1).padStart(2,'0')}-${e.getFullYear()}`;
+
+  /* body */
+  document.getElementById('tbody').innerHTML = ITEMS.map((it,idx)=>{
+    const slice = it.net.slice(B[0].from, B[B.length-1].to+1);
+    const mn = Math.min(...slice);
+    const tag = mn < 0        ? '<span class="tag tag-sh">Stock-out</span>'
+              : mn < it.min   ? '<span class="tag tag-lo">ต่ำกว่า Min</span>'
+              :                 '<span class="tag tag-ok">ปกติ</span>';
+
+    const row = (arr,klass,key) => B.map(b=>{
+      const v = sum(arr,b);
+      const clickable = v!==0 && key;
+      return `<td class="${v!==0?klass:''}${b.wkend?' wkend-c':''}${clickable?' clk':''}"${
+        clickable?` onclick="openCell(${idx},'${key}',${b.from},${b.to})"`:''}>${nz(v)}</td>`;
+    }).join('');
+
+    const netRow = B.map(b=>{
+      const v = it.net[b.to];
+      const k = v<0 ? 'v-net-neg' : (v < it.min ? 'v-net-lo' : 'v-net');
+      return `<td class="${k} clk" title="คลิกเพื่อสร้างใบสั่งงานจากยอดนี้"
+        onclick="openWO(${idx},${b.to},${v})">${nf(v)}</td>`;
+    }).join('');
+
+    const blank = `<td></td>`.repeat(B.length);
+    const openBal = B[0].from === 0 ? it.opening : it.net[B[0].from-1];
+    const isOff = collapsed.has(idx);   // ยุบอยู่ → โชว์ Net Balance บนแถวหัวรายการ
+
+    // ช่องกลุ่ม (Unit · Min · Max) — เว้นว่างในแถวย่อย
+    const gEmpty = gOpen ? TD(C.unit)+TD(C.min)+TD(C.max) : TD(C.gcol);
+    // แถวย่อย: ผสาน Item Code + Item Name เป็นช่องเดียว
+    const subHead = label => TD(C.sel) + TD2(C.code, C.name, label, 'lbl') + gEmpty;
+
+    const gBody = gOpen
+      ? TD(C.unit, it.unit, 'al-c') + TD(C.min, nf(it.min)) + TD(C.max, nf(it.max))
+      : TD(C.gcol);
+
+    return `
+    <tr class="grp" data-grp="${idx}">
+      ${TD(C.sel,`<span class="exp" onclick="toggle(${idx})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </span>`,'al-c')}
+      ${TD(C.code, `${it.code}<small>Plant ${it.plant}</small>`, 'code')}
+      ${TD(C.name, `${it.name}${tag}<small>${it.spec} · ${it.cust}</small>`, 'nm')}
+      ${gBody}
+      ${isOff ? TD(C.open, nf(openBal), 'v-net') : TD(C.open)}
+      ${isOff ? netRow : blank}
+    </tr>
+    <tr class="sub s${idx}">${subHead('Available Inventory')}${TD(C.open)}${blank}</tr>
+    <tr class="sub s${idx}">${subHead('Projected Inbound Inventory')}${TD(C.open,'','v-open')}${row(it.inb,'v-in','inb')}</tr>
+    <tr class="sub s${idx}">${subHead('Projected Outbound Inventory')}${TD(C.open)}${row(it.outb,'v-out','outb')}</tr>
+    <tr class="sub s${idx}">${subHead('Issued Inventory')}${TD(C.open)}${blank}</tr>
+    <tr class="sub row-net s${idx}">${subHead('Net Inventory Balance')}${TD(C.open, nf(openBal), 'v-net')}${netRow}</tr>`;
+  }).join('');
+
+  collapsed.forEach(i => applyToggle(i,true));
+}
+
+/* ── interactions ─────────────────────────────────────────── */
+const collapsed = new Set(ITEMS.map((_,i)=>i));   // ค่าเริ่มต้น = ยุบทุกรายการ
+function applyToggle(idx, hide){
+  document.querySelectorAll('.s'+idx).forEach(r => r.style.display = hide ? 'none' : '');
+  const b = document.querySelector(`[data-grp="${idx}"] .exp`);
+  if(b) b.classList.toggle('closed', hide);
+}
+function toggle(idx){
+  collapsed.has(idx) ? collapsed.delete(idx) : collapsed.add(idx);
+  render();
+}
+function toggleGroup(){ gOpen = !gOpen; render(); }
+function toggleAll(){
+  if(collapsed.size === ITEMS.length) collapsed.clear();
+  else ITEMS.forEach((_,i)=>collapsed.add(i));
+  render();
+}
+
+document.getElementById('zoom').addEventListener('click', e=>{
+  const b = e.target.closest('.z'); if(!b) return;
+  document.querySelectorAll('.z').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  mode = b.dataset.m;
+  anchor = 0;                       // กลับมาที่วันนี้เมื่อเปลี่ยนมุมมอง
+  render();
+});
+
+function step(dir){
+  const B = buckets();
+  const span = B[B.length-1].to - B[0].from + 1;
+  anchor = Math.max(0, Math.min(HORIZON - 1, anchor + dir*span));
+  render();
+}
+document.getElementById('prevBtn').onclick  = ()=>step(-1);
+document.getElementById('nextBtn').onclick  = ()=>step(1);
+document.getElementById('todayBtn').onclick = ()=>{ anchor = 0; render(); };
+
+/* ══════════════════════════════════════════════════════════════
+   คลิกที่เซลล์ → เปิดรายละเอียดเอกสาร (แบบ p-dialog ของ Beside)
+   ══════════════════════════════════════════════════════════════ */
+const PROC = ['CUT','DRI','PLT','DFO','SOM','LAS','AOI','PAK'];
+const RM = ['RM-CCL-S1000H-036 · CCL FR-4','RM-PP-7628-S1000HB · Prepreg',
+            'RM-CU-FOIL-1OZ · Copper Foil','RM-AL-MVC1240 · Aluminum Sheet',
+            'RM-SM-GRN-HFLF · Solder Mask','RM-DF-E9415DI · Dry Film'];
+
+function rng(seed){ let s=hash(seed); return ()=>{ s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; }; }
+function splitQty(total,n,r){
+  const wt=Array.from({length:n},()=>0.5+r());
+  const t=wt.reduce((a,b)=>a+b,0); const out=wt.map(x=>Math.round(total*x/t));
+  out[n-1]=total-out.slice(0,-1).reduce((a,b)=>a+b,0);
+  return out;
+}
+const dnum=(p,r)=>`${p}-26${String(Math.floor(r()*90000)+10000)}`;
+
+function docsOfDay(it,key,d){
+  const v=it[key][d]; if(!v) return [];
+  const r=rng(it.code+key+d), date=addDays(ORIGIN,d), out=[];
+  if(key==='inb'){                              // แผนผลิตเข้าคลัง = Work Order
+    const n=1+Math.floor(r()*2), q=splitQty(Math.abs(v),n,r);
+    for(let i=0;i<n;i++) out.push({date, obj:'WO', doc:dnum('WO',r),
+      ref:`${it.plant}-${PROC[Math.floor(r()*PROC.length)]}-0${1+Math.floor(r()*4)}`,
+      note:RM[Math.floor(r()*RM.length)], qty:q[i]});
+  } else {                                      // ส่งมอบลูกค้า = Sale Order / Delivery
+    const n=1+Math.floor(r()*3), q=splitQty(Math.abs(v),n,r);
+    for(let i=0;i<n;i++) out.push({date, obj:'SO', doc:dnum('SO',r),
+      ref:it.cust, note:`ส่งมอบ ${fmtShort(date)} · PO ลูกค้า ${dnum('C',r)}`, qty:q[i]});
+  }
+  return out;
+}
+
+const ROWMETA={
+  inb :{t:'Projected Inbound Inventory', c:['วันที่','ประเภท','เลขที่เอกสาร','โรงงาน · เครื่องจักร','วัตถุดิบหลัก','จำนวน','']},
+  outb:{t:'Projected Outbound Inventory',c:['วันที่','ประเภท','เลขที่เอกสาร','ลูกค้า','หมายเหตุ','จำนวน','']},
+};
+
+let DLG=[];
+function openCell(idx,key,from,to){
+  const it=ITEMS[idx], meta=ROWMETA[key];
+  let rows=[]; for(let d=from;d<=to;d++) rows=rows.concat(docsOfDay(it,key,d));
+  const total=rows.reduce((a,x)=>a+x.qty,0);
+  const s=addDays(ORIGIN,from), e=addDays(ORIGIN,to);
+  const period = from===to ? fmtFull(s) : `${fmtShort(s)} – ${fmtShort(e)} ${yy(e)}`;
+
+  DLG=[{it,rows,key}];
+  document.getElementById('dlgRoot').innerHTML=`
+    <div class="mask" onclick="if(event.target===this)closeDlg()">
+      <div class="dlg">
+        <div class="dlg-hd">
+          <h3>${meta.t}<small>${it.code} | ${it.name} · ${period}</small></h3>
+          <button class="dlg-x" onclick="closeDlg()">×</button>
+        </div>
+        <div class="dlg-bd">
+          <table class="dtb">
+            <thead><tr>${meta.c.map((h,i)=>`<th class="${i===5?'num':''}">${h}</th>`).join('')}</tr></thead>
+            <tbody>${rows.map((x,i)=>`<tr>
+              <td>${fmtShort(x.date)} ${yy(x.date)}</td>
+              <td><span class="obj obj-${x.obj.toLowerCase()}">${x.obj}</span></td>
+              <td><b>${x.doc}</b></td><td>${x.ref}</td>
+              <td style="color:#7d8ea0">${x.note}</td>
+              <td class="num"><b>${nf(x.qty)}</b> ${it.unit}</td>
+              <td>${key==='outb'?`<button class="dbtn" onclick="openDemand(${idx},${i})">ดู WO</button>`
+                                :`<button class="dbtn">เปิด WO</button>`}</td></tr>`).join('')}</tbody>
+            <tfoot><tr><td colspan="5">รวม ${rows.length} รายการ</td>
+              <td class="num">${nf(total)} ${it.unit}</td><td></td></tr></tfoot>
+          </table>
+        </div>
+        <div class="dlg-ft"><span>Plant ${it.plant} · ${it.cust} · Min ${nf(it.min)} / Max ${nf(it.max)}</span>
+          <button class="dbtn" onclick="closeDlg()">ปิด</button></div>
+      </div>
+    </div>`;
+}
+
+/* ระดับ 2 — Sale Order → Work Order */
+function openDemand(idx,rowNo){
+  const it=ITEMS[idx], x=DLG[0].rows[rowNo], r=rng(x.doc);
+  const woN=1+Math.floor(r()*3), wos=[]; let sp=0,spd=0;
+  for(let j=0;j<woN;j++){
+    const pq=Math.round((200+r()*1800)/10)*10;
+    const pd=Math.round(pq*(0.55+r()*0.6)), sc=Math.round(pq*r()*0.03);
+    wos.push({c:dnum('WO',r), m:`${it.plant}-${PROC[Math.floor(r()*PROC.length)]}-0${1+Math.floor(r()*4)}`,
+              pq, pd, sc, st:addDays(x.date,-Math.floor(r()*9)-1)});
+    sp+=pq; spd+=pd;
+  }
+  const st = spd>=sp*1.02?'<span class="st-over">Over</span>'
+           : spd>=sp     ?'<span class="st-ok">Completed</span>'
+           :'<span class="st-prog">In-progress</span>';
+  const bal=sp-spd;
+  document.getElementById('dlgRoot').innerHTML+=`
+    <div class="mask" onclick="if(event.target===this)closeTop()">
+      <div class="dlg wide">
+        <div class="dlg-hd">
+          <h3>ที่มาของความต้องการ — Sale Order Summary
+            <small>${it.code} | ${it.name} · ส่งมอบ ${nf(x.qty)} ${it.unit} · ${x.ref}</small></h3>
+          <button class="dlg-x" onclick="closeTop()">×</button>
+        </div>
+        <div class="dlg-bd">
+          <div class="so-card">
+            <div class="so-hd"><span>Sale Order <b>${x.doc}</b> · ${x.ref}</span>
+              <span>Work Order ${wos.length} ใบ · ${st}</span></div>
+            <div class="wo-wrap"><table class="dtb">
+              <thead><tr><th>WO Code</th><th>Machine</th><th class="num">Plan Qty</th>
+                <th class="num">Produced</th><th class="num">Scrap</th><th>Start</th></tr></thead>
+              <tbody>${wos.map(w=>`<tr><td><b>${w.c}</b></td><td>${w.m}</td>
+                <td class="num">${nf(w.pq)}</td><td class="num">${nf(w.pd)}</td>
+                <td class="num" style="color:${w.sc?'#c62828':'#b6c3d1'}">${w.sc?nf(w.sc):'—'}</td>
+                <td>${fmtShort(w.st)}</td></tr>`).join('')}
+                <tr><td colspan="2"><b>รวม</b></td><td class="num"><b>${nf(sp)}</b></td>
+                  <td class="num"><b>${nf(spd)}</b></td><td colspan="2"></td></tr></tbody>
+            </table></div>
+          </div>
+          <div class="sumbar">
+            <span>Plan<b>${nf(sp)} ${it.unit}</b></span>
+            <span>Produced<b>${nf(spd)} ${it.unit}</b></span>
+            <span>Balance<b style="color:${bal<0?'#c62828':'#1e9e50'}">${nf(bal)} ${it.unit}${bal<0?' (Over)':''}</b></span>
+          </div>
+        </div>
+        <div class="dlg-ft"><span>ข้อมูลจำลองเพื่อแสดงโครงสร้างการ drill-down</span>
+          <button class="dbtn" onclick="closeTop()">ปิด</button></div>
+      </div>
+    </div>`;
+}
+function closeDlg(){ document.getElementById('dlgRoot').innerHTML=''; }
+function closeTop(){
+  const m=document.querySelectorAll('#dlgRoot .mask');
+  if(m.length>1) m[m.length-1].remove(); else closeDlg();
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeTop(); });
+
+render();
+/* ══════════════════════════════════════════════════════════════════════
+   ใบสั่งงาน (Work Order) — โครงหน้าจอตามโปรแกรม Beside
+   เปิดจากการคลิกช่อง Net Inventory Balance บนกระดานแผน
+   ══════════════════════════════════════════════════════════════════════ */
+const WHS   = ['01-RM คลังวัตถุดิบ','05-WIP คลังงานระหว่างผลิต','08-CV คลังพักรอตรวจ','15-FG คลังสินค้าสำเร็จรูป'];
+const COLORS= ['ไม่ระบุ','Green','Black','White','Blue'];
+const PROCN = {CUT:'ตัดแผ่น',DRI:'เจาะรู',PLT:'ชุบทองแดง',DFO:'ติดฟิล์มชั้นนอก',
+               SOM:'Solder Mask',LAS:'Laser Via',AOI:'ตรวจด้วยภาพ',PAK:'บรรจุ'};
+const FLOWDEF={A1:['CUT','DRI','PLT','SOM','AOI','PAK'],
+               A2:['CUT','DRI','PLT','DFO','SOM','AOI','PAK'],
+               A3:['CUT','DRI','LAS','PLT','DFO','SOM','AOI','PAK']};
+let WO=null, woSeq=13;
+
+function woToast(m,c=''){
+  const old=document.querySelector('.wtoast'); if(old) old.remove();
+  const d=document.createElement('div'); d.className='wtoast '+c; d.innerHTML=m;
+  document.body.appendChild(d); setTimeout(()=>d.remove(),4200);
+}
+const woFmt = d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+const woNum = n=>Number(n||0).toLocaleString('en-US');
+
+/* คลิกช่อง Net Inventory Balance → เตรียมใบสั่งงานให้เลย */
+function openWO(idx, dayTo, net){
+  const it=ITEMS[idx];
+  const due=addDays(ORIGIN,dayTo);
+  const start=new Date(due.getFullYear(),due.getMonth(),due.getDate()-3,8,0);
+  /* ขาดเท่าไรก็เสนอผลิตเท่านั้น ปัดขึ้นหลักร้อย · ถ้ายังไม่ขาดใช้ยอดเติมถึง Min */
+  const need = net<0 ? Math.ceil((Math.abs(net)+it.min)/100)*100
+                     : Math.max(100, Math.ceil((it.min-net)/100)*100 || it.min);
+  const flow = FLOWDEF[it.plant];
+  woSeq++;
+  WO={
+    code:`MO2608-${String(woSeq).padStart(3,'0')}`,
+    cus:it.cust, due, so:null, tab:'detail',
+    flow:[...flow], sel:flow[Math.max(0,flow.length-3)],
+    side:false,
+    items:[{code:it.code,name:it.name,bom:`BOM-${it.code}-01`,qty:need,unit:it.unit,
+            zero:false,main:true,src:'เพิ่มเอง',idx}],
+    curItem:0, machines:[], net, dayTo
+  };
+  addMachine(true);
+  drawWO();
+}
+function machineList(){
+  const it=ITEMS[WO.items[WO.curItem].idx];
+  return [1,2,3].map(n=>`${it.plant}-${WO.sel}-0${n}`);
+}
+function addMachine(silent){
+  const it=ITEMS[WO.items[WO.curItem].idx];
+  const used=WO.machines.map(m=>m.mc);
+  const mc=machineList().find(x=>!used.includes(x));
+  if(!mc){ if(!silent) woToast('ไม่มีเครื่องว่างของกระบวนการนี้แล้ว','warn'); return; }
+  const cap=[260,320,410][WO.machines.length%3];
+  const m={mc, qty:remainQty(), std:cap, pct:100,
+           wh:WHS[1], whTo:WHS[3], color:COLORS[0], remark:'',
+           start:new Date(WO.due.getFullYear(),WO.due.getMonth(),WO.due.getDate()-3,8,0)};
+  calcEnd(m); WO.machines.push(m);
+  if(!silent) drawWO();
+}
+function calcEnd(m){
+  const hrs = (m.std>0 && m.pct>0) ? m.qty/(m.std*m.pct/100) : 0;
+  m.end = new Date(m.start.getTime()+hrs*3600000);
+}
+const plannedQty = ()=>WO.machines.reduce((a,m)=>a+(+m.qty||0),0);
+const orderQty   = ()=>+WO.items[WO.curItem].qty||0;
+const remainQty  = ()=>Math.max(0, orderQty()-plannedQty());
+
+function woSet(f,v){
+  const it=WO.items[WO.curItem];
+  if(f==='qty'){ it.qty=Math.max(0,+v||0); WO.machines.forEach(calcEnd); }
+  else if(f==='bom') it.bom=v;
+  else if(f==='zero'){ it.zero=v; if(v) it.qty=0; }
+  else if(f==='cus') WO.cus=v;
+  else if(f==='due') WO.due=new Date(v+'T00:00:00');
+  drawWO();
+}
+function mSet(i,f,v){
+  const m=WO.machines[i];
+  if(f==='qty'){
+    const other=plannedQty()-(+m.qty||0);
+    let q=Math.max(0,+v||0);
+    if(other+q>orderQty()){ q=Math.max(0,orderQty()-other);
+      woToast(`Plan Qty รวมเกินจำนวนสั่งผลิตของสินค้า (${woNum(orderQty())}) — ปรับเป็น ${woNum(q)}`,'warn'); }
+    m.qty=q;
+  }
+  else if(f==='pct') m.pct=Math.max(1,Math.min(150,+v||100));
+  else if(f==='start') m.start=new Date(v);
+  else m[f]=v;
+  calcEnd(m); drawWO();
+}
+function fillRemain(i){ mSet(i,'qty', WO.machines[i].qty + remainQty()); }
+function delMachine(i){ WO.machines.splice(i,1); drawWO(); }
+function togFlow(p){
+  const k=WO.flow.indexOf(p);
+  if(k>=0){ if(WO.flow.length===1) return woToast('กรุณาเลือก Process อย่างน้อย 1 รายการ','warn'); WO.flow.splice(k,1); }
+  else WO.flow.push(p);
+  if(!WO.flow.includes(WO.sel)) WO.sel=WO.flow[0];
+  drawWO();
+}
+function pickFlow(p){ WO.sel=p; WO.machines=[]; addMachine(true); drawWO(); }
+function woTab(t){ WO.tab=t; drawWO(); }
+function woSide(){ WO.side=!WO.side; drawWO(); }
+
+function saveWO(){
+  if(!WO.flow.length)               return woToast('กรุณาเลือก Process','warn');
+  if(!WO.due)                       return woToast('กรุณาระบุ วันกำหนดส่ง','warn');
+  if(!WO.items.length)              return woToast('กรุณาเพิ่มสินค้า','warn');
+  if(!WO.items.some(x=>x.main))     return woToast('กรุณาเลือกสินค้าหลัก','warn');
+  const it=WO.items[WO.curItem];
+  if(!it.bom)                       return woToast(`กรุณาเลือก BOM ของสินค้า ${it.code}`,'warn');
+  if(!it.qty && !it.zero)           return woToast(`กรุณาระบุจำนวนสั่งผลิตของ ${it.code}`,'warn');
+  if(!WO.machines.length)           return woToast(`สินค้า ${it.code} ยังไม่ได้วางแผนเครื่อง`,'warn');
+  if(plannedQty()!==orderQty())
+    return woToast(`สินค้า ${it.code}: วางแผนรวม ${woNum(plannedQty())} ≠ จำนวนสั่งผลิต ${woNum(orderQty())}`,'warn');
+  closeDlg();
+  woToast(`บันทึกใบสั่งงาน <b>${WO.code}</b> เรียบร้อย — สถานะ Draft<br>
+    <span style="opacity:.85;font-size:12px">${it.code} · ${woNum(it.qty)} ${it.unit} · ${WO.machines.length} เครื่อง · กำหนดส่ง ${woFmt(WO.due).slice(0,10)}</span>`,'ok');
+}
+
+function drawWO(){
+  const it=WO.items[WO.curItem], P=ITEMS[it.idx];
+  const planned=plannedQty(), diff=orderQty()-planned;
+  const dcol = diff===0?'#10B981':(diff<0?'#EF4444':'#F59E0B');
+  const dtxt = diff===0?'ครบพอดี':(diff<0?`เกิน ${woNum(-diff)}`:`คงเหลือ ${woNum(diff)}`);
+  const dueV = `${WO.due.getFullYear()}-${String(WO.due.getMonth()+1).padStart(2,'0')}-${String(WO.due.getDate()).padStart(2,'0')}`;
+  const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
+  const dtV=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+  const SOROWS=[[P.code,P.name,Math.round(it.qty*1.35),Math.round(it.qty*0.35),Math.round(it.qty)],
+    [ITEMS[(it.idx+1)%ITEMS.length].code,ITEMS[(it.idx+1)%ITEMS.length].name,900,300,600]];
+
+  document.getElementById('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg full">
+    <div class="dlg-hd"><h3>ใบสั่งงาน
+      <small>สร้างจากกระดานแผน MPS · ${P.code} | ${P.name} · Plant ${P.plant}
+        · ยอดคงเหลือสุทธิ ${nf(WO.net)} ${P.unit} ณ ${fmtFull(addDays(ORIGIN,WO.dayTo))}</small></h3>
+      <span style="display:flex;align-items:center;gap:9px;flex:none">
+        <button class="wo-sidebtn" onclick="woSide()" title="เปิด/ปิดแผงข้อมูลอ้างอิง">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><path d="M14.5 4.5v15"/></svg>
+          ข้อมูลอ้างอิง <span class="n">SO</span></button>
+        <button class="dlg-x" onclick="closeDlg()">×</button></span></div>
+
+    <div class="dlg-bd">
+      <div class="wo-scroll">
+        <!-- การ์ด 1 -->
+        <div class="wo-card"><h3>รายละเอียดใบสั่งงาน</h3>
+          <div class="wo-f c3">
+            <div class="fld"><label>ลูกค้า</label>
+              <select onchange="woSet('cus',this.value)">${opt([...new Set(ITEMS.map(x=>x.cust))],WO.cus)}</select></div>
+            <div class="fld"><label>ชื่อลูกค้า</label>
+              <input value="${WO.cus} (THAILAND) CO., LTD." readonly /></div>
+            <div class="fld"><label>วันกำหนดส่ง<span class="rq">*</span></label>
+              <input type="date" value="${dueV}" onchange="woSet('due',this.value)" /></div>
+          </div>
+        </div>
+
+        <!-- การ์ด 2 -->
+        <div class="wo-card"><h3>Process</h3>
+          <div class="selbtn">${Object.keys(PROCN).map(p=>
+            `<button class="pb ${WO.flow.includes(p)?'on':''}" onclick="togFlow('${p}')">${p} · ${PROCN[p]}</button>`).join('')}</div>
+          <div class="flow-container">${WO.flow.map((p,i)=>
+            `${i?'<span class="farw">→</span>':''}<span class="fchip ${WO.sel===p?'on':''}" onclick="pickFlow('${p}')">${p}</span>`).join('')}
+            <span style="margin-left:auto;color:var(--mut);font-size:11.5px">เลือก ${WO.flow.length} กระบวนการ · กำลังวางแผน ${WO.sel} — ${PROCN[WO.sel]}</span></div>
+        </div>
+
+        <!-- การ์ด 3 -->
+        <div class="wo-card">
+          <h3><span class="bdg">1</span>รายการสินค้าที่สั่งผลิต
+            <span class="rt"><button class="wbtn" onclick="woToast('เปิดหน้าค้นหาสินค้าเพื่อเพิ่มลงใบสั่งงาน')">+ เพิ่มสินค้า</button></span></h3>
+          <table class="dtb">
+            <thead><tr><th style="width:150px">Item Code</th><th>Item Name</th>
+              <th style="width:190px">BOM</th><th class="num" style="width:130px">จำนวนสั่งผลิต</th>
+              <th style="width:70px">หน่วย</th><th style="width:80px">จำนวน 0</th>
+              <th style="width:88px">สินค้าหลัก</th><th style="width:100px">ที่มา</th>
+              <th style="width:46px"></th></tr></thead>
+            <tbody><tr style="background:#eaf3fc">
+              <td><b style="color:var(--blue)">${it.code}</b></td><td>${it.name}</td>
+              <td><select onchange="woSet('bom',this.value)">${opt([it.bom,`BOM-${it.code}-02`],it.bom)}</select></td>
+              <td class="num"><input type="number" style="width:110px;text-align:right;padding:4px 8px;
+                  border:1px solid var(--line-d);border-radius:5px;font-family:inherit"
+                  value="${it.qty}" onchange="woSet('qty',this.value)" /></td>
+              <td style="text-align:center">${it.unit}</td>
+              <td style="text-align:center"><input type="checkbox" ${it.zero?'checked':''} onchange="woSet('zero',this.checked)" /></td>
+              <td style="text-align:center"><input type="checkbox" checked disabled /></td>
+              <td style="text-align:center;color:var(--mut)">${it.src}</td>
+              <td style="text-align:center;color:#c3d0dd">✕</td></tr></tbody>
+          </table>
+          <div class="wo-alloc">รวมสั่งผลิต <b>${woNum(it.qty)}</b> ${it.unit}
+            <span class="hint">คลิกที่แถวสินค้าเพื่อวางแผนเครื่อง</span></div>
+
+          <h3 style="margin-top:16px"><span class="bdg">2</span>วางแผนการผลิตรายเครื่อง
+            <span style="color:var(--blue);font-weight:600">— ${it.code} (${it.name})</span>
+            <span class="rt">
+              <span style="font-size:11.5px;color:var(--mut)">สั่งผลิต <b style="color:var(--ink)">${woNum(orderQty())}</b>
+                • วางแผนแล้ว <b style="color:var(--ink)">${woNum(planned)}</b>
+                • <b style="color:${dcol}">${dtxt}</b></span>
+              <button class="wbtn" onclick="addMachine()">+ เพิ่มเครื่อง</button></span></h3>
+
+          ${WO.machines.length? WO.machines.map((m,i)=>`
+            <div class="wo-mc">
+              <div class="mh">เครื่องที่ ${i+1} — ${m.mc}
+                <span class="lk">🔒 Draft</span>
+                <button class="del" onclick="delMachine(${i})">✕ ลบ</button></div>
+              <div class="mb"><div class="wo-f">
+                <div class="fld"><label>Machine</label>
+                  <select onchange="mSet(${i},'mc',this.value)">${opt(machineList(),m.mc)}</select></div>
+                <div class="fld"><label>Plan Qty</label><div class="ig">
+                  <input type="number" value="${m.qty}" onchange="mSet(${i},'qty',this.value)" />
+                  <button class="igb" title="ดึงจำนวนคงเหลือ" onclick="fillRemain(${i})">↓</button></div></div>
+                <div class="fld"><label>Cap STD (${it.unit}/ชม.)</label><input value="${woNum(m.std)}" readonly /></div>
+                <div class="fld"><label>Cap %</label>
+                  <input type="number" value="${m.pct}" onchange="mSet(${i},'pct',this.value)" /></div>
+                <div class="fld"><label>Warehouse</label>
+                  <select onchange="mSet(${i},'wh',this.value)">${opt(WHS,m.wh)}</select></div>
+                <div class="fld"><label>Warehouse To</label>
+                  <select onchange="mSet(${i},'whTo',this.value)">${opt(WHS,m.whTo)}</select></div>
+                <div class="fld"><label>Start</label>
+                  <input type="datetime-local" value="${dtV(m.start)}" onchange="mSet(${i},'start',this.value)" /></div>
+                <div class="fld"><label>End Date</label><input value="${woFmt(m.end)}" readonly /></div>
+                <div class="fld"><label>Color</label>
+                  <select onchange="mSet(${i},'color',this.value)">${opt(COLORS,m.color)}</select></div>
+                <div class="fld" style="grid-column:span 3"><label>Remark</label>
+                  <input value="${m.remark}" placeholder="หมายเหตุของเครื่องนี้"
+                    onchange="mSet(${i},'remark',this.value)" /></div>
+              </div></div>
+              <div class="wo-shift">🕐 กะการทำงาน — กะเช้า 08:00–17:00 · กะดึก 20:00–05:00
+                <button onclick="woToast('เปิดหน้าจอแก้ไขกะการทำงานของเครื่อง ${m.mc}')">✏ แก้ไขกะการทำงาน</button></div>
+            </div>`).join('')
+          : `<div class="wo-empty">เลือกสินค้าก่อน — คลิกที่แถวสินค้าด้านบนเพื่อวางแผนเครื่อง</div>`}
+        </div>
+      </div>
+      <div class="wo-scrim ${WO.side?'on':''}" onclick="woSide()"></div>
+      <div class="wo-side ${WO.side?'open':''}">
+        <button class="wo-sclose" onclick="woSide()" title="ปิดแผง">×</button>
+        <div class="wo-tabs">
+          <button class="${WO.tab==='detail'?'on':''}" onclick="woTab('detail')">รายละเอียดใบสั่งงาน</button>
+          <button class="${WO.tab==='pv'?'on':''}" onclick="woTab('pv')">Preview / Summary</button></div>
+        <div class="sb">${WO.tab==='detail'?`
+          <div class="lb">Ref.SO / Forecast</div>
+          <div class="fld"><div class="ig">
+            <input value="${WO.so||'SO-26-0918 | '+WO.cus+' | Due '+woFmt(WO.due).slice(0,10)}" readonly />
+            <button class="igb" title="เลือกเอกสาร" onclick="woToast('เปิดหน้าเลือก Sale Order')">⋯</button></div></div>
+          <table class="sotb">
+            <thead><tr><th style="width:30px"></th><th style="width:118px">Item</th><th>ชื่อสินค้า</th>
+              <th class="r" style="width:70px">ตาม SO</th><th class="r" style="width:68px">สั่งแล้ว</th>
+              <th class="r" style="width:72px">คงเหลือ</th></tr></thead>
+            <tbody>${SOROWS.map((r,i)=>`<tr><td><input type="checkbox" ${i===0?'checked':''} /></td>
+              <td><b style="color:var(--blue)">${r[0]}</b></td><td>${r[1]}</td>
+              <td class="r">${woNum(r[2])}</td><td class="r">${woNum(r[3])}</td>
+              <td class="r"><b>${woNum(r[4])}</b></td></tr>`).join('')}</tbody>
+          </table>
+          <div style="font-size:11px;color:var(--mut);margin-top:9px;line-height:1.6">
+            ติ๊กรายการเพื่อดึงเข้าตารางสินค้าที่สั่งผลิต — จำนวนจะรวมจากทุกบรรทัดของ SO ที่ยังค้างผลิต</div>`
+        :`<div class="lb">Process Flow</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 12px">
+            ${WO.flow.map(p=>`<span class="fchip ${WO.sel===p?'on':''}">${p}</span>`).join('')}</div>
+          <div class="lb">Total Process: ${WO.flow.length}</div>
+          ${WO.machines.length?WO.machines.map((m,i)=>`
+            <div class="pvw"><div class="h">${WO.sel} — ${PROCN[WO.sel]}<span class="wc">${WO.code}-${i+1}</span></div>
+              <div class="r"><span>Machine</span><b>${m.mc}</b></div>
+              <div class="r"><span>Item · BOM</span><b>${it.code}</b></div>
+              <div class="r"><span>Plan Qty</span><b>${woNum(m.qty)} ${it.unit}</b></div>
+              <div class="r"><span>Cap %</span><b>${m.pct}%</b></div>
+              <div class="r"><span>Start</span><b>${woFmt(m.start)}</b></div>
+              <div class="r"><span>End</span><b>${woFmt(m.end)}</b></div>
+              <div class="r"><span>Warehouse</span><b>${m.wh.split(' ')[0]} → ${m.whTo.split(' ')[0]}</b></div>
+            </div>`).join('')
+          :`<div class="wo-empty" style="padding:18px">เลือก Process เพื่อดูสรุปรายละเอียด</div>`}`}
+        </div>
+      </div>
+    </div>
+
+    <div class="dlg-ft">
+      <span class="wo-ft-l">เลขที่เอกสารจะออกให้อัตโนมัติเมื่อบันทึก · ${WO.code} · สถานะ Draft</span>
+      <span style="display:flex;gap:8px">
+        <button class="wbtn" onclick="woToast('ต้องการล้างข้อมูล ใช่หรือไม่? ยืนยัน เพื่อเริ่มต้นเอกสารใหม่','warn')">Clear</button>
+        <button class="wbtn" onclick="woToast('เลือกใบสั่งงานเพื่อพิมพ์รายงาน')">Report</button>
+        <button class="wbtn pri" onclick="saveWO()">Save</button></span></div>
+  </div></div>`;
+}
+
+/* ══ ประวัติการรันแผน — เปิดซ้อนจากหน้านี้ ══ */
+function openHistory(){
+  if(document.getElementById('histMask')) return;
+  const el=document.createElement('div');
+  el.className='hist-mask'; el.id='histMask';
+  el.onclick=e=>{ if(e.target===el) closeHistory(); };
+  el.innerHTML=`<div class="hist-win">
+    <div class="hist-hd"><h3>ประวัติการรันแผน (Plan Run History)</h3>
+      <small>MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูได้ว่ารอบไหนคำนวณจากอะไร</small>
+      <button class="x" onclick="closeHistory()" title="ปิด">×</button></div>
+    <iframe src="APEX_Plan_History.html" title="ประวัติการรันแผน"></iframe></div>`;
+  document.body.appendChild(el);
+}
+function closeHistory(){const el=document.getElementById('histMask'); if(el) el.remove();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHistory();});
+
+</script>
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"อาทิตย์ สุดชาติ":"Artit Sudchat",
+"Master Production Schedule · แผนผลิต FG เทียบ Sales Order / Forecast · A1 · A2 · A3":"Master Production Schedule · FG production plan vs Sales Order / Forecast · A1 · A2 · A3",
+"ดูประวัติการรันแผนย้อนหลัง":"View past plan runs",
+"ประวัติการรันแผน (Plan Run History)":"Plan Run History",
+"ประวัติการรันแผน":"Plan Run History",
+"MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูได้ว่ารอบไหนคำนวณจากอะไร":"MPS · MRP — keeps a snapshot of every run's input data so you can trace what each run was calculated from",
+"รหัส":"Code",
+"ช่วงที่แสดง":"Showing",
+"ย้อนกลับ":"Previous",
+"วันนี้":"Today",
+"ถัดไป":"Next",
+"มุมมอง":"View",
+"วัน":"Day",
+"สัปดาห์":"Week",
+"เดือน":"Month",
+"แผนผลิตเข้าคลัง":"planned production receipts",
+"ส่งมอบลูกค้า":"customer deliveries",
+"ต่ำกว่า Min":"Below Min",
+"ติดลบ / Stock-out":"Negative / Stock-out",
+"ปกติ":"Normal",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"จุดเริ่ม":"start of",
+"จำนวนวันที่":"number of days",
+"ไว้":"ahead",
+"รวมทั้งสัปดาห์":"weekly total",
+"วันเริ่มของหน้าจอ":"first visible day",
+"ถึงวันอาทิตย์":"through Sunday",
+"เปิด/ปิดกลุ่ม":"toggle group",
+"ซ่อนคอลัมน์ Unit · Min · Max":"Hide Unit · Min · Max columns",
+"แสดง Unit · Min · Max":"Show Unit · Min · Max",
+"ขยายทุกรายการ":"Expand All",
+"ยุบทุกรายการ":"Collapse All",
+"คอลัมน์ ·":"columns ·",
+"คลิกเพื่อสร้างใบสั่งงานจากยอดนี้":"Click to create a work order from this balance",
+"ยุบอยู่":"collapsed",
+"โชว์":"show",
+"บนแถวหัวรายการ":"on the group row",
+"ค่าเริ่มต้น":"default",
+"กลับมาที่วันนี้เมื่อเปลี่ยนมุมมอง":"reset to today when the view changes",
+"· ส่งมอบ":"· Delivery",
+"ส่งมอบ":"Delivery",
+"· PO ลูกค้า":"· Customer PO",
+"ประเภท":"Type",
+"เลขที่เอกสาร":"Document No.",
+"โรงงาน · เครื่องจักร":"Plant · Machine",
+"วัตถุดิบหลัก":"Main Material",
+"ลูกค้า":"Customer",
+"ดู WO":"View WO",
+"เปิด WO":"Open WO",
+"รวม ":"Total ",
+"รวม":"Total",
+"ที่มาของความต้องการ — Sale Order Summary":"Demand Source — Sale Order Summary",
+"ใบ ·":"orders ·",
+"ข้อมูลจำลองเพื่อแสดงโครงสร้างการ drill-down":"Mock data illustrating the drill-down structure",
+"01-RM คลังวัตถุดิบ":"01-RM Material Warehouse",
+"05-WIP คลังงานระหว่างผลิต":"05-WIP Work-in-Process Warehouse",
+"08-CV คลังพักรอตรวจ":"08-CV Inspection Hold Warehouse",
+"15-FG คลังสินค้าสำเร็จรูป":"15-FG Finished Goods Warehouse",
+"ไม่ระบุ":"Not Specified",
+"ตัดแผ่น":"Cutting",
+"เจาะรู":"Drilling",
+"ชุบทองแดง":"Copper Plating",
+"ติดฟิล์มชั้นนอก":"Outer Film Lamination",
+"ตรวจด้วยภาพ":"Optical Inspection",
+"บรรจุ":"Packing",
+"เพิ่มเอง":"Manual",
+"ไม่มีเครื่องว่างของกระบวนการนี้แล้ว":"No available machines left for this process",
+"Plan Qty รวมเกินจำนวนสั่งผลิตของสินค้า (":"Total Plan Qty exceeds the item's order qty (",
+") — ปรับเป็น":") — adjusted to",
+"กรุณาเลือก Process อย่างน้อย 1 รายการ":"Please select at least 1 process",
+"กรุณาเลือก Process":"Please select a process",
+"กรุณาระบุ วันกำหนดส่ง":"Please specify the due date",
+"กรุณาเพิ่มสินค้า":"Please add an item",
+"กรุณาเลือกสินค้าหลัก":"Please select a main item",
+"กรุณาเลือก BOM ของสินค้า":"Please select a BOM for item",
+"กรุณาระบุจำนวนสั่งผลิตของ":"Please enter the order qty for",
+"สินค้า":"Item",
+"ยังไม่ได้วางแผนเครื่อง":"has no machine plan yet",
+": วางแผนรวม":": planned total",
+"≠ จำนวนสั่งผลิต":"≠ order qty",
+"บันทึกใบสั่งงาน":"Work order",
+"เรียบร้อย — สถานะ Draft":"saved — status Draft",
+"เครื่อง · กำหนดส่ง":"machine(s) · due",
+"ครบพอดี":"Fully Allocated",
+"เกิน":"Over by",
+"คงเหลือ":"Remaining",
+"ใบสั่งงาน":"Work Order",
+"สร้างจากกระดานแผน":"Created from planning board",
+"ยอดคงเหลือสุทธิ":"projected on-hand",
+"ณ":"as of",
+"เปิด/ปิดแผงข้อมูลอ้างอิง":"Show/hide reference panel",
+"ข้อมูลอ้างอิง":"Reference Data",
+"รายละเอียดใบสั่งงาน":"Work Order Details",
+"ชื่อลูกค้า":"Customer Name",
+"วันกำหนดส่ง":"Due Date",
+"เลือก":"Selected",
+"กระบวนการ · กำลังวางแผน":"processes · planning",
+"รายการสินค้าที่สั่งผลิต":"Items to Produce",
+"เปิดหน้าค้นหาสินค้าเพื่อเพิ่มลงใบสั่งงาน":"Open item search to add to the work order",
+"+ เพิ่มสินค้า":"+ Add Item",
+"จำนวนสั่งผลิต":"Order Qty",
+"จำนวน 0":"Zero Qty",
+"สินค้าหลัก":"Main Item",
+"ที่มา":"Source",
+"รวมสั่งผลิต":"Total Order Qty",
+"คลิกที่แถวสินค้าเพื่อวางแผนเครื่อง":"Click an item row to plan machines",
+"วางแผนการผลิตรายเครื่อง":"Plan Production by Machine",
+"สั่งผลิต":"Ordered",
+"• วางแผนแล้ว":"• Planned",
+"+ เพิ่มเครื่อง":"+ Add Machine",
+"เครื่องที่":"Machine",
+"✕ ลบ":"✕ Remove",
+"ดึงจำนวนคงเหลือ":"Fill remaining qty",
+"/ชม.)":"/hr)",
+"หมายเหตุของเครื่องนี้":"Remarks for this machine",
+"🕐 กะการทำงาน — กะเช้า 08:00–17:00 · กะดึก 20:00–05:00":"🕐 Work Shifts — Day 08:00–17:00 · Night 20:00–05:00",
+"เปิดหน้าจอแก้ไขกะการทำงานของเครื่อง":"Open the shift editor for machine",
+"✏ แก้ไขกะการทำงาน":"✏ Edit Shifts",
+"เลือกสินค้าก่อน — คลิกที่แถวสินค้าด้านบนเพื่อวางแผนเครื่อง":"Select an item first — click an item row above to plan machines",
+"ปิดแผง":"Close Panel",
+"เลือกเอกสาร":"Select Document",
+"เปิดหน้าเลือก Sale Order":"Open the Sale Order picker",
+"ชื่อสินค้า":"Item Name",
+"ตาม SO":"SO Qty",
+"สั่งแล้ว":"Ordered",
+"ติ๊กรายการเพื่อดึงเข้าตารางสินค้าที่สั่งผลิต — จำนวนจะรวมจากทุกบรรทัดของ SO ที่ยังค้างผลิต":"Tick rows to pull into the production items table — quantities are summed from all open SO lines",
+"เลือก Process เพื่อดูสรุปรายละเอียด":"Select a process to view the summary",
+"เลขที่เอกสารจะออกให้อัตโนมัติเมื่อบันทึก ·":"Document number is issued automatically on save ·",
+"· สถานะ Draft":"· status Draft",
+"ต้องการล้างข้อมูล ใช่หรือไม่? ยืนยัน เพื่อเริ่มต้นเอกสารใหม่":"Clear all data? Confirm to start a new document",
+"เลือกใบสั่งงานเพื่อพิมพ์รายงาน":"Select a work order to print the report",
+"จำนวนวันที่ generate ไว้":"number of generated days"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>

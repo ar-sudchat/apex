@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
+<title>จัดลำดับและล็อกแผน — APEX Circuit</title>
+<link rel="icon" type="image/png" href="apex-logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838; --purple:#7a4fd3;
+  --orange:#c25f1e; --cyan:#0e8ca8;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4; --p-amber:#fdfaef; --p-purple:#f8f4fd; --p-cyan:#f0fafd;
+  --th:#5b9fe0; --line:#edf2f8; --line-d:#d7e2ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--hdr);display:flex;align-items:stretch;height:76px;flex:none;position:sticky;top:0;z-index:100}
+.logo-tab{background:#fff;border-radius:0 0 26px 0;width:212px;display:flex;align-items:center;justify-content:center;flex:none}
+.apexlogo{height:44px;width:auto;display:block}
+nav{display:flex;align-items:center;gap:4px;padding:0 10px;flex:1;min-width:0;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+.mi{display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;font-size:12.5px;
+    padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:.94;cursor:pointer;transition:.2s;text-decoration:none}
+.mi:hover{background:rgba(255,255,255,.12)}
+.mi svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mi.active{background:rgba(255,255,255,.22);opacity:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#fff;padding-right:24px;flex:none}
+.user svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.user b{font-size:14.5px;font-weight:600;display:block;line-height:1.3}
+.user span{font-size:12px;opacity:.85}
+.topstrip{background:var(--strip);color:#2b567c;font-size:12.5px;text-align:right;padding:5px 24px;flex:none}
+.content{flex:1;padding:16px 20px 64px}
+footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padding:14px;flex:none}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:16px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:12.5px;color:var(--mut);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:20px;
+     border:1px solid #dfe7f0;background:#fff;font-family:inherit;font-size:13px;
+     font-weight:500;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.1)}
+.btn:active{transform:translateY(.5px)}
+.btn-p{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.btn-p:hover{background:#3d8ad6;border-color:#3d8ad6}
+.btn-s{padding:5px 12px;font-size:12px}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sel,.inp{padding:7px 11px;border:1px solid #dfe7f0;border-radius:8px;background:#fff;
+     font-family:inherit;font-size:13px;color:var(--ink);outline:none;transition:.15s}
+.sel{padding-right:30px;cursor:pointer;appearance:none;
+     background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237d8ea0' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+     background-repeat:no-repeat;background-position:right 11px center;background-size:10px}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.sel:focus,.inp:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+
+/* ── แถบสถานะ ── */
+.strip{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+       margin-bottom:14px;flex-wrap:wrap}
+.sc{padding:11px 20px 11px 0;margin-right:20px;border-right:1px solid var(--line);flex:none}
+.sc:last-child{border-right:none}
+.sc .n{font-size:23px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.sc .t{font-size:12px;color:var(--mut);margin-top:2px}
+.sc .t2{font-size:11px;color:#a8b6c4;margin-top:3px;line-height:1.5}
+.c-blue .n{color:var(--blue)} .c-cyan .n{color:var(--cyan)} .c-red .n{color:var(--red)}
+.c-amber .n{color:#a06a00} .c-green .n{color:var(--green)}
+
+/* ── แถบเวลา Frozen / Open ── */
+.tl{border:1px solid var(--line-d);border-radius:11px;padding:14px 16px;margin-bottom:14px;background:#fff}
+.tl .h{font-size:12.5px;font-weight:700;color:#3a5773;margin-bottom:11px;display:flex;align-items:center;gap:10px}
+.tl .h small{font-weight:400;color:var(--mut);font-size:11.5px}
+.tl .h .rt{margin-left:auto;display:flex;align-items:center;gap:9px;font-weight:400}
+.days{display:flex;gap:3px}
+.day{flex:1;border-radius:7px;padding:8px 4px 9px;text-align:center;font-size:11px;
+     border:1px solid transparent;transition:.15s}
+.day .d{font-weight:700;font-size:13px;font-variant-numeric:tabular-nums}
+.day .w{font-size:10px;opacity:.75;margin-top:1px}
+.day .s{font-size:9.5px;margin-top:4px;font-weight:700;letter-spacing:.3px}
+.day.fz{background:#eef2f6;color:#5a6b7d;border-color:#dde4ec}
+.day.fz .s{color:#5a6b7d}
+.day.op{background:var(--p-green);color:#1a7a42;border-color:#c6e8d5}
+.day.op .s{color:#1a7a42}
+.day.wk{opacity:.55}
+.day.today{box-shadow:inset 0 0 0 2px var(--hdr)}
+
+/* ── ตัวกรอง ── */
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.search{position:relative}
+.search input{width:250px;padding:7px 11px 7px 32px;border:1px solid #dfe7f0;border-radius:8px;
+  font-family:inherit;font-size:13px;outline:none;transition:.15s}
+.search input:hover{border-color:#c2d5e8}
+.search input:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+.search .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mut);display:flex}
+.cnt{font-size:12.5px;color:var(--mut)} .cnt b{color:var(--blue)}
+.frow .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ── ตาราง ── */
+.tw{border:1px solid var(--line-d);border-radius:8px;overflow:auto;max-height:560px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+thead th{background:var(--th);color:#fff;font-weight:600;padding:9px 11px 10px;text-align:left;white-space:nowrap;
+  position:sticky;top:0;z-index:5;border-right:1px solid rgba(255,255,255,.18);user-select:none;
+  vertical-align:top;height:52px;line-height:1.3}
+thead th:last-child{border-right:none}
+thead th.r{text-align:right} thead th.c{text-align:center}
+thead th small{display:block;font-weight:400;font-size:10.5px;opacity:.78;margin-top:3px;line-height:1.25}
+tbody td{padding:8px 11px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+tbody td:last-child{border-right:none}
+td.r{text-align:right} td.c{text-align:center}
+.mono{font-variant-numeric:tabular-nums}
+.code{font-weight:700;color:var(--blue)}
+.seq{color:#a8b6c4;font-size:12px;font-variant-numeric:tabular-nums}
+.sup{color:#4a6b86;font-size:12.5px}
+.dash{color:#c3d0dd}
+.chip{display:inline-block;padding:2px 9px;border-radius:11px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.k-fz{background:#eef2f6;color:#5a6b7d} .k-op{background:var(--p-green);color:#1a7a42}
+.k-hard{background:var(--p-blue);color:var(--blue)} .k-soft{background:#f7fafd;color:#8ba4bd;border:1px solid #e6edf4}
+.k-short{background:var(--p-red);color:#b32b2b} .k-exp{background:#fbeadd;color:#b3561e}
+
+/* แถวหัววัตถุดิบ */
+tr.rm td{background:#f7fafd;font-weight:600}
+tr.rm:hover td{background:#f2f7fc}
+tr.rm .tgl{border:1px solid #059669;background:#fff;color:#047857;width:16px;height:16px;
+  border-radius:4px;font-size:11px;line-height:1;cursor:pointer;font-family:inherit;padding:0;margin-right:9px;
+  vertical-align:-2px}
+tr.rm .tgl:hover{background:#d1fae5}
+tr.rs td{background:#fff}
+tr.rs:hover td{background:#fafcfe}
+tr.rs.fz td{background:#fbfcfd;color:#7d8ea0}
+tr.rs.fz:hover td{background:#f7f9fb}
+tr.drag{opacity:.45}
+tr.over td{box-shadow:inset 0 2px 0 var(--hdr)}
+.pri{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:7px;
+     background:var(--p-blue);color:var(--blue);font-size:12px;font-weight:700}
+.pri.p1{background:var(--hdr);color:#fff}
+.bar{display:inline-block;width:72px;height:7px;background:#eef3f8;border-radius:4px;overflow:hidden;
+     vertical-align:-1px;margin-right:8px}
+.bar i{display:block;height:100%;border-radius:4px}
+.ib{border:none;background:transparent;cursor:pointer;padding:4px 6px;border-radius:6px;line-height:0;vertical-align:middle}
+.ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ib-e{color:var(--blue)} .ib-e:hover{background:var(--p-blue)}
+.pager{display:flex;align-items:center;justify-content:space-between;padding:9px 2px 0;font-size:12.5px;color:var(--mut)}
+
+/* ── ป้ายตัวอย่าง ── */
+.demo{background:#fdf3e3;color:#a5730a;border:1px solid #f0d9a8;border-radius:20px;
+  padding:5px 13px;font-size:12px;font-weight:600;white-space:nowrap}
+/* ── คำอธิบายใต้หัวข้อ ── */
+.expl{background:#fbfdff;border:1px solid var(--line-d);border-left:3px solid var(--hdr);
+  border-radius:0 9px 9px 0;padding:10px 14px;margin:0 0 14px;font-size:12.5px;line-height:1.75;color:#4a6b86}
+.expl b{color:var(--ink);font-weight:600}
+/* ── ตารางเปรียบเทียบทางเลือก ── */
+.cmp{width:100%;border-collapse:collapse;font-size:12.8px;margin-bottom:6px}
+.cmp th{background:#f4f8fc;color:#456;font-weight:600;text-align:left;padding:9px 12px;
+  border:1px solid var(--line-d);white-space:nowrap}
+.cmp td{padding:10px 12px;border:1px solid var(--line-d);vertical-align:top;line-height:1.65;color:var(--ink)}
+.cmp td.h{font-weight:600;color:var(--blue);white-space:nowrap}
+.cmp .up{color:var(--green)}.cmp .dn{color:var(--red)}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* ── ประวัติการตัดสินใจ ── */
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* ── ประวัติการตัดสินใจ ── */
+.lg{border:1px solid var(--line-d);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.lg-r{display:flex;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+.lg-r:last-child{border-bottom:0}
+.lg-r.pend{background:#fffdf6}
+.lg-t{width:118px;flex:none;color:var(--mut);font-size:12px;line-height:1.5}
+.lg-k{width:132px;flex:none}
+.lg-b{flex:1;color:var(--ink);line-height:1.55}
+.lg-b b{font-weight:600}
+.lg-b .why{color:var(--mut);font-size:12.5px;display:block;margin-top:2px}
+.lg-a{flex:none;display:flex;gap:6px;align-items:center}
+.tagk{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+.t-unl{background:#eef7ff;color:#1f6fc4}
+.t-req{background:#fdf3e3;color:#a5730a}
+.t-ord{background:#f4f0fd;color:#7a4fd3}
+.t-def{background:#fdf4f4;color:#c23a3a}
+.t-buy{background:#f4fbf7;color:#1e9e50}
+.t-sub{background:#f0f9fb;color:#0e8ca8}
+.t-spl{background:#f6f9fc;color:#5b7590}
+.fld{margin-bottom:12px}
+.fld label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:5px}
+.fld textarea{width:100%;min-height:66px;border:1px solid var(--line-d);border-radius:8px;padding:9px 11px;
+  font-family:inherit;font-size:13px;color:var(--ink);resize:vertical;outline:none}
+.fld textarea:focus,.fld .sel:focus{border-color:var(--hdr)}
+.fld .sel{width:100%}
+.imp{background:var(--p-amber);border:1px solid #f0d9a8;border-radius:9px;padding:11px 13px;font-size:12.8px;line-height:1.7;color:#7a5a12}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* ── กล่อง ── */
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.4);z-index:200;display:flex;
+      align-items:flex-start;justify-content:center;padding:44px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:10px;box-shadow:0 14px 44px rgba(15,40,80,.3);width:90%;max-width:1080px;overflow:hidden}
+.dlg.sm{max-width:720px}
+.dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
+.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:transparent;border:none;color:#fff;font-size:21px;cursor:pointer;padding:1px 7px;border-radius:5px;font-family:inherit}
+.dlg-x:hover{background:rgba(255,255,255,.24)}
+.dlg-bd{padding:16px 18px;max-height:72vh;overflow:auto}
+.dlg-ft{padding:10px 18px;border-top:1px solid var(--line);background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:9px}
+.sect{font-size:12.5px;font-weight:700;color:#3a5773;margin:15px 0 8px;display:flex;align-items:center;gap:9px}
+.sect:first-child{margin-top:0}
+.sect small{font-weight:400;color:var(--mut);font-size:11.5px}
+.hint{background:#f5f9fd;border-left:3px solid var(--hdr);border-radius:0 7px 7px 0;padding:10px 14px;
+      font-size:12.5px;color:#4a6b86;line-height:1.65;margin-top:12px}
+.redbox{background:#fdf7f7;border:1px solid #f0c9c7;border-radius:9px;padding:12px 15px;
+        font-size:12.5px;color:#b32b2b;line-height:1.65;margin-bottom:13px}
+.chain{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;margin:10px 0}
+.node{border:1px solid #dfe7f0;border-radius:9px;padding:7px 13px;background:#fff;line-height:1.45}
+.node b{color:var(--blue)} .node .m{font-size:11px;color:var(--mut)}
+.node.on{border-color:var(--hdr);background:var(--p-blue)}
+.arw{color:#c3d0dd;font-size:15px}
+.opt{display:flex;gap:11px;align-items:flex-start;border:1px solid #dfe7f0;border-radius:10px;
+     padding:12px 14px;margin-bottom:9px;cursor:pointer;transition:.15s;background:#fff}
+.opt:hover{border-color:#9dbdd9;background:#fbfdff}
+.opt.on{border-color:var(--hdr);background:var(--p-blue);box-shadow:0 0 0 2px rgba(79,157,230,.18)}
+.opt .rd{width:16px;height:16px;border-radius:50%;border:2px solid #c3d0dd;flex:none;margin-top:2px}
+.opt.on .rd{border-color:var(--hdr);box-shadow:inset 0 0 0 3px #fff;background:var(--hdr)}
+.opt .tx b{display:block;font-size:13px;font-weight:600}
+.opt .tx span{font-size:12px;color:var(--mut);line-height:1.6}
+.dtb{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:8px 10px;
+        border-bottom:1px solid var(--line-d);white-space:nowrap}
+.dtb td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dtb tr:hover td{background:#fafcfe}
+.dtb .r{text-align:right;font-variant-numeric:tabular-nums}
+.dtb .c{text-align:center}
+.toast{position:fixed;right:22px;bottom:22px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.tst{background:#0f3f8c;color:#fff;border-radius:9px;padding:11px 16px;font-size:13px;
+     box-shadow:0 6px 20px rgba(15,40,80,.28);animation:sl .2s ease-out;max-width:450px;line-height:1.55}
+.tst.ok{background:#1a7a42} .tst.warn{background:#a06a00} .tst.bad{background:#b32b2b}
+@keyframes sl{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+::selection{background:#cfe6fa;color:#1a3a5c}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed .content{padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo-tab"><img class="apexlogo" src="apex-logo.png" alt="APEX Circuit" /></div>
+    <nav>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5"/><circle cx="18.5" cy="6" r="2.5"/></svg>Administrator</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
+    </nav>
+    <div class="user">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div><b>อาทิตย์ สุดชาติ</b><span>Production Planner</span></div>
+    </div>
+  </header>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
+
+  <div class="content">
+    <div class="card">
+      <div class="page-head">
+        <div><div class="page-title">จัดลำดับและล็อกแผน</div>
+          <div class="page-sub">การจองวัตถุดิบรายใบสั่งผลิต · ล็อกช่วงเวลาไม่ให้แผนขยับ · MO ที่เข้ามาใหม่ต้องไม่ดึงของจาก MO เดิมเอง</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="demo">ตัวอย่างหน้าจอ · ข้อมูลจำลอง</span>
+          <button class="btn" onclick="openNewMO()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8.5v5M12 16.6v.1"/></svg>ดูตัวอย่าง: ของไม่พอแล้วทำอย่างไร</button>
+        </div>
+      </div>
+
+      <div class="strip" id="strip"></div>
+
+      <!-- แถบเวลา -->
+      <div class="tl">
+        <div class="h">ช่วงเวลาของแผน
+          <small>ล็อกการจัดสรรวัตถุดิบล่วงหน้าตามค่าที่ตั้งไว้ · รายการในโซนล็อกแก้ไม่ได้</small>
+          <span class="rt">
+            <span style="font-size:12px;color:var(--mut)">Freeze Window</span>
+            <select class="sel" id="fzSel" style="width:120px" onchange="setFz(this.value)">
+              <option value="5">5 วัน</option><option value="7" selected>7 วัน</option>
+              <option value="10">10 วัน</option><option value="14">14 วัน</option>
+            </select>
+            <span style="font-size:12px;color:var(--mut)">รอบรัน MRP</span>
+            <select class="sel" style="width:130px"><option>ทุกวันจันทร์</option><option>ทุกวัน</option><option>ทุกวันจันทร์และพฤหัส</option></select>
+          </span></div>
+        <div class="days" id="days"></div>
+        <div class="expl" style="margin:12px 0 0">
+          <b>ช่องสีเข้ม</b> คือช่วงล็อก งานที่ต้องใช้ของในช่วงนี้แก้ไม่ได้แล้ว ·
+          <b>ช่องสีอ่อน</b> ยังปรับลำดับได้ตามปกติ
+        </div>
+      </div>
+
+      <div class="frow">
+        <div class="search"><span class="si"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+          <input id="q" placeholder="ค้นหา วัตถุดิบ / MO / ลูกค้า / พนักงานขาย" /></div>
+        <select class="sel" id="fSt" style="width:175px"><option value="">ทุกสถานะ</option>
+          <option value="fz">อยู่ในช่วงล็อก</option><option value="op">ยังปรับได้</option></select>
+        <select class="sel" id="fSale" style="width:190px"><option value="">ทุกพนักงานขาย</option></select>
+        <span class="cnt" id="cnt"></span>
+        <div class="right"><span class="cnt" id="warn" style="color:var(--red)"></span></div>
+      </div>
+
+      <div class="tw"><table>
+        <thead><tr>
+          <th style="width:40px"></th>
+          <th class="c" style="width:54px">คิว</th>
+          <th style="width:248px">วัตถุดิบ / ใบสั่งผลิต</th>
+          <th style="width:168px">สินค้า</th>
+          <th style="width:172px">ลูกค้า</th>
+          <th style="width:146px">พนักงานขาย</th>
+          <th style="width:150px">เอกสารต้นทาง<small>Sale Forecast</small></th>
+          <th class="r" style="width:126px">จองไว้</th>
+          <th class="c" style="width:112px">ต้องใช้</th>
+          <th style="width:194px">Lot ที่ผูก</th>
+          <th class="c" style="width:112px">สถานะ</th>
+          <th class="c" style="width:64px">ที่มา</th>
+        </tr></thead><tbody id="tb"></tbody></table></div>
+      <div class="pager"><span id="pg"></span>
+        <span>ลำดับคือคิวได้ของ — ตัวบนได้ของก่อนเมื่อของไม่พอ</span></div>
+    </div>
+  </div>
+  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
+</div>
+<div id="dlgRoot"></div><div class="toast" id="toast"></div>
+
+<script>
+const g=id=>document.getElementById(id);
+const nf=(n,d=0)=>Number(n).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const TODAY=new Date(2026,7,3);
+const DOW=['อา','จ','อ','พ','พฤ','ศ','ส'];
+const addD=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
+const fmt=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
+const fmtS=d=>`${d.getDate()}-${d.getMonth()+1}`;
+function toast(m,c=''){const d=document.createElement('div');d.className='tst '+c;d.innerHTML=m;
+  g('toast').appendChild(d);setTimeout(()=>d.remove(),4200);}
+
+/* ═════════ ข้อมูลจำลองของ APEX ═════════ */
+const RM={
+ 'RM-CCL-S1000H':{n:'CCL FR-4 S1000H 0.36mm 37"×49"',u:'SHT',stock:5100,
+   lots:[{l:'L2607-118',q:2400,exp:'12-06-2028'},{l:'L2607-204',q:1800,exp:'28-07-2028'},{l:'L2608-011',q:900,exp:'15-09-2028'}]},
+ 'RM-CU-FOIL1' :{n:'COPPER FOIL 1 Oz (34.3 um) LF/HF',u:'KG',stock:420,
+   lots:[{l:'C2606-077',q:260,exp:'—'},{l:'C2607-142',q:160,exp:'—'}]},
+ 'RM-AU-SALT'  :{n:'GOLD SALT KAu(CN)2',u:'KG',stock:1.9,
+   lots:[{l:'AU-2607-05',q:1.2,exp:'30-11-2027'},{l:'AU-2608-01',q:0.7,exp:'18-01-2028'}]},
+ 'RM-PP-7628'  :{n:'PREPREG FR-4 S1000HB 7628',u:'SHT',stock:640,
+   lots:[{l:'P2606-231',q:380,exp:'20-08-2026'},{l:'P2607-090',q:260,exp:'14-11-2026'}]},
+ 'RM-NM-SM-GRN':{n:'SOLDER MASK Green HF/LF (2K)',u:'KG',stock:280,
+   lots:[{l:'S2607-044',q:180,exp:'05-10-2026'},{l:'S2608-002',q:100,exp:'22-12-2026'}]},
+};
+const SALES={'FC-2609-01':'ปิยะนุช ท.',
+             'FC-2609-02':'ณัฐพล ว.',
+             'FC-2609-03':'ปิยะนุช ท.',
+             'FC-2609-04':'ธนากร ศ.',
+             'FC-2609-05':'ธนากร ศ.',
+             'FC-2609-06':'ณัฐพล ว.',
+             'FC-2609-07':'ธนากร ศ.',
+             'FC-2609-08':'ณัฐพล ว.',
+             'FC-2609-09':'ปิยะนุช ท.'};
+const R=(rm,mo,fg,cust,src,qty,day,lot)=>({rm,mo,fg,cust,src,qty,day,lot,id:mo+'|'+rm});
+let RES=[
+ R('RM-CCL-S1000H','WO-26080142','A048T-168BJ','SEMCO','FC-2609-01',1780, 4,'L2607-118'),
+ R('RM-CCL-S1000H','WO-26080155','G120A-017A','SEMCO','FC-2609-01',1240, 6,'L2607-204'),
+ R('RM-CCL-S1000H','WO-26080177','D617P-140S','TDK','FC-2609-02',  980,11,null),
+ R('RM-CCL-S1000H','WO-26080191','S158G-019E','SEMCO','FC-2609-01', 760,16,null),
+ R('RM-CCL-S1000H','WO-26080203','T118M-204R','KYOCERA','FC-2609-03',640,19,null),
+
+ R('RM-CU-FOIL1','WO-26080155','G120A-017A','SEMCO','FC-2609-01',  150, 5,'C2606-077'),
+ R('RM-CU-FOIL1','WO-26080168','H720R-063M','HITACHI ASTEMO','FC-2609-04',110, 9,null),
+ R('RM-CU-FOIL1','WO-26080184','Q094D-208F','DELTA ELECTRONICS','FC-2609-05', 65,14,null),
+ R('RM-CU-FOIL1','WO-26080196','F903C-055H','FOXCONN','FC-2609-06', 35,18,null),
+
+ R('RM-AU-SALT','WO-26080131','T772F-041C','DENSO','FC-2609-07', 0.72, 3,'AU-2607-05'),
+ R('RM-AU-SALT','WO-26080142','A048T-168BJ','SEMCO','FC-2609-01',0.64, 6,'AU-2608-01'),
+ R('RM-AU-SALT','WO-26080203','T118M-204R','KYOCERA','FC-2609-03',0.40,19,null),
+
+ R('RM-PP-7628','WO-26080142','A048T-168BJ','SEMCO','FC-2609-01', 240, 4,'P2606-231'),
+ R('RM-PP-7628','WO-26080161','B491V-072D','PANASONIC','FC-2609-08',186,10,null),
+ R('RM-PP-7628','WO-26080177','D617P-140S','TDK','FC-2609-02',    148,13,null),
+
+ R('RM-NM-SM-GRN','WO-26080149','R806N-115K','MURATA','FC-2609-09',88, 5,'S2607-044'),
+ R('RM-NM-SM-GRN','WO-26080168','H720R-063M','HITACHI ASTEMO','FC-2609-04',74,10,null),
+ R('RM-NM-SM-GRN','WO-26080184','Q094D-208F','DELTA ELECTRONICS','FC-2609-05',62,15,null),
+];
+
+/* ═════════ สถานะหน้าจอ ═════════ */
+let FZ=7, fq='', fSt='', fLot='', fSale='', OPEN=new Set(Object.keys(RM));
+const USER='อาทิตย์ สุดชาติ';
+const isFz = r => r.day < FZ;   /* งานที่ต้องใช้ของภายในช่วงล็อก */
+const salesOf = r => SALES[r.src]||'—';
+
+/* ── ไปหน้าจออื่นในชุดเดียวกัน ── */
+function goScreen(f){
+  try{ if(window.self!==window.top && window.parent.openScreen){ window.parent.openScreen(f); return; } }catch(e){}
+  window.open(f,'_blank');
+}
+[...new Set(RES.map(salesOf))].filter(x=>x!=='—').sort()
+  .forEach(x=>g('fSale').add(new Option(x,x)));
+
+function setFz(v){ FZ=+v; RES.forEach(r=>{ if(isFz(r)&&!r.lot) r.lot=pickLot(r); }); draw(); }
+function pickLot(r){
+  const L=RM[r.rm].lots; if(!L.length) return null;
+  /* FEFO — เรียงตามวันหมดอายุ แล้วเลือก lot แรกที่ยังมีของเหลือพอ */
+  const p=x=>{if(x==='—')return new Date(9999,0,1);const[d,m,y]=x.split('-').map(Number);return new Date(y,m-1,d);};
+  const sorted=[...L].sort((a,b)=>p(a.exp)-p(b.exp));
+  for(const lot of sorted){
+    const taken=RES.filter(x=>x!==r&&x.rm===r.rm&&x.lot===lot.l).reduce((a,x)=>a+x.qty,0);
+    if(lot.q-taken>=r.qty) return lot.l;
+  }
+  return null;   /* ไม่มี lot ไหนพอทั้งก้อน — ต้องให้คนตัดสินใจว่าจะแบ่ง lot ไหม */
+}
+function drawDays(){
+  g('days').innerHTML=Array.from({length:14},(_,i)=>{
+    const d=addD(TODAY,i), fz=i<FZ, wk=[0,6].includes(d.getDay());
+    return `<div class="day ${fz?'fz':'op'} ${wk?'wk':''} ${i===0?'today':''}">
+      <div class="d">${fmtS(d)}</div><div class="w">${DOW[d.getDay()]}</div>
+      <div class="s">${fz?'🔒 ล็อก':'แก้ได้'}</div></div>`;}).join('');
+}
+function list(){
+  let l=RES.slice();
+  if(fSt==='fz') l=l.filter(isFz); else if(fSt==='op') l=l.filter(r=>!isFz(r));
+  if(fSale) l=l.filter(r=>salesOf(r)===fSale);
+  if(fq){const q=fq.toLowerCase();
+    l=l.filter(r=>(r.rm+' '+RM[r.rm].n+' '+r.mo+' '+r.fg+' '+r.cust+' '+salesOf(r)+' '+r.src).toLowerCase().includes(q));}
+  return l;
+}
+function draw(){
+  drawDays();
+  const L=list(), byRm={};
+  L.forEach(r=>(byRm[r.rm]=byRm[r.rm]||[]).push(r));
+  let html='', seq=0, over=0;
+  Object.keys(RM).filter(k=>byRm[k]).forEach(k=>{
+    const rows=byRm[k], info=RM[k];
+    const used=rows.reduce((a,r)=>a+r.qty,0), free=info.stock-used, short=free<0;
+    if(short) over++;
+    const pct=Math.min(100,used/info.stock*100);
+    html+=`<tr class="rm">
+      <td class="c"><button class="tgl" onclick="tog('${k}')" title="${OPEN.has(k)?'ย่อ':'ขยาย'}">${OPEN.has(k)?'−':'+'}</button></td>
+      <td class="c dash">—</td>
+      <td><span class="code">${k}</span><br><span class="sup" style="font-weight:400">${info.n}</span></td>
+      <td colspan="4" class="sup" style="font-weight:400">
+        คงเหลือในคลัง <b>${nf(info.stock,info.stock<10?2:0)}</b> ${info.u} ·
+        ${rows.length} ใบสั่งผลิตจองอยู่ ·
+        ${short?`<b style="color:var(--red)">จองเกิน ${nf(-free,2)} ${info.u}</b>`
+                :`เหลือว่าง <b style="color:var(--green)">${nf(free,free<10?2:0)}</b> ${info.u}`}</td>
+      <td class="r"><b>${nf(used,used<10?2:0)}</b> <span class="sup">${info.u}</span></td>
+      <td class="c dash">—</td>
+      <td class="sup" style="font-weight:400">${info.lots.length} lot ในคลัง</td>
+      <td class="c"><span class="bar"><i style="width:${pct}%;background:${short?'var(--red)':(pct>85?'var(--amber)':'var(--green)')}"></i></span>
+        ${short?`<br><span class="chip k-short" style="cursor:pointer;margin-top:3px" title="เปิดกระดานวางแผนวัตถุดิบ (MRP)" onclick="goScreen('APEX_MRP_Advanced.html')">จองเกินของ ↗</span>`:''}</td>
+      <td></td></tr>`;
+    if(!OPEN.has(k)) return;
+    rows.forEach((r,i)=>{
+      seq++;
+      const fz=isFz(r), due=addD(TODAY,r.day);
+      const lot=info.lots.find(x=>x.l===r.lot);
+      html+=`<tr class="rs ${fz?'fz':''}" data-id="${r.id}">
+        <td></td>
+        <td class="c"><span class="pri ${i===0?'p1':''}">${i+1}</span></td>
+        <td style="padding-left:26px"><span class="code">${r.mo}</span></td>
+        <td>${r.fg}</td>
+        <td class="sup">${r.cust}</td>
+        <td class="sup">${salesOf(r)}</td>
+        <td><span class="code" style="font-size:12.5px">${r.src}</span></td>
+        <td class="r mono"><b>${nf(r.qty,r.qty<10?2:0)}</b> <span class="sup">${info.u}</span></td>
+        <td class="c mono">${fmt(due)}</td>
+        <td>${r.lot?`<span class="code" style="font-size:12.5px">${r.lot}</span>${lot&&lot.exp!=='—'?`<span class="sup" style="font-size:11.5px"> exp ${lot.exp}</span>`:''}`
+                   :'<span class="sup" style="color:#b6c4d2">ยังไม่ผูก</span>'}</td>
+        <td class="c"><span class="chip ${fz?'k-fz':'k-op'}">${fz?'🔒 ล็อก':'ยังปรับได้'}</span></td>
+        <td class="c"><button class="ib ib-e" title="ดูที่มาของการจองก้อนนี้" onclick="openTrace('${r.id}')">
+          <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><circle cx="19" cy="12" r="2.4"/><path d="M7.1 10.9l2.6-2.7M7.1 13.1l2.6 2.7M14.2 7.3l2.6 3.1M14.2 16.7l2.6-3.1"/></svg></button></td>
+      </tr>`;
+    });
+  });
+  g('tb').innerHTML = html || `<tr><td colspan="12" style="text-align:center;padding:36px;color:var(--mut)">ไม่พบรายการตามเงื่อนไข</td></tr>`;
+  g('cnt').innerHTML=`<b>${L.length}</b> รายการจอง · วัตถุดิบ ${Object.keys(byRm).length} ตัว`;
+  g('pg').textContent=`แสดง ${L.length} จาก ${RES.length} รายการจอง`;
+  g('warn').innerHTML = over?`⚠ วัตถุดิบ ${over} ตัวถูกจองเกินของที่มี`:'';
+  drawStrip();
+}
+function drawStrip(){
+  const fz=RES.filter(isFz).length, hard=RES.filter(r=>r.lot).length;
+  const over=Object.keys(RM).filter(k=>{
+    const u=RES.filter(r=>r.rm===k).reduce((a,r)=>a+r.qty,0); return u>RM[k].stock;}).length;
+  const S=[['c-blue',RES.length,'รายการจองทั้งหมด','ใบสั่งผลิต × วัตถุดิบ'],
+           ['c-cyan',fz,`อยู่ในช่วงล็อก ${FZ} วัน`,'แก้ไม่ได้แล้ว'],
+           ['c-red',over,'วัตถุดิบที่จองเกินของ','ต้องซื้อเพิ่มหรือใช้ตัวแทน']];
+  g('strip').innerHTML=S.map(([c,n,t,d])=>`<div class="sc ${c}">
+    <div class="n">${n}</div><div class="t">${t}</div><div class="t2">${d}</div></div>`).join('');
+}
+function tog(k){ OPEN.has(k)?OPEN.delete(k):OPEN.add(k); draw(); }
+g('q').addEventListener('input',e=>{fq=e.target.value.trim();draw();});
+g('fSt').onchange=e=>{fSt=e.target.value;draw();};
+g('fSale').onchange=e=>{fSale=e.target.value;draw();};
+
+/* ── กล่อง : สาวที่มาของการจอง ── */
+function closeDlg(){ g('dlgRoot').innerHTML=''; }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
+function openTrace(id){
+  const r=RES.find(x=>x.id===id), info=RM[r.rm], fz=isFz(r);
+  const lot=info.lots.find(x=>x.l===r.lot);
+  const same=RES.filter(x=>x.rm===r.rm);
+  const used=same.reduce((a,x)=>a+x.qty,0);
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><h3>ที่มาของการจอง — ${r.rm}
+      <small>${info.n} · จองให้ ${r.mo} จำนวน ${nf(r.qty,r.qty<10?2:0)} ${info.u} · ต้องใช้ ${fmt(addD(TODAY,r.day))}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="sect">สายที่มา <small>ของก้อนนี้ถูกกันไว้ให้ใคร และมาจากออเดอร์ของพนักงานขายคนไหน</small></div>
+      <div class="chain">
+        <span class="node on"><b>${r.lot||'ยังไม่ผูก Lot'}</b><div class="m">${lot?`คงเหลือ ${nf(lot.q,lot.q<10?2:0)} ${info.u}${lot.exp!=='—'?' · หมดอายุ '+lot.exp:''}`:'จองแบบยอดรวม'}</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>${r.mo}</b><div class="m">ใบสั่งผลิต · ${r.fg}</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>MPS-2608</b><div class="m">แผนผลิตสินค้าสำเร็จรูป</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>${r.src}</b><div class="m">พยากรณ์การขาย (Sale Forecast) · ${r.cust}</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>${salesOf(r)}</b><div class="m">พนักงานขายผู้รับผิดชอบ</div></span>
+      </div>
+
+      <div class="sect">คิวการจองของ ${r.rm} <small>เรียงตามลำดับ — ตัวบนได้ของก่อน</small></div>
+      <table class="dtb">
+        <thead><tr><th class="c" style="width:52px">ลำดับ</th><th style="width:140px">ใบสั่งผลิต</th>
+          <th style="width:150px">สินค้า</th><th style="width:160px">ลูกค้า</th>
+          <th style="width:130px">พนักงานขาย</th>
+          <th class="r" style="width:110px">จองไว้</th>
+          <th class="c" style="width:110px">ต้องใช้</th>
+          <th class="c" style="width:110px">ช่วงเวลา</th></tr></thead>
+        <tbody>${same.map((x,i)=>`<tr style="${x.id===r.id?'background:var(--p-blue)':''}">
+          <td class="c"><span class="pri ${i===0?'p1':''}">${i+1}</span></td>
+          <td><b style="color:var(--blue)">${x.mo}</b></td><td>${x.fg}</td>
+          <td style="color:#4a6b86">${x.cust}</td><td style="color:#4a6b86">${salesOf(x)}</td>
+          <td class="r"><b>${nf(x.qty,x.qty<10?2:0)}</b> ${info.u}</td>
+          <td class="c">${fmt(addD(TODAY,x.day))}</td>
+          <td class="c"><span class="chip ${isFz(x)?'k-fz':'k-op'}">${isFz(x)?'🔒 ล็อก':'แก้ไขได้'}</span></td></tr>`).join('')}
+          <tr style="background:#f7fafd"><td colspan="5" style="font-weight:700;text-align:right">รวมที่จองไว้</td>
+            <td class="r" style="font-weight:700">${nf(used,used<10?2:0)} ${info.u}</td>
+            <td colspan="2" style="color:${used>info.stock?'var(--red)':'var(--green)'};font-weight:700">
+              จากของในคลัง ${nf(info.stock,info.stock<10?2:0)} ${info.u}</td></tr>
+        </tbody></table>
+
+      <div class="sect">Lot ในคลัง <small>ผูก Lot เมื่อรายการเข้าสู่ช่วงล็อก โดยเลือกตัวที่หมดอายุก่อน (FEFO)</small></div>
+      <table class="dtb">
+        <thead><tr><th class="c" style="width:52px">#</th><th style="width:170px">Lot</th>
+          <th class="r" style="width:130px">คงเหลือ</th><th class="c" style="width:150px">วันหมดอายุ</th>
+          <th>ผูกกับใบสั่งผลิต</th></tr></thead>
+        <tbody>${info.lots.map((x,i)=>{
+          const own=same.filter(y=>y.lot===x.l);
+          return `<tr><td class="c" style="color:#a8b6c4">${i+1}</td>
+          <td><b style="color:var(--blue)">${x.l}</b></td>
+          <td class="r">${nf(x.q,x.q<10?2:0)} ${info.u}</td>
+          <td class="c">${x.exp}</td>
+          <td>${own.length?own.map(y=>`${y.mo} <span style="color:var(--mut)">${nf(y.qty,y.qty<10?2:0)}</span>`).join(' · ')
+                          :'<span style="color:#c3d0dd">ยังไม่ถูกจอง</span>'}
+            ${own.length?`<span class="chip ${own.reduce((a,y)=>a+y.qty,0)>x.q?'k-short':'k-op'}" style="margin-left:8px">
+              ${own.reduce((a,y)=>a+y.qty,0)>x.q?'เกินของใน lot':'เหลือ '+nf(x.q-own.reduce((a,y)=>a+y.qty,0),x.q<10?2:0)}</span>`:''}</td></tr>`;}).join('')}
+        </tbody></table>
+
+      <div class="hint">รายการนี้อยู่ในสถานะ <b>${fz?'ล็อก':'แก้ไขได้'}</b> —
+        ${fz?'ปรับลำดับหรือปลดจองไม่ได้ ต้องให้ผู้มีสิทธิ์ปลดล็อกก่อน เพื่อกันไม่ให้แผนที่ยืนยันกับฝ่ายผลิตแล้วขยับ'
+            :'ยังปรับลำดับได้ เมื่อวันที่ต้องใช้เข้ามาอยู่ในช่วงล็อก ระบบจะผูก Lot ให้อัตโนมัติแบบ FEFO'}</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
+      ${same.length} ใบสั่งผลิตจองวัตถุดิบตัวนี้ · ${info.lots.length} lot ในคลัง</span>
+      <span><button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
+  </div></div>`;
+}
+
+/* ── กล่อง : ตัวอย่าง MO ใหม่แทรกเข้ามาแล้วของไม่พอ (อ่านอย่างเดียว) ── */
+function openNewMO(){
+  const k='RM-CU-FOIL1', info=RM[k];
+  const same=RES.filter(r=>r.rm===k);
+  const used=same.reduce((a,r)=>a+r.qty,0), need=180, free=info.stock-used, shortQty=need-free;
+  const victim=same[same.length-1];
+  const OPTS=[
+   {t:'เลื่อนงานที่ลำดับท้ายสุดออกไป',
+    d:`ปลดจองของ <b>${victim.mo}</b> (${victim.cust}) ${nf(victim.qty)} ${info.u} ยกให้งานใหม่`,
+    up:'งานใหม่ได้ของครบตามกำหนด',
+    dn:`ต้องแจ้ง ${salesOf(victim)} และเจรจาวันส่งกับ ${victim.cust}`},
+   {t:'เร่งซื้อเพิ่ม',
+    d:`ออกใบขอซื้อด่วน ${nf(shortQty)} ${info.u}`,
+    up:'ไม่มีงานไหนเสียคิว ทุกออเดอร์เดินตามแผนเดิม',
+    dn:'Lead Time 42 วัน อาจไม่ทัน ต้องเจรจาย่นเวลากับผู้ขาย'},
+   {t:'ใช้วัตถุดิบทดแทน',
+    d:'สลับไปใช้ RM-CU-FOIL1B (MITSUI MINING) · ของในคลัง 640 KG · อัตราแปลง 1.000',
+    up:'ใช้ได้ทันที เพราะผ่านการอนุมัติทางเทคนิคไว้แล้ว',
+    dn:'ต้นทุนต่างจากตัวเดิม ต้องบันทึกไว้เทียบตอนปิดต้นทุน'},
+   {t:'แบ่งของตามสัดส่วน',
+    d:`ลดจำนวนจองของทั้ง ${same.length} ใบลงตามสัดส่วน`,
+    up:'ทุกงานเดินต่อได้ ไม่มีใครหยุดสนิท',
+    dn:'ทุกงานได้ของไม่ครบ ต้องยืนยันกับฝ่ายผลิตว่ารับได้'},
+  ];
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><h3>ตัวอย่าง — มีใบสั่งผลิตใหม่เข้ามาแล้ววัตถุดิบไม่พอ
+      <small>WO-26080219 · PCB NIDEC 4L Gold · NIDEC · ต้องใช้ ${fmt(addD(TODAY,8))}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="redbox"><b>ระบบไม่ดึงของจากใบสั่งผลิตอื่นให้เองโดยอัตโนมัติ</b><br>
+        ${k} · ${info.n}<br>
+        ของในคลัง ${nf(info.stock)} ${info.u} · จองไว้แล้ว ${nf(used)} · เหลือว่าง <b>${nf(free)}</b> ${info.u}<br>
+        งานใหม่ต้องการ <b>${nf(need)}</b> ${info.u} → <b>ขาดอีก ${nf(shortQty)} ${info.u}</b></div>
+
+      <div class="expl">ถ้าระบบตัดสินใจเอง ของจะถูกดึงจากงานที่จองไว้ก่อนโดยไม่มีใครรู้
+        แล้วฝ่ายขายจะมารู้อีกทีตอนของไม่ทันส่ง — <b>หน้าจอนี้จึงหยุดรอให้คนเลือก</b>
+        โดยวางทางเลือกทั้งหมดพร้อมผลได้ผลเสียไว้ให้เทียบในที่เดียว</div>
+
+      <div class="sect">ทางเลือกที่ระบบเสนอ <small>ผู้วางแผนเป็นคนตัดสินใจ · ทางเลือกที่เลือกจะถูกบันทึกไว้พร้อมเหตุผล</small></div>
+      <table class="cmp">
+        <thead><tr><th style="width:210px">ทางเลือก</th><th style="width:340px">ทำอะไร</th>
+          <th style="width:270px">ได้อะไร</th><th>ต้องแลกกับอะไร</th></tr></thead>
+        <tbody>${OPTS.map(o=>`<tr>
+          <td class="h">${o.t}</td><td>${o.d}</td>
+          <td class="up">${o.up}</td><td class="dn">${o.dn}</td></tr>`).join('')}
+        </tbody></table>
+
+      <div class="hint">ทางเลือก "ใช้วัตถุดิบทดแทน" ดูคู่ที่อนุมัติไว้แล้วได้ที่หน้า
+        <span class="lnk" onclick="goScreen('APEX_Substitute_Material_Mockup.html')">วัตถุดิบทดแทน ↗</span>
+        · ภาพรวมของที่ถูกจองและที่ยังว่างดูได้ที่
+        <span class="lnk" onclick="goScreen('APEX_MRP_Advanced.html')">กระดานวางแผนวัตถุดิบ (MRP) ↗</span></div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
+      ${same.length} ใบสั่งผลิตกำลังจองวัตถุดิบตัวนี้อยู่</span>
+      <span><button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
+  </div></div>`;
+}
+
+draw();
+</script>
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"จัดลำดับและล็อกแผน — APEX Circuit":"Priority & Plan Freeze — APEX Circuit",
+"จัดลำดับและล็อกแผน":"Priority & Plan Freeze",
+"อาทิตย์ สุดชาติ":"Artit Sudchat",
+"การจองวัตถุดิบรายใบสั่งผลิต · ล็อกช่วงเวลาไม่ให้แผนขยับ · MO ที่เข้ามาใหม่ต้องไม่ดึงของจาก MO เดิมเอง":"Material reservations per work order · Freeze window keeps the plan from shifting · New MOs must not pull stock from existing MOs on their own",
+"ตัวอย่างหน้าจอ · ข้อมูลจำลอง":"Screen Mockup · Sample Data",
+"ดูตัวอย่าง: ของไม่พอแล้วทำอย่างไร":"See Example: What to Do When Stock Runs Short",
+"ช่วงเวลาของแผน":"Plan Timeline",
+"ล็อกการจัดสรรวัตถุดิบล่วงหน้าตามค่าที่ตั้งไว้ · รายการในโซนล็อกแก้ไม่ได้":"Material allocation is frozen ahead per the configured window · Items in the frozen zone cannot be changed",
+"5 วัน":"5 days",
+"7 วัน":"7 days",
+"10 วัน":"10 days",
+"14 วัน":"14 days",
+"รอบรัน MRP":"MRP Run Cycle",
+"ทุกวันจันทร์และพฤหัส":"Every Mon & Thu",
+"ทุกวันจันทร์":"Every Monday",
+"ทุกวัน":"Every Day",
+"ช่องสีเข้ม":"Dark cells",
+"คือช่วงล็อก งานที่ต้องใช้ของในช่วงนี้แก้ไม่ได้แล้ว ·":"mark the freeze window — jobs needing material in this period can no longer be changed ·",
+"ช่องสีอ่อน":"Light cells",
+"ยังปรับลำดับได้ตามปกติ":"can still be resequenced normally",
+"ค้นหา วัตถุดิบ / MO / ลูกค้า / พนักงานขาย":"Search material / MO / customer / salesperson",
+"ทุกสถานะ":"All Statuses",
+"อยู่ในช่วงล็อก":"In Freeze Window",
+"ยังปรับได้":"Still Adjustable",
+"ทุกพนักงานขาย":"All Salespersons",
+"คิว":"Queue",
+"วัตถุดิบ / ใบสั่งผลิต":"Material / Work Order",
+"สินค้า":"Product",
+"ลูกค้า":"Customer",
+"พนักงานขายผู้รับผิดชอบ":"Responsible Salesperson",
+"พนักงานขาย":"Salesperson",
+"เอกสารต้นทาง":"Source Document",
+"จองไว้":"Reserved",
+"ต้องใช้":"Required By",
+"Lot ที่ผูก":"Linked Lot",
+"ที่มา":"Trace",
+"ลำดับคือคิวได้ของ — ตัวบนได้ของก่อนเมื่อของไม่พอ":"Sequence is the allocation queue — top rows get material first when stock runs short",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"อา":"Su",
+"จ":"Mo",
+"อ":"Tu",
+"พ":"We",
+"พฤ":"Th",
+"ศ":"Fr",
+"ส":"Sa",
+"ปิยะนุช ท.":"Piyanuch T.",
+"ณัฐพล ว.":"Nattapon W.",
+"ธนากร ศ.":"Thanakorn S.",
+"🔒 ล็อก":"🔒 Frozen",
+"แก้ได้":"Open",
+"คงเหลือในคลัง":"On-hand",
+"ใบสั่งผลิตจองอยู่ ·":"work orders reserving ·",
+"จองเกินของ ↗":"Over-reserved ↗",
+"จองเกิน":"Over-reserved by",
+"เหลือว่าง":"Available",
+"lot ในคลัง":"lots in stock",
+"Lot ในคลัง":"Lots in Stock",
+"เปิดกระดานวางแผนวัตถุดิบ (MRP)":"Open the Material Planning Board (MRP)",
+"ยังไม่ผูก Lot":"No Lot Linked Yet",
+"ยังไม่ผูก":"Not linked",
+"ดูที่มาของการจองก้อนนี้":"View this reservation's trace",
+"ไม่พบรายการตามเงื่อนไข":"No items match the filter",
+"รายการจอง · วัตถุดิบ":"reservations · materials",
+"ตัว":"items",
+"แสดง":"Showing",
+"จาก":"of",
+"รายการจองทั้งหมด":"Total Reservations",
+"รายการจอง":"reservations",
+"⚠ วัตถุดิบ":"⚠ Materials",
+"ตัวถูกจองเกินของที่มี":"over-reserved beyond on-hand",
+"ใบสั่งผลิต × วัตถุดิบ":"work orders × materials",
+"วัน":"days",
+"แก้ไม่ได้แล้ว":"No longer editable",
+"วัตถุดิบที่จองเกินของ":"Materials Over-reserved",
+"ต้องซื้อเพิ่มหรือใช้ตัวแทน":"Buy more or use a substitute",
+"ที่มาของการจอง —":"Reservation Trace —",
+"· จองให้":"· Reserved for",
+"· ต้องใช้":"· Required by",
+"สายที่มา":"Trace Chain",
+"ของก้อนนี้ถูกกันไว้ให้ใคร และมาจากออเดอร์ของพนักงานขายคนไหน":"Who this material is held for, and which salesperson's order it traces back to",
+"คงเหลือ":"Remaining",
+"· หมดอายุ":"· Expires",
+"จองแบบยอดรวม":"Reserved at total level",
+"ใบสั่งผลิต ·":"Work order ·",
+"แผนผลิตสินค้าสำเร็จรูป":"Finished Goods Production Plan",
+"พยากรณ์การขาย (Sale Forecast) ·":"Sales Forecast ·",
+"คิวการจองของ":"Reservation Queue for",
+"เรียงตามลำดับ — ตัวบนได้ของก่อน":"Sequenced by priority — top rows get material first",
+"ลำดับ":"Seq",
+"ใบสั่งผลิตจองวัตถุดิบตัวนี้ ·":"work orders reserving this material ·",
+"ใบสั่งผลิตกำลังจองวัตถุดิบตัวนี้อยู่":"work orders are currently reserving this material",
+"ใบสั่งผลิต":"Work Order",
+"ช่วงเวลา":"Window",
+"แก้ไขได้":"Editable",
+"รวมที่จองไว้":"Total Reserved",
+"จากของในคลัง":"vs on-hand",
+"ผูก Lot เมื่อรายการเข้าสู่ช่วงล็อก โดยเลือกตัวที่หมดอายุก่อน (FEFO)":"Lots are linked when an item enters the freeze window, earliest expiry first (FEFO)",
+"วันหมดอายุ":"Expiry Date",
+"ผูกกับใบสั่งผลิต":"Linked Work Orders",
+"ยังไม่ถูกจอง":"Not reserved",
+"เกินของใน lot":"Exceeds lot qty",
+"เหลือ":"Left",
+"รายการนี้อยู่ในสถานะ":"This item's status is",
+"ล็อก":"Frozen",
+"ปรับลำดับหรือปลดจองไม่ได้ ต้องให้ผู้มีสิทธิ์ปลดล็อกก่อน เพื่อกันไม่ให้แผนที่ยืนยันกับฝ่ายผลิตแล้วขยับ":"resequencing and unreserving are blocked; an authorized user must unfreeze it first, so a plan already confirmed with Production cannot shift",
+"ยังปรับลำดับได้ เมื่อวันที่ต้องใช้เข้ามาอยู่ในช่วงล็อก ระบบจะผูก Lot ให้อัตโนมัติแบบ FEFO":"it can still be resequenced; once its required date enters the freeze window, the system auto-links a lot by FEFO",
+"เลื่อนงานที่ลำดับท้ายสุดออกไป":"Push Out the Lowest-Priority Job",
+"ปลดจองของ":"Unreserve from",
+"ยกให้งานใหม่":"and give it to the new job",
+"งานใหม่ได้ของครบตามกำหนด":"The new job gets full material on time",
+"ต้องแจ้ง":"Must notify",
+"และเจรจาวันส่งกับ":"and renegotiate the delivery date with",
+"เร่งซื้อเพิ่ม":"Expedite a Purchase",
+"ออกใบขอซื้อด่วน":"Issue an urgent purchase requisition for",
+"ไม่มีงานไหนเสียคิว ทุกออเดอร์เดินตามแผนเดิม":"No job loses its queue slot — every order stays on the original plan",
+"Lead Time 42 วัน อาจไม่ทัน ต้องเจรจาย่นเวลากับผู้ขาย":"42-day lead time may be too late — must negotiate a shorter lead time with the supplier",
+"สลับไปใช้ RM-CU-FOIL1B (MITSUI MINING) · ของในคลัง 640 KG · อัตราแปลง 1.000":"Switch to RM-CU-FOIL1B (MITSUI MINING) · On-hand 640 KG · Conversion ratio 1.000",
+"ใช้ได้ทันที เพราะผ่านการอนุมัติทางเทคนิคไว้แล้ว":"Usable immediately — already technically approved",
+"ต้นทุนต่างจากตัวเดิม ต้องบันทึกไว้เทียบตอนปิดต้นทุน":"Cost differs from the original — record it for comparison at cost closing",
+"แบ่งของตามสัดส่วน":"Split Pro-Rata",
+"ลดจำนวนจองของทั้ง":"Reduce reservations across all",
+"ใบลงตามสัดส่วน":"orders pro-rata",
+"ทุกงานเดินต่อได้ ไม่มีใครหยุดสนิท":"Every job keeps moving — none stops completely",
+"ทุกงานได้ของไม่ครบ ต้องยืนยันกับฝ่ายผลิตว่ารับได้":"Every job gets partial material — Production must confirm this is acceptable",
+"ตัวอย่าง — มีใบสั่งผลิตใหม่เข้ามาแล้ววัตถุดิบไม่พอ":"Example — A New Work Order Arrives and Material Falls Short",
+"ระบบไม่ดึงของจากใบสั่งผลิตอื่นให้เองโดยอัตโนมัติ":"The system never pulls stock from other work orders on its own",
+"ของในคลัง":"On-hand",
+"· จองไว้แล้ว":"· Reserved",
+"งานใหม่ต้องการ":"The new job needs",
+"ขาดอีก":"Short by",
+"ถ้าระบบตัดสินใจเอง ของจะถูกดึงจากงานที่จองไว้ก่อนโดยไม่มีใครรู้":"If the system decided on its own, stock would be pulled from earlier reservations without anyone knowing",
+"แล้วฝ่ายขายจะมารู้อีกทีตอนของไม่ทันส่ง —":"and Sales would only find out when the delivery is already late —",
+"หน้าจอนี้จึงหยุดรอให้คนเลือก":"so this screen stops and waits for a person to choose",
+"โดยวางทางเลือกทั้งหมดพร้อมผลได้ผลเสียไว้ให้เทียบในที่เดียว":"laying out every option with its trade-offs side by side in one place",
+"ทางเลือกที่ระบบเสนอ":"Options Proposed by the System",
+"ผู้วางแผนเป็นคนตัดสินใจ · ทางเลือกที่เลือกจะถูกบันทึกไว้พร้อมเหตุผล":"The planner decides · The chosen option is recorded along with the reason",
+"ทางเลือก \"ใช้วัตถุดิบทดแทน\" ดูคู่ที่อนุมัติไว้แล้วได้ที่หน้า":"For the \"Use a Substitute Material\" option, see approved pairs on the",
+"ดูคู่ที่อนุมัติไว้แล้วได้ที่หน้า":"see approved substitute pairs on the",
+"ใช้วัตถุดิบทดแทน":"Use a Substitute Material",
+"ทางเลือก":"Option",
+"ทำอะไร":"What It Does",
+"ได้อะไร":"What You Gain",
+"ต้องแลกกับอะไร":"What It Costs",
+"วัตถุดิบทดแทน ↗":"Substitute Materials ↗",
+"· ภาพรวมของที่ถูกจองและที่ยังว่างดูได้ที่":"· For an overview of reserved vs free stock, see the",
+"กระดานวางแผนวัตถุดิบ (MRP) ↗":"Material Planning Board (MRP) ↗"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>

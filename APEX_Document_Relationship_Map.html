@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
+
+<title>แผนผังความสัมพันธ์เอกสาร — APEX Circuit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838; --purple:#7a4fd3;
+  --orange:#c25f1e; --cyan:#0e8ca8; --teal:#12857a;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4; --p-amber:#fdfaef; --p-purple:#f8f4fd; --p-cyan:#f0fafd;
+  --line:#edf2f8; --line-d:#d7e2ee; --edge:#c3d5e8;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+#app{height:100vh;display:flex;flex-direction:column}
+
+/* ─── แถบบน ─── */
+.top{background:#fff;border-bottom:1px solid var(--line-d);display:flex;align-items:center;
+     gap:18px;padding:11px 18px;flex:none;box-shadow:0 1px 3px rgba(31,80,140,.05);z-index:40}
+.brand{display:flex;align-items:center;gap:12px;flex:none}
+.brand .bi{width:40px;height:40px;border-radius:11px;background:#fff;border:1px solid var(--line-d);
+  display:flex;align-items:center;justify-content:center;color:var(--hdr)}
+.brand .bi svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.apexlogo{width:30px;height:30px;object-fit:contain}
+.brand h1{font-size:19px;font-weight:700;color:var(--blue);line-height:1.2}
+.brand .m{font-size:11.5px;color:var(--mut);margin-top:1px}
+.finder{display:flex;align-items:stretch;border:1.5px solid var(--line-d);border-radius:10px;
+        overflow:hidden;background:#fff;flex:none;transition:.15s}
+.finder:focus-within{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+.finder select{border:none;border-right:1px solid var(--line-d);background:#f7fafd;padding:0 30px 0 13px;
+  font-family:inherit;font-size:13px;font-weight:600;color:#3a5773;outline:none;cursor:pointer;appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8ea0' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:10px}
+.finder input{border:none;outline:none;padding:9px 13px;font-family:inherit;font-size:13.5px;
+  width:250px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.finder button{border:none;background:var(--hdr);color:#fff;font-family:inherit;font-size:13px;font-weight:600;
+  padding:0 17px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s}
+.finder button:hover{background:#3d8ad6}
+.finder button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.1;stroke-linecap:round}
+.tools{margin-left:auto;display:flex;align-items:center;gap:5px;flex:none}
+.tb{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;
+    color:#5b7590;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.tb:hover{background:var(--p-blue);color:var(--blue)}
+.tb.on{background:var(--p-blue);color:var(--blue);border-color:#bcdcf7}
+.tb svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tsep{width:1px;height:22px;background:var(--line-d);margin:0 6px}
+
+/* ─── พื้นที่กราฟ ─── */
+.stage{flex:1;position:relative;overflow:hidden;
+  background:
+    radial-gradient(circle at 1px 1px, #d3e0ee 1px, transparent 0) 0 0/26px 26px,
+    linear-gradient(#f4f8fc,#eef4fb)}
+.stage.grab{cursor:grab} .stage.grabbing{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#nodes{position:absolute;left:0;top:0}
+
+/* ─── การ์ดเอกสาร ─── */
+.n{position:absolute;width:230px;background:#fff;border-radius:13px;border:1px solid #e1eaf4;
+   box-shadow:0 2px 5px rgba(31,80,140,.07),0 10px 24px -14px rgba(31,80,140,.35);
+   overflow:hidden;cursor:pointer;transition:box-shadow .18s,transform .18s,opacity .18s}
+.n:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(31,80,140,.11),0 16px 30px -14px rgba(31,80,140,.45)}
+.n.sel{border-color:var(--hdr);box-shadow:0 0 0 3px rgba(79,157,230,.28),0 14px 30px -12px rgba(31,80,140,.5)}
+.n.dim{opacity:.26;filter:saturate(.35)}
+.n .nh{height:33px;display:flex;align-items:center;gap:7px;padding:0 11px;color:#fff}
+.n .nh svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.n .nh span{font-size:11.5px;font-weight:600;letter-spacing:.2px}
+.n .nh .ext{margin-left:auto;width:21px;height:21px;border-radius:6px;background:rgba(255,255,255,.22);
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+.n .nh .ext:hover{background:rgba(255,255,255,.4)}
+.n .nb{padding:10px 12px 11px}
+.n .cd{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:.1px;font-variant-numeric:tabular-nums}
+.n .tt{font-size:11.5px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.n .st{display:inline-block;margin-top:7px;padding:2px 9px;border-radius:11px;font-size:10px;font-weight:700}
+.n .kv{display:flex;justify-content:space-between;gap:9px;font-size:11.5px;margin-top:5px}
+.n .kv .k{color:var(--mut);flex:none}
+.n .kv .v{font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.h-so{background:linear-gradient(100deg,#1e9e50,#28b562)}
+.h-fc{background:linear-gradient(100deg,#7a4fd3,#9067e0)}
+.h-mps{background:linear-gradient(100deg,#0e8ca8,#17a3c2)}
+.h-wo{background:linear-gradient(100deg,#1f6fc4,#3f8ad9)}
+.h-pln{background:linear-gradient(100deg,#5b7590,#728da8)}
+.h-pr{background:linear-gradient(100deg,#c99400,#e0ab14)}
+.h-po{background:linear-gradient(100deg,#c25f1e,#dd7530)}
+.h-gr{background:linear-gradient(100deg,#12857a,#199e91)}
+.h-in{background:linear-gradient(100deg,#3d4f63,#54687e)}
+.s-ok{background:var(--p-green);color:#1a7a42}
+.s-run{background:var(--p-blue);color:var(--blue)}
+.s-wait{background:var(--p-amber);color:#8a6a00}
+.s-plan{background:#eef2f6;color:#5a6b7d}
+.s-fc{background:var(--p-purple);color:#54339c}
+
+/* ─── เส้นเชื่อม ─── */
+.e{fill:none;stroke:var(--edge);stroke-width:2;transition:stroke .18s,opacity .18s,stroke-width .18s}
+.e.act{stroke:var(--hdr);stroke-width:2.6}
+.e.dim{opacity:.18}
+.eflow{fill:none;stroke:#fff;stroke-width:2.6;stroke-dasharray:5 9;opacity:0}
+.eflow.act{opacity:.85;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-14}}
+.elab{font-size:10.5px;fill:#7d8ea0;font-family:inherit;text-anchor:middle;
+  paint-order:stroke;stroke:#f2f7fc;stroke-width:5px;stroke-linejoin:round}
+.elab.act{fill:var(--blue);font-weight:600}
+.elab.dim{opacity:.2}
+
+/* ─── ชิปกรองมุมซ้ายบน ─── */
+.deps{position:absolute;left:16px;top:14px;display:flex;gap:7px;z-index:20;flex-wrap:wrap;max-width:520px}
+.dep{border:1.5px solid var(--line-d);background:rgba(255,255,255,.94);backdrop-filter:blur(4px);
+  border-radius:20px;padding:5px 13px 5px 9px;font-family:inherit;font-size:12px;font-weight:600;
+  color:#4a6b86;cursor:pointer;display:flex;align-items:center;gap:7px;transition:.15s}
+.dep:hover{border-color:#9dbdd9}
+.dep .dt{width:9px;height:9px;border-radius:3px;flex:none}
+.dep.off{opacity:.42}
+.dep.off .dt{background:#c3d0dd!important}
+
+/* ─── แผงรายละเอียด ─── */
+.panel{position:absolute;right:16px;top:14px;bottom:14px;width:376px;background:#fff;border-radius:14px;
+  box-shadow:0 8px 34px -10px rgba(15,40,80,.28),0 2px 8px rgba(31,80,140,.08);
+  display:flex;flex-direction:column;overflow:hidden;z-index:30;
+  transform:translateX(0);transition:transform .22s ease,opacity .22s}
+.panel.hide{transform:translateX(calc(100% + 22px));opacity:0;pointer-events:none}
+.ph{padding:13px 16px;color:#fff;display:flex;align-items:flex-start;gap:10px}
+.ph .pt{font-size:11.5px;font-weight:600;opacity:.92;letter-spacing:.2px}
+.ph .pc{font-size:17px;font-weight:700;line-height:1.25;font-variant-numeric:tabular-nums}
+.ph .px{margin-left:auto;width:26px;height:26px;border-radius:8px;border:none;background:rgba(255,255,255,.22);
+  color:#fff;font-size:17px;cursor:pointer;font-family:inherit;line-height:1;flex:none;transition:.15s}
+.ph .px:hover{background:rgba(255,255,255,.38)}
+.pb{flex:1;overflow:auto;padding:14px 16px}
+.pb::-webkit-scrollbar{width:7px}
+.pb::-webkit-scrollbar-thumb{background:#dbe6f1;border-radius:4px}
+.prow{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)}
+.prow:last-of-type{border-bottom:none}
+.prow .k{color:var(--mut);flex:none}
+.prow .v{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+.pchip{display:inline-block;padding:3px 11px;border-radius:12px;font-size:11px;font-weight:700}
+.plink{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--line-d);border-radius:9px;
+  background:#fff;padding:6px 13px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);
+  cursor:pointer;margin-top:11px;transition:.15s}
+.plink:hover{border-color:#9dbdd9;background:var(--p-blue)}
+.plink svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.psec{font-size:12px;font-weight:700;color:#3a5773;margin:16px 0 9px;display:flex;align-items:center;gap:8px}
+.psec .n{font-weight:400;color:var(--mut)}
+.psec::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--hdr)}
+.li{border:1px solid var(--line-d);border-radius:10px;padding:10px 12px;margin-bottom:8px;transition:.15s}
+.li:hover{border-color:#9dbdd9;background:#fbfdff}
+.li .r1{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.li .cd{font-size:13px;font-weight:700;color:var(--ink)}
+.li .q{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+.li .nmx{font-size:11.5px;color:var(--mut);margin-top:1px;line-height:1.4}
+.li .r2{display:flex;justify-content:flex-end;font-size:11px;margin-top:5px;font-variant-numeric:tabular-nums}
+.li .trk{height:5px;background:#eef3f8;border-radius:3px;overflow:hidden;margin-top:6px}
+.li .trk i{display:block;height:100%;border-radius:3px}
+.ptot{display:flex;justify-content:space-between;align-items:baseline;border-top:1.5px solid var(--line-d);
+  margin-top:12px;padding-top:11px;font-size:13px}
+.ptot .v{font-size:20px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.pnav{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.pnav .col{border:1px solid var(--line-d);border-radius:10px;padding:9px 11px}
+.pnav .col .h{font-size:11px;color:var(--mut);margin-bottom:6px}
+.pnav .col button{display:block;width:100%;text-align:left;border:none;background:transparent;font-family:inherit;
+  font-size:12px;font-weight:600;color:var(--blue);padding:3px 0;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnav .col button:hover{text-decoration:underline}
+.pnav .col .none{font-size:12px;color:#c3d0dd}
+
+/* ─── ควบคุมมุมล่าง ─── */
+.zoom{position:absolute;left:16px;bottom:16px;display:flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border:1px solid var(--line-d);
+  border-radius:12px;padding:5px 7px;box-shadow:0 3px 12px -4px rgba(31,80,140,.25);z-index:20}
+.zb{width:29px;height:29px;border-radius:8px;border:none;background:transparent;color:#5b7590;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:inherit;font-size:16px;transition:.15s}
+.zb:hover{background:var(--p-blue);color:var(--blue)}
+.zb svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zv{min-width:52px;text-align:center;font-size:12.5px;font-weight:700;color:#3a5773;font-variant-numeric:tabular-nums}
+.zsep{width:1px;height:18px;background:var(--line-d);margin:0 4px}
+.legend{position:absolute;right:16px;bottom:16px;display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end;
+  background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border:1px solid var(--line-d);
+  border-radius:12px;padding:9px 14px;box-shadow:0 3px 12px -4px rgba(31,80,140,.25);z-index:20;max-width:420px}
+.legend.push{right:406px}
+.lg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#4a6b86}
+.lg i{width:11px;height:11px;border-radius:4px;flex:none}
+.hintbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);background:rgba(43,58,74,.9);
+  color:#fff;font-size:12px;padding:7px 15px;border-radius:20px;z-index:20;white-space:nowrap;
+  box-shadow:0 4px 14px -4px rgba(15,40,80,.4)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:82px;z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center}
+.tst{background:#0f3f8c;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;
+     box-shadow:0 8px 22px -6px rgba(15,40,80,.45);animation:pop .2s ease-out}
+.tst.warn{background:#a06a00}
+@keyframes pop{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+
+/* ══ เก็บรายละเอียดความสวยงามทั้งโปรแกรม ══ */
+::selection{background:#cfe6fa;color:#1a3a5c}
+:focus-visible{outline:2px solid #7FB3E0;outline-offset:2px;border-radius:6px}
+button,select,input,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#bcd0e2;background-clip:content-box}
+/* ปุ่มและช่องกรอกให้สูงเท่ากันและมุมนุ่มขึ้น */
+.btn{border-radius:20px;transition:border-color .15s,box-shadow .15s,background .15s,color .15s}
+.btn:active{transform:translateY(.5px)}
+.sel,.inp{border-radius:8px;border-color:#dfe7f0;transition:border-color .15s,box-shadow .15s}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.chip{letter-spacing:.1px}
+/* ตัวเลขทุกที่ใช้ความกว้างเท่ากัน อ่านเป็นคอลัมน์ได้ */
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed #app{min-height:100vh}
+html.embed .content{padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <div class="brand">
+      <div class="bi"><img class="apexlogo" src="data:image/png;base64,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" alt="APEX Circuit" /></div>
+      <div><h1>แผนผังความสัมพันธ์เอกสาร</h1>
+        <div class="m" id="brandMeta">—</div></div>
+    </div>
+    <div class="finder">
+      <select id="dType">
+        <option value="PR">PR — ใบขอซื้อ</option>
+        <option value="PO">PO — ใบสั่งซื้อ</option>
+        <option value="WO">WO — ใบสั่งผลิต</option>
+        <option value="SO">SO — คำสั่งซื้อลูกค้า</option>
+      </select>
+      <input id="dCode" value="PR-26080071" />
+      <button onclick="doSearch()"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>ค้นหา</button>
+    </div>
+    <div class="tools">
+      <button class="tb on" id="tbFlow" title="ไฮไลต์เส้นทางของเอกสารที่เลือก" onclick="togFlow()">
+        <svg viewBox="0 0 24 24"><path d="M4 7h9M4 12h16M4 17h9"/><path d="M16 4l4 3-4 3"/><path d="M16 14l4 3-4 3"/></svg></button>
+      <button class="tb" id="tbLab" title="แสดง / ซ่อนคำอธิบายบนเส้น" onclick="togLab()">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg></button>
+      <div class="tsep"></div>
+      <button class="tb" title="จัดวางใหม่" onclick="relayout()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="3" y="14" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/></svg></button>
+      <button class="tb" title="ย่อ-ขยายให้พอดีจอ" onclick="fit()">
+        <svg viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg></button>
+      <button class="tb" title="ส่งออกภาพ" onclick="toast('ส่งออกแผนผังเป็นไฟล์ภาพ')">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg></button>
+      <button class="tb" title="ปิด" onclick="toast('ปิดหน้าต่างแผนผัง')">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+  </div>
+
+  <div class="stage grab" id="stage">
+    <div id="world">
+      <svg id="edges"></svg>
+      <div id="nodes"></div>
+    </div>
+    <div class="deps" id="deps"></div>
+
+    <div class="panel hide" id="panel">
+      <div class="ph" id="ph"></div>
+      <div class="pb" id="pb"></div>
+    </div>
+
+    <div class="zoom">
+      <button class="zb" onclick="zoomBy(-0.12)" title="ย่อ">−</button>
+      <span class="zv" id="zv">70%</span>
+      <button class="zb" onclick="zoomBy(0.12)" title="ขยาย">+</button>
+      <span class="zsep"></span>
+      <button class="zb" onclick="fit()" title="พอดีจอ">
+        <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M9 12h6M12 9v6"/></svg></button>
+      <button class="zb" onclick="reset()" title="กลับค่าเริ่มต้น">
+        <svg viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/></svg></button>
+    </div>
+
+    <div class="legend" id="legend"></div>
+    <div class="hintbar" id="hintbar">คลิกการ์ดเพื่อดูรายละเอียด · ลากพื้นหลังเพื่อเลื่อน · หมุนล้อพร้อมกด Ctrl เพื่อซูม</div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const nf=(n,d=0)=>n==null?'—':n.toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const g=id=>document.getElementById(id);
+const SV=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
+const ICO={
+ SO :SV('<path d="M4 7h13l3 5v6H4z"/><circle cx="8" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>'),
+ FC :SV('<path d="M3 16l5-6 4 4 5-7 4 4"/>'),
+ MPS:SV('<path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/>'),
+ WO :SV('<path d="M4 20V9l6-4 6 4v11M4 20h16"/><rect x="9" y="13" width="4" height="7"/>'),
+ PLN:SV('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
+ PR :SV('<path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/>'),
+ PO :SV('<path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/>'),
+ GR :SV('<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>'),
+ IN :SV('<path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/>')
+};
+const TYPE={
+ SO :['คำสั่งซื้อลูกค้า','h-so','#1e9e50','ขาย'],
+ FC :['พยากรณ์การขาย','h-fc','#7a4fd3','ขาย'],
+ MPS:['แผนผลิตสินค้าสำเร็จรูป','h-mps','#0e8ca8','วางแผน'],
+ WO :['ใบสั่งผลิต','h-wo','#1f6fc4','ผลิต'],
+ PLN:['แผนสั่งซื้อจาก MRP','h-pln','#5b7590','วางแผน'],
+ PR :['ใบขอซื้อ','h-pr','#c99400','จัดซื้อ'],
+ PO :['ใบสั่งซื้อ','h-po','#c25f1e','จัดซื้อ'],
+ GR :['ใบรับสินค้า','h-gr','#12857a','คลังสินค้า'],
+ IN :['นำเข้าคลัง','h-in','#3d4f63','คลังสินค้า'],
+};
+const DEPS=[['ขาย','#1e9e50'],['วางแผน','#0e8ca8'],['ผลิต','#1f6fc4'],['จัดซื้อ','#c25f1e'],['คลังสินค้า','#3d4f63']];
+
+/* ══════════ เอกสารของ APEX — สายของ RM-CCL-S1000H ══════════ */
+const N=(id,t,code,title,col,row,st,stc,kv,extra)=>({id,t,code,title,col,row,st,stc,kv,...extra});
+const NODES=[
+ N('SO1','SO','SO-26-0918','PCB SEMCO 4L Gold HDI',0,0,'ยืนยันแล้ว','s-ok',
+   [['ลูกค้า','SEMCO'],['ส่งมอบ','18-09-2026'],['จำนวน','52,000 บอร์ด']],
+   {cust:'SEMCO',amount:7202000,items:[['A048T-168BJ','PCB SEMCO 4L Gold HDI',52000,52000,'บอร์ด']]}),
+ N('SO2','SO','SO-26-0922','PCB SEMCO 4L Normal',0,1,'ยืนยันแล้ว','s-ok',
+   [['ลูกค้า','SEMCO'],['ส่งมอบ','20-09-2026'],['จำนวน','31,000 บอร์ด']],
+   {cust:'SEMCO',amount:2246500,items:[['G120A-017A','PCB SEMCO 4L Normal',31000,31000,'บอร์ด']]}),
+ N('SO3','SO','SO-26-0931','PCB TDK 4L Normal',0,2,'ยืนยันแล้ว','s-ok',
+   [['ลูกค้า','TDK'],['ส่งมอบ','22-09-2026'],['จำนวน','24,500 บอร์ด']],
+   {cust:'TDK',amount:1881250,items:[['D617P-140S','PCB TDK 4L Normal',24500,24500,'บอร์ด']]}),
+ N('FC1','FC','FC-2026-09','พยากรณ์เดือนกันยายน 2569',0,3,'ใช้ในการวางแผน','s-fc',
+   [['ลูกค้า','SEMCO'],['เดือน','กันยายน 2569'],['จำนวน','18,000 บอร์ด']],
+   {cust:'SEMCO',amount:475200,items:[['S158G-019E','PCB SEMCO 2L Normal',18000,18000,'บอร์ด']]}),
+
+ N('MPS1','MPS','MPS-2608-01','แผนผลิตสัปดาห์ที่ 34',1,0,'ยืนยันแผนแล้ว','s-ok',
+   [['สินค้า','A048T-168BJ'],['โรงงาน','A3'],['จำนวน','52,000 บอร์ด']],
+   {items:[['A048T-168BJ','PCB SEMCO 4L Gold HDI',52000,52000,'บอร์ด']]}),
+ N('MPS2','MPS','MPS-2608-02','แผนผลิตสัปดาห์ที่ 35',1,1,'ยืนยันแผนแล้ว','s-ok',
+   [['สินค้า','G120A-017A'],['โรงงาน','A1'],['จำนวน','31,000 บอร์ด']],
+   {items:[['G120A-017A','PCB SEMCO 4L Normal',31000,31000,'บอร์ด']]}),
+ N('MPS3','MPS','MPS-2608-03','แผนผลิตสัปดาห์ที่ 36',1,2,'ยืนยันแผนแล้ว','s-ok',
+   [['สินค้า','D617P-140S'],['โรงงาน','A1'],['จำนวน','24,500 บอร์ด']],
+   {items:[['D617P-140S','PCB TDK 4L Normal',24500,24500,'บอร์ด']]}),
+ N('MPS4','MPS','MPS-2608-04','แผนผลิตสัปดาห์ที่ 37',1,3,'ร่างแผน','s-plan',
+   [['สินค้า','S158G-019E'],['โรงงาน','A1'],['จำนวน','18,000 บอร์ด']],
+   {items:[['S158G-019E','PCB SEMCO 2L Normal',18000,18000,'บอร์ด']]}),
+
+ N('WO1','WO','WO-26080142','ผลิต A048T-168BJ',2,0,'กำลังผลิต','s-run',
+   [['โรงงาน','A3'],['ต้องใช้ CCL','18-09-2026'],['ใช้ CCL','4,472 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',4472,4472,'SHT']]}),
+ N('WO2','WO','WO-26080155','ผลิต G120A-017A',2,1,'กำลังผลิต','s-run',
+   [['โรงงาน','A1'],['ต้องใช้ CCL','20-09-2026'],['ใช้ CCL','2,666 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2666,2666,'SHT']]}),
+ N('WO3','WO','WO-26080177','ผลิต D617P-140S',2,2,'ปล่อยงานแล้ว','s-ok',
+   [['โรงงาน','A1'],['ต้องใช้ CCL','22-09-2026'],['ใช้ CCL','2,107 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2107,2107,'SHT']]}),
+ N('WO4','WO','WO-26080191','ผลิต S158G-019E',2,3,'รอปล่อยงาน','s-wait',
+   [['โรงงาน','A1'],['ต้องใช้ CCL','25-09-2026'],['ใช้ CCL','1,548 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',1548,1548,'SHT']]}),
+
+ N('PLN','PLN','PLN-2608-0142','แผนสั่งซื้อจากการรัน MRP',3,0,'แปลงเป็น PR แล้ว','s-ok',
+   [['วัตถุดิบ','RM-CCL-S1000H'],['ต้องการสุทธิ','18,120 SHT'],['เสนอสั่ง','20,000 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']],
+    calc:[['ความต้องการรวมจาก 4 ใบสั่งผลิต',14820],['หัก สินค้าคงเหลือในคลัง',-5100],
+          ['หัก ของที่สั่งแล้วกำลังจะเข้า',-2000],['บวก ยอดที่ถูกจองไว้',1400],
+          ['บวก สต็อกกันชน',9000],['ความต้องการสุทธิ',18120],['ปัดขึ้น 5 ล็อต × MOQ 4,000',20000]]}),
+ N('PR','PR','PR-26080071','ขอซื้อ CCL S1000H',4,0,'อนุมัติแล้ว','s-ok',
+   [['ผู้ขาย','NAN YA PLASTICS'],['ออกเอกสาร','04-08-2026'],['จำนวน','20,000 SHT']],
+   {amount:5780000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']]}),
+ N('PO','PO','PO-26080119','สั่งซื้อ CCL S1000H',5,0,'ส่งให้ผู้ขายแล้ว','s-run',
+   [['ผู้ขาย','NAN YA PLASTICS'],['กำหนดส่ง','18-09-2026'],['มูลค่า','5,780,000']],
+   {amount:5780000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']]}),
+ N('GR','GR','GR-26090203','รับสินค้าจาก NAN YA',6,0,'รับบางส่วน','s-wait',
+   [['ผู้ขาย','NAN YA PLASTICS'],['วันที่รับ','16-09-2026'],['รับแล้ว','14,000 / 20,000']],
+   {amount:4046000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',14000,20000,'SHT']]}),
+ N('IN','IN','IN-0087','นำเข้าคลัง 01-RM',7,0,'บันทึกแล้ว','s-ok',
+   [['คลัง','01-RM คลังวัตถุดิบ'],['วันที่','16-09-2026'],['จำนวน','14,000 SHT']],
+   {amount:4046000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',14000,14000,'SHT']]}),
+];
+const EDGES=[
+ ['SO1','MPS1','ตั้งแผนผลิต'],['SO2','MPS2','ตั้งแผนผลิต'],['SO3','MPS3','ตั้งแผนผลิต'],['FC1','MPS4','ตั้งแผนผลิต'],
+ ['MPS1','WO1','ออกใบสั่งผลิต'],['MPS2','WO2','ออกใบสั่งผลิต'],['MPS3','WO3','ออกใบสั่งผลิต'],['MPS4','WO4','ออกใบสั่งผลิต'],
+ ['WO1','PLN','ระเบิด BOM'],['WO2','PLN','ระเบิด BOM'],['WO3','PLN','ระเบิด BOM'],['WO4','PLN','ระเบิด BOM'],
+ ['PLN','PR','แปลงเป็นใบขอซื้อ'],['PR','PO','อนุมัติและสั่งซื้อ'],['PO','GR','รับของ'],['GR','IN','เข้าคลัง'],
+];
+const IDX=Object.fromEntries(NODES.map(n=>[n.id,n]));
+
+/* ══════════ วางตำแหน่ง ══════════ */
+const NW=230, NH=150, CGAP=86, RGAP=26;
+function layout(){
+  const cols={}; NODES.forEach(n=>(cols[n.col]=cols[n.col]||[]).push(n));
+  const maxR=Math.max(...Object.values(cols).map(a=>a.length));
+  const H=maxR*NH+(maxR-1)*RGAP;
+  Object.entries(cols).forEach(([c,arr])=>{
+    arr.sort((a,b)=>a.row-b.row);
+    const h=arr.length*NH+(arr.length-1)*RGAP, off=(H-h)/2;
+    arr.forEach((n,i)=>{ n.x=48+ +c*(NW+CGAP); n.y=48+off+i*(NH+RGAP); });
+  });
+  W_W=48*2+(Math.max(...NODES.map(n=>n.col))+1)*(NW+CGAP)-CGAP;
+  W_H=96+H;
+}
+let W_W=0,W_H=0; layout();
+
+/* ══════════ วาด ══════════ */
+let SEL=null, FLOW=true, LAB=false, OFFDEP=new Set();
+function related(id){
+  const up=new Set(), dn=new Set();
+  const walk=(x,dir,acc)=>EDGES.forEach(([a,b])=>{
+    if(dir<0&&b===x&&!acc.has(a)){acc.add(a);walk(a,dir,acc);}
+    if(dir>0&&a===x&&!acc.has(b)){acc.add(b);walk(b,dir,acc);}});
+  walk(id,-1,up); walk(id,1,dn);
+  return {up,dn,all:new Set([id,...up,...dn])};
+}
+function draw(){
+  const act = (SEL&&FLOW)?related(SEL).all:null;
+  const on = n=>!OFFDEP.has(TYPE[n.t][3]);
+  g('nodes').innerHTML=NODES.map(n=>{
+    const T=TYPE[n.t];
+    const dim = (!on(n)) || (act&&!act.has(n.id));
+    return `<div class="n ${n.id===SEL?'sel':''} ${dim?'dim':''}" style="left:${n.x}px;top:${n.y}px"
+        data-id="${n.id}" onclick="pick('${n.id}')">
+      <div class="nh ${T[1]}">${ICO[n.t]}<span>${T[0]}</span>
+        <span class="ext" title="เปิดเอกสาร" onclick="event.stopPropagation();toast('เปิดเอกสาร ${n.code}')">
+          <svg viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></span></div>
+      <div class="nb">
+        <div class="cd">${n.code}</div>
+        <div class="tt" title="${n.title}">${n.title}</div>
+        <div class="st ${n.stc}">${n.st}</div>
+        ${n.kv.map(([k,v])=>`<div class="kv"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+      </div></div>`;}).join('');
+
+  const sv=g('edges'); sv.setAttribute('width',W_W); sv.setAttribute('height',W_H);
+  sv.innerHTML=`<defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7.2" refY="3.2" orient="auto">
+      <path d="M0 0 L7 3.2 L0 6.4 z" fill="var(--edge)"/></marker>
+    <marker id="ara" markerWidth="9" markerHeight="9" refX="7.2" refY="3.2" orient="auto">
+      <path d="M0 0 L7 3.2 L0 6.4 z" fill="#4f9de6"/></marker>
+  </defs>`+
+  EDGES.map(([a,b,lb])=>{
+    const A=IDX[a],B=IDX[b];
+    const x1=A.x+NW, y1=A.y+NH/2, x2=B.x-9, y2=B.y+NH/2;
+    const mx=(x1+x2)/2;
+    const d=`M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`;
+    const isAct = act && act.has(a) && act.has(b);
+    const isDim = (OFFDEP.has(TYPE[A.t][3])||OFFDEP.has(TYPE[B.t][3])) || (act&&!isAct);
+    const cls=`e ${isAct?'act':''} ${isDim?'dim':''}`;
+    const lx=mx, ly=(y1+y2)/2-9;
+    return `<path class="${cls}" d="${d}" marker-end="url(#${isAct?'ara':'ar'})"/>
+      ${isAct?`<path class="eflow act" d="${d}"/>`:''}
+      ${LAB?`<text class="elab ${isAct?'act':''} ${isDim?'dim':''}" x="${lx}" y="${ly}">${lb}</text>`:''}`;
+  }).join('');
+
+  const vis=NODES.filter(on).length;
+  g('brandMeta').textContent=`${vis} เอกสาร · ${EDGES.filter(([a,b])=>on(IDX[a])&&on(IDX[b])).length} เส้นเชื่อม`
+    + (SEL?` · เลือก ${IDX[SEL].code}`:'');
+}
+function renderDeps(){
+  g('deps').innerHTML=DEPS.map(([d,c])=>
+    `<button class="dep ${OFFDEP.has(d)?'off':''}" onclick="togDep('${d}')">
+      <span class="dt" style="background:${c}"></span>${d}</button>`).join('');
+}
+function renderLegend(){
+  g('legend').innerHTML=Object.entries(TYPE).map(([k,v])=>
+    `<span class="lg"><i style="background:${v[2]}"></i>${v[0]}</span>`).join('');
+}
+function togDep(d){OFFDEP.has(d)?OFFDEP.delete(d):OFFDEP.add(d);renderDeps();draw();}
+function togFlow(){FLOW=!FLOW;g('tbFlow').classList.toggle('on',FLOW);draw();}
+function togLab(){LAB=!LAB;g('tbLab').classList.toggle('on',LAB);draw();}
+
+/* ══════════ แผงรายละเอียด ══════════ */
+function pick(id){
+  SEL=id; draw(); showPanel(id);
+}
+function showPanel(id){
+  const n=IDX[id], T=TYPE[n.t], R=related(id);
+  const par=[...R.up].filter(x=>EDGES.some(([a,b])=>a===x&&b===id));
+  const chi=[...R.dn].filter(x=>EDGES.some(([a,b])=>a===id&&b===x));
+  g('ph').className='ph '+T[1];
+  g('ph').innerHTML=`<div><div class="pt">${T[0]}</div><div class="pc">${n.code}</div></div>
+    <button class="px" onclick="closePanel()">×</button>`;
+  const items=(n.items||[]).map(([c,nm2,q,tot,u])=>{
+    const pct=Math.min(100,q/tot*100), full=pct>=99.5;
+    return `<div class="li"><div class="r1"><span class="cd">${c}</span>
+        <span class="q" style="color:${full?'var(--green)':'#a06a00'}">${nf(q)}</span></div>
+      <div class="nmx">${nm2}</div>
+      <div class="r2" style="color:${full?'var(--green)':'#a06a00'}">${nf(q)} / ${nf(tot)} ${u}</div>
+      <div class="trk"><i style="width:${pct}%;background:${full?'var(--green)':'var(--amber)'}"></i></div></div>`;}).join('');
+  const calc=n.calc?`<div class="psec">ที่มาของจำนวน</div>
+    ${n.calc.map((c,i)=>`<div class="prow" style="${i>=n.calc.length-2?'font-weight:700':''}">
+      <span class="k" style="${i>=n.calc.length-2?'color:var(--ink)':''}">${c[0]}</span>
+      <span class="v" style="${i>=n.calc.length-1?'color:var(--blue);font-size:14px':''}">${nf(c[1])} SHT</span></div>`).join('')}`:'';
+  g('pb').innerHTML=`
+    <div><span class="pchip ${n.stc}">${n.st}</span>
+      ${n.cust?`<span style="font-size:12.5px;color:#4a6b86;margin-left:9px">${n.cust}</span>`:''}</div>
+    <button class="plink" onclick="toast('เปิดเอกสาร ${n.code}')">
+      <svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>เปิดเอกสาร</button>
+    <div class="psec">ข้อมูลเอกสาร</div>
+    <div class="prow"><span class="k">ชื่อรายการ</span><span class="v">${n.title}</span></div>
+    ${n.kv.map(([k,v])=>`<div class="prow"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}
+    ${calc}
+    ${items?`<div class="psec">รายการสินค้า <span class="n">(${n.items.length})</span></div>${items}`:''}
+    ${n.amount?`<div class="ptot"><span>มูลค่ารวม</span><span class="v">${nf(n.amount)}</span></div>`:''}
+    <div class="psec">เชื่อมต่อกับเอกสาร</div>
+    <div class="pnav">
+      <div class="col"><div class="h">ต้นทาง (${par.length})</div>
+        ${par.length?par.map(x=>`<button onclick="pick('${x}')">← ${IDX[x].code}</button>`).join(''):'<div class="none">ไม่มี</div>'}</div>
+      <div class="col"><div class="h">ปลายทาง (${chi.length})</div>
+        ${chi.length?chi.map(x=>`<button onclick="pick('${x}')">${IDX[x].code} →</button>`).join(''):'<div class="none">ไม่มี</div>'}</div>
+    </div>
+    <div class="psec">ทั้งสายที่เกี่ยวข้อง</div>
+    <div class="prow"><span class="k">เอกสารต้นทางทั้งหมด</span><span class="v">${R.up.size} ฉบับ</span></div>
+    <div class="prow"><span class="k">เอกสารปลายทางทั้งหมด</span><span class="v">${R.dn.size} ฉบับ</span></div>
+    <div class="prow"><span class="k">รวมทั้งสาย</span><span class="v">${R.all.size} ฉบับ</span></div>`;
+  g('panel').classList.remove('hide');
+  g('legend').classList.add('push');
+}
+function closePanel(){SEL=null;g('panel').classList.add('hide');g('legend').classList.remove('push');draw();}
+
+/* ══════════ ซูม / เลื่อน ══════════ */
+let Z=0.7,TX=0,TY=0;
+function apply(){g('world').style.transform=`translate(${TX}px,${TY}px) scale(${Z})`;
+  g('zv').textContent=Math.round(Z*100)+'%';}
+function zoomBy(d){const c=g('stage').getBoundingClientRect();
+  const cx=c.width/2,cy=c.height/2, nz=Math.min(2,Math.max(0.25,Z+d));
+  TX=cx-(cx-TX)*(nz/Z); TY=cy-(cy-TY)*(nz/Z); Z=nz; apply();}
+function fit(){
+  const c=g('stage').getBoundingClientRect();
+  const pad=36, pr=g('panel').classList.contains('hide')?0:400;
+  const availW=Math.max(200,c.width-pr-pad*2), availH=Math.max(200,c.height-pad*2-56);
+  Z=Math.max(0.25,Math.min(availW/W_W, availH/W_H, 1.5));
+  TX=Math.max(20,(c.width-pr-W_W*Z)/2);
+  TY=Math.max(14,(c.height-W_H*Z)/2-14);
+  apply();
+}
+function reset(){fit();}
+const st=g('stage');
+let drag=null;
+st.addEventListener('mousedown',e=>{
+  if(e.target.closest('.n,.panel,.zoom,.legend,.deps'))return;
+  drag={x:e.clientX-TX,y:e.clientY-TY}; st.classList.add('grabbing');});
+window.addEventListener('mousemove',e=>{if(!drag)return;TX=e.clientX-drag.x;TY=e.clientY-drag.y;apply();});
+window.addEventListener('mouseup',()=>{drag=null;st.classList.remove('grabbing');});
+st.addEventListener('wheel',e=>{
+  if(!e.ctrlKey&&!e.metaKey)return; e.preventDefault();
+  const r=st.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+  const nz=Math.min(2,Math.max(0.25,Z*(e.deltaY<0?1.1:0.9)));
+  TX=mx-(mx-TX)*(nz/Z); TY=my-(my-TY)*(nz/Z); Z=nz; apply();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePanel();});
+
+function relayout(){layout();draw();fit();toast('จัดวางแผนผังใหม่แล้ว');}
+function doSearch(){
+  const code=g('dCode').value.trim().toUpperCase();
+  const n=NODES.find(x=>x.code.toUpperCase()===code);
+  if(!n) return toast(`ไม่พบเอกสาร ${code} ในแผนผังนี้`,'warn');
+  pick(n.id); centerOn(n.id);
+}
+function centerOn(id){const n=IDX[id], c=g('stage').getBoundingClientRect();
+  const pr=g('panel').classList.contains('hide')?0:400;
+  TX=(c.width-pr)/2-(n.x+NW/2)*Z; TY=c.height/2-(n.y+NH/2)*Z; apply();}
+function toast(m,c=''){const d=document.createElement('div');d.className='tst '+c;d.textContent=m;
+  g('toast').appendChild(d);setTimeout(()=>d.remove(),3000);}
+
+renderDeps(); renderLegend(); draw(); apply();
+setTimeout(()=>{fit();},0);
+setTimeout(()=>{const h=g('hintbar'); if(h) h.style.display='none';},9000);
+</script>
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"แผนผังความสัมพันธ์เอกสาร — APEX Circuit":"Document Relationship Map — APEX Circuit",
+"แผนผังความสัมพันธ์เอกสาร":"Document Relationship Map",
+"PR — ใบขอซื้อ":"PR — Purchase Requisition",
+"PO — ใบสั่งซื้อ":"PO — Purchase Order",
+"WO — ใบสั่งผลิต":"WO — Work Order",
+"SO — คำสั่งซื้อลูกค้า":"SO — Sales Order",
+"ไฮไลต์เส้นทางของเอกสารที่เลือก":"Highlight Selected Document's Path",
+"แสดง / ซ่อนคำอธิบายบนเส้น":"Show / Hide Edge Labels",
+"จัดวางใหม่":"Re-layout",
+"ย่อ-ขยายให้พอดีจอ":"Fit to Screen",
+"ส่งออกภาพ":"Export Image",
+"ส่งออกแผนผังเป็นไฟล์ภาพ":"Exported map as an image file",
+"ปิดหน้าต่างแผนผัง":"Closed the map window",
+"พอดีจอ":"Fit to Screen",
+"กลับค่าเริ่มต้น":"Reset View",
+"คลิกการ์ดเพื่อดูรายละเอียด · ลากพื้นหลังเพื่อเลื่อน · หมุนล้อพร้อมกด Ctrl เพื่อซูม":"Click a card for details · Drag the background to pan · Ctrl + scroll to zoom",
+"คำสั่งซื้อลูกค้า":"Sales Order",
+"ขาย":"Sales",
+"พยากรณ์การขาย":"Sales Forecast",
+"แผนผลิตสินค้าสำเร็จรูป":"FG Production Plan",
+"วางแผน":"Planning",
+"ใบสั่งผลิต":"Work Order",
+"ผลิต":"Production",
+"แผนสั่งซื้อจาก MRP":"MRP Planned Order",
+"ใบขอซื้อ":"Purchase Requisition",
+"จัดซื้อ":"Purchasing",
+"ใบสั่งซื้อ":"Purchase Order",
+"ใบรับสินค้า":"Goods Receipt",
+"คลังสินค้า":"Warehouse",
+"นำเข้าคลัง 01-RM":"Putaway to 01-RM",
+"นำเข้าคลัง":"Putaway",
+"ยืนยันแล้ว":"Confirmed",
+"ลูกค้า":"Customer",
+"ส่งมอบ":"Delivery",
+"บอร์ด":"boards",
+"พยากรณ์เดือนกันยายน 2569":"September 2026 Forecast",
+"ใช้ในการวางแผน":"Used for Planning",
+"เดือน":"Month",
+"กันยายน 2569":"September 2026",
+"แผนผลิตสัปดาห์ที่ 34":"Production Plan — Week 34",
+"แผนผลิตสัปดาห์ที่ 35":"Production Plan — Week 35",
+"แผนผลิตสัปดาห์ที่ 36":"Production Plan — Week 36",
+"แผนผลิตสัปดาห์ที่ 37":"Production Plan — Week 37",
+"ยืนยันแผนแล้ว":"Plan Confirmed",
+"สินค้า":"Product",
+"โรงงาน":"Plant",
+"ร่างแผน":"Draft Plan",
+"ผลิต A048T-168BJ":"Produce A048T-168BJ",
+"ผลิต G120A-017A":"Produce G120A-017A",
+"ผลิต D617P-140S":"Produce D617P-140S",
+"ผลิต S158G-019E":"Produce S158G-019E",
+"กำลังผลิต":"In Production",
+"ต้องใช้ CCL":"CCL Required By",
+"ใช้ CCL":"CCL Qty",
+"ปล่อยงานแล้ว":"Released",
+"รอปล่อยงาน":"Awaiting Release",
+"แผนสั่งซื้อจากการรัน MRP":"Planned Order from MRP Run",
+"แปลงเป็น PR แล้ว":"Converted to PR",
+"วัตถุดิบ":"Material",
+"ต้องการสุทธิ":"Net Requirement",
+"เสนอสั่ง":"Proposed Qty",
+"ความต้องการรวมจาก 4 ใบสั่งผลิต":"Gross requirement from 4 work orders",
+"หัก สินค้าคงเหลือในคลัง":"Less: on-hand stock",
+"หัก ของที่สั่งแล้วกำลังจะเข้า":"Less: scheduled receipts",
+"บวก ยอดที่ถูกจองไว้":"Plus: reserved quantity",
+"บวก สต็อกกันชน":"Plus: safety stock",
+"ความต้องการสุทธิ":"Net requirement",
+"ปัดขึ้น 5 ล็อต × MOQ 4,000":"Round up: 5 lots × MOQ 4,000",
+"ขอซื้อ CCL S1000H":"Requisition CCL S1000H",
+"อนุมัติแล้ว":"Approved",
+"ผู้ขาย":"Supplier",
+"ออกเอกสาร":"Issued",
+"สั่งซื้อ CCL S1000H":"Purchase CCL S1000H",
+"ส่งให้ผู้ขายแล้ว":"Sent to Supplier",
+"กำหนดส่ง":"Due Date",
+"มูลค่า":"Value",
+"รับสินค้าจาก NAN YA":"Receipt from NAN YA",
+"รับบางส่วน":"Partial Receipt",
+"วันที่รับ":"Receipt Date",
+"รับแล้ว":"Received",
+"บันทึกแล้ว":"Posted",
+"คลัง":"Warehouse",
+"01-RM คลังวัตถุดิบ":"01-RM Raw Material Warehouse",
+"ตั้งแผนผลิต":"Create production plan",
+"ออกใบสั่งผลิต":"Issue work order",
+"ระเบิด BOM":"Explode BOM",
+"แปลงเป็นใบขอซื้อ":"Convert to PR",
+"อนุมัติและสั่งซื้อ":"Approve & order",
+"รับของ":"Receive goods",
+"เข้าคลัง":"Putaway",
+"เส้นเชื่อม":"links",
+"เปิดเอกสาร":"Open Document",
+"ที่มาของจำนวน":"Quantity Calculation",
+"ข้อมูลเอกสาร":"Document Details",
+"ชื่อรายการ":"Description",
+"รายการสินค้า":"Line Items",
+"มูลค่ารวม":"Total Value",
+"เชื่อมต่อกับเอกสาร":"Linked Documents",
+"ต้นทาง":"Upstream",
+"ปลายทาง":"Downstream",
+"ไม่มี":"None",
+"ทั้งสายที่เกี่ยวข้อง":"Related Chain",
+"เอกสารต้นทางทั้งหมด":"Total Upstream Docs",
+"เอกสารปลายทางทั้งหมด":"Total Downstream Docs",
+"รวมทั้งสาย":"Chain Total",
+"ฉบับ":"docs",
+"จัดวางแผนผังใหม่แล้ว":"Map layout refreshed",
+"ไม่พบเอกสาร":"Document not found:",
+"ในแผนผังนี้":"in this map",
+"เลือก":"Selected",
+"เอกสาร":"documents"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>

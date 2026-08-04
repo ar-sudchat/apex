@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
+
+<title>วัตถุดิบทดแทน — APEX Circuit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838; --purple:#7a4fd3; --orange:#c25f1e; --cyan:#0e8ca8;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4; --p-amber:#fdfaef; --p-purple:#f8f4fd; --p-cyan:#f0fafd;
+  --th:#5b9fe0; --line:#edf2f8; --line-d:#d7e2ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--hdr);display:flex;align-items:stretch;height:76px;flex:none;position:sticky;top:0;z-index:100}
+.logo-tab{background:#fff;border-radius:0 0 26px 0;width:212px;display:flex;align-items:center;justify-content:center;flex:none}
+.logo-tab svg{height:46px}
+.apexlogo{height:44px;width:auto;display:block}
+
+nav{display:flex;align-items:center;gap:4px;padding:0 10px;flex:1;min-width:0;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+.mi{display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;font-size:12.5px;
+    padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:.94;cursor:pointer;transition:.2s;text-decoration:none}
+.mi:hover{background:rgba(255,255,255,.12)}
+.mi svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mi.active{background:rgba(255,255,255,.22);opacity:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#fff;padding-right:24px;flex:none}
+.user svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.user b{font-size:14.5px;font-weight:600;display:block;line-height:1.3}
+.user span{font-size:12px;opacity:.85}
+.topstrip{background:var(--strip);color:#2b567c;font-size:12.5px;text-align:right;padding:5px 24px;flex:none}
+.content{flex:1;padding:16px 20px 64px}
+footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padding:14px;flex:none}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:16px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:12.5px;color:var(--mut);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:20px;
+     border:1.5px solid var(--line-d);background:#fff;font-family:inherit;font-size:13px;
+     font-weight:500;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.1)}
+.btn-p{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.btn-p:hover{background:#3d8ad6;border-color:#3d8ad6}
+.btn-g{background:var(--green);border-color:var(--green);color:#fff}
+.btn-g:hover{background:#188542;border-color:#188542}
+.btn-s{padding:5px 12px;font-size:12px}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sel,.inp{padding:7px 11px;border:1px solid var(--line-d);border-radius:6px;background:#fff;
+     font-family:inherit;font-size:13px;color:var(--ink);outline:none}
+.sel{padding-right:30px;cursor:pointer;appearance:none;
+     background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8ea0' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+     background-repeat:no-repeat;background-position:right 10px center;background-size:10px}
+.sel:focus,.inp:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.18)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line-d);margin:0 -20px 14px;padding:0 20px}
+.tab{background:transparent;border:none;font-family:inherit;cursor:pointer;padding:11px 17px;
+     font-size:13.5px;color:var(--mut);border-bottom:2.5px solid transparent;display:flex;align-items:center;gap:7px}
+.tab:hover{background:#f6fafe}
+.tab.on{color:var(--blue);font-weight:600;background:#f6fafe;border-bottom-color:var(--hdr)}
+.tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab .bdg{background:var(--red);color:#fff;border-radius:9px;padding:0 6px;font-size:10.5px;font-weight:700}
+
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.search{position:relative}
+.search input{width:250px;padding:7px 11px 7px 32px;border:1px solid var(--line-d);border-radius:6px;
+  font-family:inherit;font-size:13px;outline:none}
+.search input:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.18)}
+.search .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mut);display:flex}
+.cnt{font-size:12.5px;color:var(--mut)} .cnt b{color:var(--blue)}
+.frow .right{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+.tw{border:1px solid var(--line-d);border-radius:6px;overflow:auto;max-height:540px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+thead th{background:var(--th);color:#fff;font-weight:600;padding:9px 11px 10px;text-align:left;white-space:nowrap;
+  position:sticky;top:0;z-index:5;border-right:1px solid rgba(255,255,255,.18);user-select:none;
+  vertical-align:top;height:52px;line-height:1.3}
+thead th.s{cursor:pointer} thead th.s:hover{background:#4f95d8}
+thead th:last-child{border-right:none}
+thead th.r{text-align:right} thead th.c{text-align:center}
+thead th small{display:block;font-weight:400;font-size:10.5px;opacity:.78;margin-top:3px;line-height:1.25}
+thead th .cbx{margin-top:1px}
+.sm{font-size:9px;margin-left:3px}
+tbody td{padding:9px 11px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+tbody td:last-child{border-right:none}
+tbody tr:hover td{background:#f7fbff}
+tbody tr.clk{cursor:pointer}
+tbody tr.sh td{background:#fdf7f7}
+tbody tr.sh:hover td{background:#fbf0f0}
+td.r{text-align:right} td.c{text-align:center}
+.mono{font-variant-numeric:tabular-nums}
+.code{font-weight:700;color:var(--blue)}
+.seq{color:#a8b6c4;font-size:12px;font-variant-numeric:tabular-nums}
+.sup{color:#4a6b86;font-size:12.5px}
+.dash{color:#c3d0dd}
+.chip{display:inline-block;padding:2px 9px;border-radius:11px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.k-ok{background:var(--p-green);color:#1a7a42} .k-no{background:var(--p-red);color:#b32b2b}
+.k-wait{background:var(--p-amber);color:#8a6a00} .k-free{background:var(--p-blue);color:var(--blue)}
+.k-cust{background:var(--p-purple);color:#54339c} .k-qa{background:var(--p-cyan);color:#0b6f87}
+.k-off{background:#eef2f6;color:#5a6b7d}
+.pri{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;
+     background:var(--p-blue);color:var(--blue);font-size:11.5px;font-weight:700}
+.pri.p1{background:var(--hdr);color:#fff}
+.ib{border:none;background:transparent;cursor:pointer;padding:4px 6px;border-radius:5px;line-height:0;vertical-align:middle}
+.ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ib-e{color:var(--blue)} .ib-e:hover{background:var(--p-blue)}
+.ib-g{color:var(--green)} .ib-g:hover{background:var(--p-green)}
+.bar{display:inline-block;width:78px;height:8px;background:#f2f6fa;border-radius:4px;overflow:hidden;vertical-align:-1px;margin-right:7px}
+.bar i{display:block;height:100%;border-radius:4px}
+.pager{display:flex;align-items:center;justify-content:space-between;padding:9px 2px 0;font-size:12.5px;color:var(--mut)}
+
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.4);z-index:200;display:flex;
+      align-items:flex-start;justify-content:center;padding:44px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:8px;box-shadow:0 14px 44px rgba(15,40,80,.3);width:90%;max-width:1240px;overflow:hidden}
+.dlg.sm{max-width:720px}
+.dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
+.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:transparent;border:none;color:#fff;font-size:21px;cursor:pointer;padding:1px 7px;border-radius:4px;font-family:inherit}
+.dlg-x:hover{background:rgba(255,255,255,.24)}
+.dlg-bd{padding:16px 18px;max-height:72vh;overflow:auto}
+.dlg-ft{padding:10px 18px;border-top:1px solid var(--line);background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:9px}
+.sect{font-size:12.5px;font-weight:700;color:#3a5773;margin:14px 0 8px;display:flex;align-items:center;gap:9px}
+.sect:first-child{margin-top:0}
+.sect small{font-weight:400;color:var(--mut);font-size:11.5px}
+.hint{background:#f5f9fd;border-left:3px solid var(--hdr);border-radius:0 6px 6px 0;padding:10px 14px;
+      font-size:12.5px;color:#4a6b86;line-height:1.65;margin-top:12px}
+.warnbox{background:#fdfaef;border:1px solid #ecdba6;border-radius:9px;padding:11px 15px;
+         font-size:12.5px;color:#8a6a00;line-height:1.6;margin-bottom:12px}
+.redbox{background:#fdf7f7;border:1px solid #f0c9c7;border-radius:9px;padding:11px 15px;
+        font-size:12.5px;color:#b32b2b;line-height:1.6;margin-bottom:12px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.mc{border:1px solid var(--line-d);border-radius:9px;padding:13px 15px}
+.mc .l{font-size:11px;color:var(--mut)}
+.mc .v{font-size:23px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.mc .u{font-size:12.5px;font-weight:400;color:var(--mut);margin-left:3px}
+.mc .s{font-size:11.5px;color:var(--mut);margin-top:2px}
+.mc-b{background:var(--p-blue);border-color:#bcdcf7} .mc-b .v{color:var(--blue)}
+.mc-r{background:var(--p-red);border-color:#f3c9c7} .mc-r .v{color:var(--red)}
+.mc-g{background:var(--p-green);border-color:#c3e8d3} .mc-g .v{color:var(--green)}
+.mc-a{background:var(--p-amber);border-color:#ecdba6} .mc-a .v{color:#a06a00}
+.chain{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12.5px;margin-bottom:12px}
+.node{border:1.5px solid var(--line-d);border-radius:8px;padding:7px 13px;background:#fff;line-height:1.4}
+.node b{color:var(--blue)} .node .m{font-size:11px;color:var(--mut)}
+.node.main{border-color:var(--hdr);background:var(--p-blue)}
+.node.gone{border-color:#f0bdbb;background:#fdf4f4} .node.gone b{color:var(--red)}
+.arw{color:var(--mut);font-size:16px}
+.up{color:var(--red);font-weight:600} .down{color:var(--green);font-weight:600}
+.toast{position:fixed;right:22px;bottom:22px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.tst{background:#0f3f8c;color:#fff;border-radius:8px;padding:11px 16px;font-size:13px;
+     box-shadow:0 6px 20px rgba(15,40,80,.28);animation:sl .2s ease-out;max-width:450px;line-height:1.55}
+.tst.ok{background:#1a7a42} .tst.warn{background:#a06a00}
+@keyframes sl{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(2,1fr)}}
+
+/* ══ เก็บรายละเอียดความสวยงามทั้งโปรแกรม ══ */
+::selection{background:#cfe6fa;color:#1a3a5c}
+:focus-visible{outline:2px solid #7FB3E0;outline-offset:2px;border-radius:6px}
+button,select,input,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#bcd0e2;background-clip:content-box}
+/* ปุ่มและช่องกรอกให้สูงเท่ากันและมุมนุ่มขึ้น */
+.btn{border-radius:20px;transition:border-color .15s,box-shadow .15s,background .15s,color .15s}
+.btn:active{transform:translateY(.5px)}
+.sel,.inp{border-radius:8px;border-color:#dfe7f0;transition:border-color .15s,box-shadow .15s}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.chip{letter-spacing:.1px}
+/* ตัวเลขทุกที่ใช้ความกว้างเท่ากัน อ่านเป็นคอลัมน์ได้ */
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed #app{min-height:100vh}
+html.embed .content{padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo-tab"><img class="apexlogo" src="data:image/png;base64,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" alt="APEX Circuit" /></div>
+    <nav>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5"/><circle cx="18.5" cy="6" r="2.5"/></svg>Administrator</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
+    </nav>
+    <div class="user">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div><b>อาทิตย์ สุดชาติ</b><span>Planner</span></div>
+    </div>
+  </header>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
+
+  <div class="content">
+    <div class="card">
+      <div class="page-head">
+        <div><div class="page-title">วัตถุดิบทดแทน</div>
+          <div class="page-sub">กำหนดตัวแทนของวัตถุดิบหลัก พร้อมลำดับ อัตราแปลง และเงื่อนไขการอนุมัติ — MRP จะหยิบไปใช้เองเมื่อของหลักไม่พอ</div></div>
+        <button class="btn btn-p" onclick="toast('เปิดฟอร์มเพิ่มคู่ทดแทนใหม่')">+ เพิ่มคู่ทดแทน</button>
+      </div>
+
+      <div class="tabs" id="tabs">
+        <button class="tab on" data-t="pair"><svg viewBox="0 0 24 24"><path d="M4 8h12l-3-3M20 16H8l3 3"/></svg>คู่วัตถุดิบทดแทน</button>
+        <button class="tab" data-t="short"><svg viewBox="0 0 24 24"><path d="M12 4l8.5 15h-17z"/><path d="M12 10v4M12 17h0"/></svg>ของขาด — หาตัวแทน<span class="bdg" id="bdgShort">0</span></button>
+        <button class="tab" data-t="log"><svg viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 8v4.5l3 1.8"/></svg>ประวัติการใช้ตัวแทน</button>
+      </div>
+
+      <!-- ═══ คู่วัตถุดิบทดแทน ═══ -->
+      <div id="p-pair">
+        <div class="frow">
+          <div class="search"><span class="si"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+            <input id="q" placeholder="ค้นหา รหัส / ชื่อ / ผู้ขาย" /></div>
+          <select class="sel" id="fGrp" style="width:185px"><option value="">ทุกกลุ่มวัตถุดิบ</option></select>
+          <select class="sel" id="fAp" style="width:210px"><option value="">ทุกเงื่อนไขอนุมัติ</option>
+            <option value="free">ใช้ได้ทันที</option><option value="qa">ต้องผ่าน QA</option>
+            <option value="cust">ต้องให้ลูกค้าอนุมัติ</option></select>
+          <select class="sel" id="fSt" style="width:175px"><option value="">ทุกสถานะ</option>
+            <option value="on">เปิดใช้งาน</option><option value="wait">รออนุมัติ</option><option value="off">ปิดใช้งาน</option></select>
+          <span class="cnt" id="cnt"></span>
+        </div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th class="c" style="width:48px">#</th>
+            <th class="s" data-s="code" style="width:150px">วัตถุดิบหลัก<span class="sm"></span></th>
+            <th style="width:240px">ชื่อวัตถุดิบหลัก</th>
+            <th style="width:130px">กลุ่ม</th>
+            <th class="c" style="width:56px">ลำดับ</th>
+            <th style="width:150px">ตัวแทน</th>
+            <th style="width:230px">ชื่อตัวแทน</th>
+            <th style="width:160px">ผู้ขายตัวแทน</th>
+            <th class="r" style="width:100px">อัตราแปลง<small>ตัวแทน : หลัก</small></th>
+            <th class="r" style="width:110px">ส่วนต่างต้นทุน</th>
+            <th class="r" style="width:120px">สต็อกตัวแทน</th>
+            <th style="width:150px">เงื่อนไขอนุมัติ</th>
+            <th class="c" style="width:115px">สถานะ</th>
+            <th class="c" style="width:64px">แก้ไข</th>
+          </tr></thead><tbody id="tbPair"></tbody></table></div>
+        <div class="pager"><span id="pgPair"></span><span>คลิกแถวเพื่อดูสายทดแทนทั้งหมดของวัตถุดิบหลัก</span></div>
+      </div>
+
+      <!-- ═══ ของขาด ═══ -->
+      <div id="p-short" style="display:none">
+        <div class="cards" id="shCards"></div>
+        <div class="frow">
+          <span class="cnt" id="shCnt"></span>
+          <div class="right">
+            <button class="btn btn-s" onclick="toast('ส่งออกรายการเป็นไฟล์ Excel')">ส่งออก Excel</button>
+            <button class="btn btn-s btn-g" onclick="applyAll()">ใช้ตัวแทนที่แนะนำทั้งหมดที่ใช้ได้ทันที</button>
+          </div>
+        </div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th class="c" style="width:48px">#</th>
+            <th style="width:150px">วัตถุดิบที่ขาด</th>
+            <th style="width:230px">ชื่อวัตถุดิบ</th>
+            <th class="c" style="width:105px">วันที่ต้องใช้</th>
+            <th class="r" style="width:110px">ต้องการ</th>
+            <th class="r" style="width:110px">คงเหลือ</th>
+            <th class="r" style="width:110px">ขาด</th>
+            <th style="width:160px">ตัวแทนที่แนะนำ</th>
+            <th style="width:150px">ครอบคลุมได้</th>
+            <th class="r" style="width:125px">ผลต่อต้นทุน</th>
+            <th style="width:150px">ต้องทำอะไรก่อน</th>
+            <th class="c" style="width:130px">ดำเนินการ</th>
+          </tr></thead><tbody id="tbShort"></tbody></table></div>
+      </div>
+
+      <!-- ═══ ประวัติ ═══ -->
+      <div id="p-log" style="display:none">
+        <div class="frow"><span class="cnt" id="lgCnt"></span></div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th class="c" style="width:48px">#</th>
+            <th style="width:145px">วันที่</th>
+            <th style="width:130px">ใบสั่งผลิต</th>
+            <th style="width:150px">ของหลัก</th>
+            <th style="width:150px">ใช้ตัวแทน</th>
+            <th class="r" style="width:120px">จำนวนที่ใช้</th>
+            <th class="r" style="width:125px">ผลต่อต้นทุน</th>
+            <th style="width:165px">ผู้อนุมัติ</th>
+            <th>เหตุผล</th>
+          </tr></thead><tbody id="tbLog"></tbody></table></div>
+      </div>
+
+    </div>
+  </div>
+  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
+</div>
+<div id="dlgRoot"></div><div class="toast" id="toast"></div>
+
+<script>
+const nf=(n,d=0)=>n==null?'—':n.toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sg=(n,d=2)=>(n>0?'+':'')+nf(n,d);
+const IC_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg>';
+
+/* ═════════ วัตถุดิบหลักของ APEX ═════════ */
+const M={
+ 'RM-CCL-S1000H':['CCL FR-4 S1000H 0.36mm 1040×1240','CCL mat','NAN YA PLASTICS','SHT',289.00],
+ 'RM-CCL-IT180A':['CCL HIGH TG IT-180A 0.51mm','CCL mat','ITEQ CORPORATION','SHT',412.00],
+ 'RM-CCL-S1150G':['CCL HALOGEN FREE S1150G','CCL mat','SHENGYI TECHNOLOGY','SHT',366.00],
+ 'RM-CCL-EM370' :['CCL EM-370(5) MID TG','CCL mat','ELITE MATERIAL','SHT',344.00],
+ 'RM-CCL-TU752' :['CCL TU-752 HIGH TG','CCL mat','TUC (TAIWAN UNION)','SHT',398.00],
+ 'RM-PP-7628'   :['PREPREG FR-4 S1000HB 7628','PP mat','SHENGYI TECHNOLOGY','ROLL',6820.00],
+ 'RM-PP-7628B'  :['PREPREG FR-4 IT-180A 7628','PP mat','ITEQ CORPORATION','ROLL',7180.00],
+ 'RM-PP-2116'   :['PREPREG FR-4 S1000HB 2116','PP mat','ITEQ CORPORATION','ROLL',7240.00],
+ 'RM-PP-2113'   :['PREPREG FR-4 2113','PP mat','DOOSAN ELECTRONICS','ROLL',7020.00],
+ 'RM-PP-1080'   :['PREPREG FR-4 1080 (บาง)','PP mat','DOOSAN ELECTRONICS','ROLL',7690.00],
+ 'RM-PP-1086'   :['PREPREG FR-4 1086','PP mat','SHENGYI TECHNOLOGY','ROLL',7420.00],
+ 'RM-CU-FOIL1'  :['COPPER FOIL 1 Oz LF/HF 1040mm','Copper mat','FURUKAWA ELECTRIC','KG',1240.00],
+ 'RM-CU-FOIL1B' :['COPPER FOIL 1 Oz RTF','Copper mat','MITSUI MINING','KG',1318.00],
+ 'RM-CU-FOIL1C' :['COPPER FOIL 1 Oz HTE (จีน)','Copper mat','NINGBO JINTIAN','KG',1096.00],
+ 'RM-CU-FOIL05' :['COPPER FOIL 0.5 Oz HTE','Copper mat','MITSUI MINING','KG',1385.00],
+ 'RM-CU-FOIL05B':['COPPER FOIL 0.5 Oz LP','Copper mat','FURUKAWA ELECTRIC','KG',1462.00],
+ 'RM-CU-ANODE'  :['COPPER ANODE Micrograin Ø50','Copper mat','NIKKO METALS','KG',428.00],
+ 'RM-CU-ANODE-B':['COPPER ANODE Phosphorized Ø50','Copper mat','MITSUBISHI MATERIALS','KG',441.00],
+ 'RM-AU-SALT'   :['GOLD SALT KAu(CN)2','Precious metal','TANAKA KIKINZOKU','KG',64220.00],
+ 'RM-AU-SALT-B' :['GOLD SALT KAu(CN)2 (Metalor)','Precious metal','METALOR TECHNOLOGIES','KG',65840.00],
+ 'RM-NM-SM-GRN' :['SOLDER MASK Green HF/LF (2K)','Non-market mat','TAIYO INK MFG.','KG',1850.00],
+ 'RM-NM-SM-GRN2':['SOLDER MASK Green PSR-4000','Non-market mat','GOO CHEMICAL','KG',1742.00],
+ 'RM-NM-DF'     :['DRY FILM E9415DI 1.5 MIL','Non-market mat','ASAHI KASEI','ROLL',4120.00],
+ 'RM-NM-DF-B'   :['DRY FILM RY-3625 1.5 MIL','Non-market mat','HITACHI CHEMICAL','ROLL',3960.00],
+ 'RM-AL-MVC'    :['ALUMINUM SHEET MVC-1240 0.15mm','AL mat','UACJ (THAILAND)','SHT',38.00],
+ 'RM-AL-MVC-B'  :['ALUMINUM SHEET 0.15mm (ในประเทศ)','AL mat','THAI METAL ALUMINIUM','SHT',34.50],
+ 'PKG-CTN-A4'   :['CARTON BOX A4 Double Wall','Packaging mat','THAI CONTAINERS GROUP','SET',42.50],
+ 'PKG-CTN-A4-B' :['CARTON BOX A4 Double Wall (ผู้ขายสำรอง)','Packaging mat','SCG PACKAGING','SET',44.80],
+};
+const STOCK={
+ 'RM-CCL-EM370':3820,'RM-CCL-TU752':1450,'RM-CCL-S1150G':6240,'RM-CCL-IT180A':4180,
+ 'RM-PP-7628B':92,'RM-PP-2113':64,'RM-PP-1086':38,'RM-PP-2116':118,
+ 'RM-CU-FOIL1B':640,'RM-CU-FOIL1C':1180,'RM-CU-FOIL05B':320,'RM-CU-FOIL05':890,
+ 'RM-CU-ANODE-B':760,'RM-AU-SALT-B':2.8,'RM-NM-SM-GRN2':410,'RM-NM-DF-B':86,
+ 'RM-AL-MVC-B':7200,'PKG-CTN-A4-B':2600,'RM-CCL-S1000H':5100,'RM-PP-7628':64,
+ 'RM-CU-FOIL1':420,'RM-AU-SALT':1.9,'RM-NM-SM-GRN':280,'RM-NM-DF':44,'RM-AL-MVC':9800,
+ 'PKG-CTN-A4':3400,'RM-CU-ANODE':1520,
+};
+/* คู่ทดแทน: [หลัก, ตัวแทน, ลำดับ, อัตราแปลง, เงื่อนไขอนุมัติ, สถานะ, หมายเหตุ] */
+const AP={free:['ใช้ได้ทันที','k-free'],qa:['ต้องผ่าน QA','k-qa'],cust:['ต้องให้ลูกค้าอนุมัติ','k-cust']};
+const ST={on:['เปิดใช้งาน','k-ok'],wait:['รออนุมัติ','k-wait'],off:['ปิดใช้งาน','k-off']};
+const PAIRS=[
+ ['RM-CCL-S1000H','RM-CCL-EM370',1,1.000,'qa','on','ผ่านทดสอบ Tg และ peel strength แล้ว'],
+ ['RM-CCL-S1000H','RM-CCL-S1150G',2,1.000,'cust','on','Halogen free ลูกค้ากลุ่มยานยนต์ต้องอนุมัติก่อน'],
+ ['RM-CCL-S1000H','RM-CCL-TU752',3,1.000,'cust','wait','อยู่ระหว่างส่งตัวอย่างให้ลูกค้า'],
+ ['RM-CCL-IT180A','RM-CCL-TU752',1,1.000,'qa','on','Tg เทียบเท่า 170–180°C'],
+ ['RM-CCL-IT180A','RM-CCL-S1150G',2,1.000,'cust','on','ต้องแจ้งลูกค้าล่วงหน้า 1 รอบผลิต'],
+ ['RM-CCL-S1150G','RM-CCL-EM370',1,1.000,'cust','off','ลูกค้าปฏิเสธเมื่อ มี.ค. 2569 — เก็บไว้อ้างอิง'],
+ ['RM-PP-7628','RM-PP-7628B',1,1.000,'free','on','สเปกเดียวกัน ต่างผู้ขาย'],
+ ['RM-PP-7628','RM-PP-2113',2,1.320,'qa','on','ผ้าบางกว่า ต้องเพิ่มจำนวนชั้น'],
+ ['RM-PP-2116','RM-PP-2113',1,1.080,'qa','on','ความหนาต่างกัน 8%'],
+ ['RM-PP-2116','RM-PP-1086',2,1.450,'qa','wait','รอผลทดสอบ delamination'],
+ ['RM-PP-1080','RM-PP-1086',1,1.060,'free','on','ผู้ขายรับรองว่าใช้แทนกันได้'],
+ ['RM-CU-FOIL1','RM-CU-FOIL1B',1,1.000,'free','on','RTF ผิวหยาบกว่า ใช้ได้ทุกงาน'],
+ ['RM-CU-FOIL1','RM-CU-FOIL1C',2,1.000,'cust','on','ผู้ขายจีน ลูกค้าญี่ปุ่นต้องอนุมัติ'],
+ ['RM-CU-FOIL05','RM-CU-FOIL05B',1,1.000,'free','on','LP ใช้แทนได้ทุกกรณี'],
+ ['RM-CU-FOIL05','RM-CU-FOIL1',2,0.500,'qa','on','ใช้ 1 Oz แทนแล้วกัดลดความหนา — เปลืองขึ้น'],
+ ['RM-CU-ANODE','RM-CU-ANODE-B',1,1.000,'free','on','ทดแทนได้เต็มรูปแบบ'],
+ ['RM-AU-SALT','RM-AU-SALT-B',1,1.000,'qa','on','ความบริสุทธิ์เทียบเท่า 99.99%'],
+ ['RM-NM-SM-GRN','RM-NM-SM-GRN2',1,1.040,'cust','on','เฉดสีต่างเล็กน้อย ต้องส่ง swatch ให้ลูกค้า'],
+ ['RM-NM-DF','RM-NM-DF-B',1,1.000,'qa','on','ความหนาเท่ากัน 1.5 MIL'],
+ ['RM-AL-MVC','RM-AL-MVC-B',1,1.000,'free','on','ใช้เป็นแผ่นรองเจาะ ไม่ติดกับชิ้นงาน'],
+ ['PKG-CTN-A4','PKG-CTN-A4-B',1,1.000,'free','on','ขนาดเดียวกัน'],
+];
+/* ของขาดจากการรัน MRP รอบล่าสุด */
+const SHORT=[
+ {c:'RM-PP-7628',   need:118, on:64,   date:'11-08-2026', wo:'WO-26080142'},
+ {c:'RM-CU-FOIL1',  need:760, on:420,  date:'14-08-2026', wo:'WO-26080155'},
+ {c:'RM-AU-SALT',   need:3.4, on:1.9,  date:'09-08-2026', wo:'WO-26080131'},
+ {c:'RM-NM-DF',     need:96,  on:44,   date:'18-08-2026', wo:'WO-26080168'},
+ {c:'RM-CCL-S1000H',need:8600,on:5100, date:'21-08-2026', wo:'WO-26080177'},
+ {c:'RM-NM-SM-GRN', need:520, on:280,  date:'12-08-2026', wo:'WO-26080149'},
+ {c:'RM-CU-FOIL05', need:1240,on:890,  date:'25-08-2026', wo:'WO-26080184'},
+ {c:'RM-PP-2116',   need:186, on:118,  date:'16-08-2026', wo:'WO-26080161'},
+];
+const LOG=[
+ ['02-08-2026 09:14','WO-26070921','RM-PP-7628','RM-PP-7628B',48,'ระบบอัตโนมัติ','ของหลักไม่พอ ตัวแทนใช้ได้ทันที'],
+ ['30-07-2026 15:47','WO-26070884','RM-CU-FOIL1','RM-CU-FOIL1C',280,'สมชาย ว. (QA) · ลูกค้า SEMCO','ผู้ขายหลักส่งช้า 12 วัน'],
+ ['28-07-2026 11:02','WO-26070851','RM-NM-DF','RM-NM-DF-B',62,'ปรีชา ก. (QA)','Dry film ล็อตหลักไม่ผ่าน incoming'],
+ ['24-07-2026 08:33','WO-26070812','RM-CCL-S1000H','RM-CCL-EM370',2400,'สมชาย ว. (QA)','เร่งงานให้ทัน ETD ลูกค้า'],
+ ['19-07-2026 14:20','WO-26070764','RM-AU-SALT','RM-AU-SALT-B',0.9,'ปรีชา ก. (QA)','ทองล็อตหลักหมด รอของ 3 สัปดาห์'],
+ ['15-07-2026 10:55','WO-26070722','RM-PP-2116','RM-PP-2113',72,'สมชาย ว. (QA)','ปรับจำนวนชั้นตามอัตราแปลง'],
+ ['11-07-2026 16:08','WO-26070688','RM-AL-MVC','RM-AL-MVC-B',3200,'ระบบอัตโนมัติ','ของหลักไม่พอ ตัวแทนใช้ได้ทันที'],
+ ['08-07-2026 09:41','WO-26070641','PKG-CTN-A4','PKG-CTN-A4-B',900,'ระบบอัตโนมัติ','ของหลักไม่พอ ตัวแทนใช้ได้ทันที'],
+];
+/* ผลต่อต้นทุนของแต่ละครั้ง คิดจากอัตราแปลงและราคาปัจจุบัน — บวก = ต้นทุนเพิ่ม */
+const logImp=l=>{const p=PAIRS.find(x=>x[0]===l[2]&&x[1]===l[3]);
+  return l[4]*diff(l[2],l[3],p?p[3]:1);};
+
+const g=id=>document.getElementById(id);
+const nm=c=>M[c]?M[c][0]:c, grp=c=>M[c]?M[c][1]:'—', sup=c=>M[c]?M[c][2]:'—',
+      un=c=>M[c]?M[c][3]:'', pr=c=>M[c]?M[c][4]:0, stk=c=>STOCK[c]??0;
+function toast(m,c=''){const d=document.createElement('div');d.className='tst '+c;d.innerHTML=m;
+  g('toast').appendChild(d);setTimeout(()=>d.remove(),4200);}
+/* ส่วนต่างต้นทุนต่อ 1 หน่วยของหลัก = ราคาตัวแทน × อัตราแปลง − ราคาหลัก */
+const diff=(main,sub,ratio)=>pr(sub)*ratio-pr(main);
+
+/* ═════════ แท็บ 1 : คู่ทดแทน ═════════ */
+let fq='',fg='',fa='',fst='',sortD=1;
+[...new Set(Object.values(M).map(x=>x[1]))].forEach(x=>g('fGrp').add(new Option(x,x)));
+function pairList(){
+  let l=PAIRS.slice();
+  if(fg)l=l.filter(p=>grp(p[0])===fg);
+  if(fa)l=l.filter(p=>p[4]===fa);
+  if(fst)l=l.filter(p=>p[5]===fst);
+  if(fq){const q=fq.toLowerCase();
+    l=l.filter(p=>(p[0]+' '+p[1]+' '+nm(p[0])+' '+nm(p[1])+' '+sup(p[1])).toLowerCase().includes(q));}
+  return l.sort((a,b)=>(a[0].localeCompare(b[0])*sortD)||a[2]-b[2]);
+}
+function renderPair(){
+  const l=pairList();
+  g('tbPair').innerHTML=l.length?l.map((p,i)=>{
+    const [mc,sc,pri,ratio,ap,st]=p, d=diff(mc,sc,ratio), s=stk(sc);
+    return `<tr class="clk" onclick="openChain('${mc}')">
+      <td class="c seq">${i+1}</td>
+      <td><span class="code">${mc}</span></td>
+      <td>${nm(mc)}</td>
+      <td>${grp(mc)}</td>
+      <td class="c"><span class="pri ${pri===1?'p1':''}">${pri}</span></td>
+      <td><span class="code">${sc}</span></td>
+      <td>${nm(sc)}</td>
+      <td class="sup">${sup(sc)}</td>
+      <td class="r mono">${ratio.toFixed(3)}</td>
+      <td class="r mono ${Math.abs(d)<0.005?'dash':(d>0?'up':'down')}">${Math.abs(d)<0.005?'เท่ากัน':sg(d)}</td>
+      <td class="r mono ${s?'':'dash'}">${s?nf(s)+' '+un(sc):'ไม่มีของ'}</td>
+      <td><span class="chip ${AP[ap][1]}">${AP[ap][0]}</span></td>
+      <td class="c"><span class="chip ${ST[st][1]}">${ST[st][0]}</span></td>
+      <td class="c"><button class="ib ib-e" title="แก้ไขคู่ทดแทน"
+        onclick="event.stopPropagation();openEditPair('${mc}','${sc}')">${IC_EDIT}</button></td>
+    </tr>`;}).join('') : `<tr><td colspan="14" style="text-align:center;padding:36px;color:var(--mut)">ไม่พบคู่ทดแทนตามเงื่อนไข</td></tr>`;
+  const mains=new Set(l.map(p=>p[0]));
+  g('cnt').innerHTML=`<b>${l.length}</b> คู่ · ครอบคลุมวัตถุดิบหลัก <b>${mains.size}</b> รายการ`;
+  g('pgPair').textContent=`แสดง 1–${l.length} จาก ${l.length} คู่`;
+}
+g('q').addEventListener('input',e=>{fq=e.target.value.trim();renderPair();});
+g('fGrp').onchange=e=>{fg=e.target.value;renderPair();};
+g('fAp').onchange=e=>{fa=e.target.value;renderPair();};
+g('fSt').onchange=e=>{fst=e.target.value;renderPair();};
+document.querySelector('th[data-s="code"]').onclick=function(){sortD=-sortD;
+  this.querySelector('.sm').textContent=sortD>0?'▲':'▼';renderPair();};
+
+/* ═════════ แท็บ 2 : ของขาด ═════════ */
+const APPLIED=new Set();
+function best(code){
+  return PAIRS.filter(p=>p[0]===code&&p[5]==='on'&&stk(p[1])>0).sort((a,b)=>a[2]-b[2])[0]||null;
+}
+function shortRow(s){
+  const gap=s.need-s.on, b=best(s.c);
+  if(!b) return {...s,gap,sub:null,cov:0,cost:0,ap:null};
+  const avail=stk(b[1])/b[3];                 /* แปลงกลับเป็นหน่วยของหลัก */
+  const cov=Math.min(gap,avail);
+  return {...s,gap,sub:b[1],ratio:b[3],ap:b[4],cov,pct:cov/gap*100,cost:cov*diff(s.c,b[1],b[3])};
+}
+function renderShort(){
+  const L=SHORT.map(shortRow);
+  const full=L.filter(x=>x.sub&&x.pct>=99.5).length;
+  const part=L.filter(x=>x.sub&&x.pct<99.5&&x.pct>0).length;
+  const none=L.filter(x=>!x.sub||x.pct<=0).length;
+  const cost=L.reduce((a,x)=>a+x.cost,0);
+  g('shCards').innerHTML=`
+   <div class="mc mc-r"><div class="l">รายการที่ขาด</div><div class="v">${L.length}</div>
+     <div class="s">จากการรัน MRP วันที่ 03-08-2026</div></div>
+   <div class="mc mc-g"><div class="l">มีตัวแทนครอบคลุมเต็ม</div><div class="v">${full}</div>
+     <div class="s">ปิดช่องว่างได้ทั้งจำนวน</div></div>
+   <div class="mc mc-a"><div class="l">ครอบคลุมได้บางส่วน</div><div class="v">${part}</div>
+     <div class="s">ยังต้องซื้อเพิ่มส่วนที่เหลือ</div></div>
+   <div class="mc ${cost>0?'mc-r':'mc-b'}"><div class="l">ผลต่อต้นทุนรวม</div>
+     <div class="v">${sg(cost,0)}<span class="u">฿</span></div>
+     <div class="s">${none?none+' รายการยังไม่มีตัวแทน':'ทุกรายการมีตัวแทน'}</div></div>`;
+  g('bdgShort').textContent=L.length;
+  g('shCnt').innerHTML=`<b>${L.length}</b> รายการขาด · ปิดได้ด้วยตัวแทน <b>${full+part}</b> รายการ`;
+  g('tbShort').innerHTML=L.map((x,i)=>{
+    const done=APPLIED.has(x.c);
+    const col=x.pct>=99.5?'var(--green)':(x.pct>0?'var(--amber)':'var(--red)');
+    return `<tr class="${x.sub?'':'sh'}">
+      <td class="c seq">${i+1}</td>
+      <td><span class="code">${x.c}</span></td>
+      <td>${nm(x.c)}</td>
+      <td class="c mono">${x.date}</td>
+      <td class="r mono">${nf(x.need,x.need<10?1:0)}</td>
+      <td class="r mono" style="color:var(--mut)">${nf(x.on,x.on<10?1:0)}</td>
+      <td class="r mono" style="color:var(--red);font-weight:700">${nf(x.gap,x.gap<10?1:0)}</td>
+      <td>${x.sub?`<span class="code">${x.sub}</span><span style="color:var(--mut);font-size:11.5px"> ×${x.ratio.toFixed(2)}</span>`:'<span class="dash">ไม่มีตัวแทนพร้อมใช้</span>'}</td>
+      <td>${x.sub?`<span class="bar"><i style="width:${Math.min(100,x.pct)}%;background:${col}"></i></span>
+        <span class="mono" style="font-size:12px">${nf(x.pct,0)}%</span>`:'<span class="dash">—</span>'}</td>
+      <td class="r mono ${x.cost>0.5?'up':(x.cost<-0.5?'down':'dash')}">${Math.abs(x.cost)<0.5?'—':sg(x.cost,0)}</td>
+      <td>${x.sub?`<span class="chip ${AP[x.ap][1]}">${AP[x.ap][0]}</span>`:'<span class="dash">ต้องเร่งซื้อ</span>'}</td>
+      <td class="c">${x.sub
+        ? (done?'<span class="chip k-ok">ใช้ตัวแทนแล้ว</span>'
+              :`<button class="btn btn-s ${x.ap==='free'?'btn-g':''}" onclick="openApply('${x.c}')">${x.ap==='free'?'ใช้ตัวแทน':'ขออนุมัติ'}</button>`)
+        : `<button class="btn btn-s" onclick="toast('ส่งคำขอเร่งซื้อ ${x.c} ให้ฝ่ายจัดซื้อแล้ว','ok')">เร่งซื้อ</button>`}</td>
+    </tr>`;}).join('');
+}
+function applyAll(){
+  const t=SHORT.map(shortRow).filter(x=>x.sub&&x.ap==='free'&&!APPLIED.has(x.c));
+  if(!t.length) return toast('ไม่มีรายการที่ใช้ตัวแทนได้ทันทีเหลืออยู่','warn');
+  t.forEach(x=>APPLIED.add(x.c));
+  renderShort();
+  toast(`ใช้ตัวแทนกับ ${t.length} รายการแล้ว<br>
+    <span style="opacity:.85;font-size:12px">รายการที่ต้องผ่าน QA หรือให้ลูกค้าอนุมัติ ระบบไม่แตะต้อง ต้องกดขออนุมัติทีละรายการ</span>`,'ok');
+}
+function openApply(code){
+  const x=shortRow(SHORT.find(s=>s.c===code));
+  const free=x.ap==='free';
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg sm">
+    <div class="dlg-hd"><h3>${free?'ยืนยันการใช้วัตถุดิบทดแทน':'ขออนุมัติใช้วัตถุดิบทดแทน'}
+      <small>${x.wo} · ต้องใช้ ${x.date}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="chain">
+        <span class="node gone"><b>${x.c}</b><div class="m">${nm(x.c)}</div>
+          <div class="m">ขาด ${nf(x.gap,x.gap<10?1:0)} ${un(x.c)}</div></span>
+        <span class="arw">→</span>
+        <span class="node main"><b>${x.sub}</b><div class="m">${nm(x.sub)}</div>
+          <div class="m">มีของ ${nf(stk(x.sub),stk(x.sub)<10?1:0)} ${un(x.sub)}</div></span>
+      </div>
+      ${free?'':`<div class="warnbox"><b>${AP[x.ap][0]}</b> — ระบบจะสร้างคำขออนุมัติ
+        และยังไม่เปลี่ยน BOM ของใบสั่งผลิตจนกว่าจะได้รับอนุมัติ</div>`}
+      <div class="tw" style="max-height:none"><table>
+        <thead><tr><th class="c" style="width:48px">#</th><th>รายการ</th><th class="r" style="width:200px">ค่า</th></tr></thead>
+        <tbody>
+          <tr><td class="c seq">1</td><td>จำนวนที่ขาด</td><td class="r mono">${nf(x.gap,x.gap<10?1:0)} ${un(x.c)}</td></tr>
+          <tr><td class="c seq">2</td><td>อัตราแปลง (ตัวแทน : หลัก)</td><td class="r mono">${x.ratio.toFixed(3)}</td></tr>
+          <tr><td class="c seq">3</td><td>ต้องใช้ตัวแทน</td><td class="r mono">${nf(x.gap*x.ratio,x.gap<10?2:0)} ${un(x.sub)}</td></tr>
+          <tr><td class="c seq">4</td><td>สต็อกตัวแทนคงเหลือ</td><td class="r mono">${nf(stk(x.sub),stk(x.sub)<10?1:0)} ${un(x.sub)}</td></tr>
+          <tr><td class="c seq">5</td><td>ปิดช่องว่างได้</td>
+            <td class="r mono" style="font-weight:700;color:${x.pct>=99.5?'var(--green)':'#a06a00'}">${nf(x.pct,0)}%</td></tr>
+          <tr><td class="c seq">6</td><td>ผลต่อต้นทุนใบสั่งผลิตนี้</td>
+            <td class="r mono ${x.cost>0?'up':'down'}" style="font-weight:700">${sg(x.cost,0)} ฿</td></tr>
+        </tbody></table></div>
+      ${x.pct<99.5?`<div class="redbox" style="margin-top:12px">ตัวแทนปิดช่องว่างได้ไม่ครบ
+        ส่วนที่เหลือ ${nf(x.gap-x.cov,1)} ${un(x.c)} ยังต้องเร่งซื้อของหลัก</div>`:''}
+      <div class="hint">ระบบจะบันทึกการใช้ตัวแทนลงประวัติพร้อมผู้อนุมัติและเหตุผล
+        และส่งผลต่างต้นทุนเข้าไปคิดในต้นทุนจริงของใบสั่งผลิตนี้</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">${nm(x.c)} → ${nm(x.sub)}</span>
+      <span><button class="btn" onclick="closeDlg()">ยกเลิก</button>
+      <button class="btn ${free?'btn-g':'btn-p'}" onclick="doApply('${x.c}',${free})">${free?'ยืนยันใช้ตัวแทน':'ส่งคำขออนุมัติ'}</button></span></div>
+  </div></div>`;
+}
+function doApply(code,free){
+  closeDlg();
+  if(free){APPLIED.add(code);renderShort();
+    toast(`ใช้ตัวแทนแทน ${code} เรียบร้อย — บันทึกลงประวัติแล้ว`,'ok');}
+  else toast(`ส่งคำขออนุมัติใช้ตัวแทนแทน ${code} แล้ว รอผลจาก QA / ลูกค้า`,'warn');
+}
+
+/* ═════════ Dialog: สายทดแทน ═════════ */
+function openChain(mc){
+  const subs=PAIRS.filter(p=>p[0]===mc).sort((a,b)=>a[2]-b[2]);
+  const used=LOG.filter(l=>l[2]===mc);
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><h3>สายวัตถุดิบทดแทน — ${mc}
+      <small>${nm(mc)} · ${grp(mc)} · ผู้ขายหลัก ${sup(mc)} · ราคา ${nf(pr(mc),2)} ฿/${un(mc)}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="chain">
+        <span class="node main"><b>${mc}</b><div class="m">ของหลัก · คงเหลือ ${nf(stk(mc),stk(mc)<10?1:0)} ${un(mc)}</div></span>
+        ${subs.map(p=>`<span class="arw">→</span>
+          <span class="node ${p[5]==='on'?'':'gone'}"><b>${p[1]}</b>
+            <div class="m">ลำดับ ${p[2]} · ${ST[p[5]][0]} · คงเหลือ ${nf(stk(p[1]),stk(p[1])<10?1:0)} ${un(p[1])}</div></span>`).join('')}
+      </div>
+      <div class="sect">ตัวแทนทั้งหมด <small>MRP จะไล่ตามลำดับจากน้อยไปมาก และข้ามตัวที่ปิดใช้งานหรือไม่มีของ</small></div>
+      <div class="tw" style="max-height:none"><table>
+        <thead><tr><th class="c" style="width:48px">#</th><th class="c" style="width:60px">ลำดับ</th>
+          <th style="width:150px">รหัส</th><th style="width:250px">ชื่อ</th><th style="width:170px">ผู้ขาย</th>
+          <th class="r" style="width:105px">ราคา (฿)</th><th class="r" style="width:95px">อัตราแปลง</th>
+          <th class="r" style="width:120px">ส่วนต่างต้นทุน</th><th class="r" style="width:120px">คงเหลือ</th>
+          <th style="width:150px">เงื่อนไขอนุมัติ</th><th class="c" style="width:110px">สถานะ</th></tr></thead>
+        <tbody>
+          <tr style="background:#f5f9fd">
+            <td class="c seq">—</td><td class="c"><span class="pri p1">หลัก</span></td>
+            <td><span class="code">${mc}</span></td><td>${nm(mc)}</td><td class="sup">${sup(mc)}</td>
+            <td class="r mono">${nf(pr(mc),2)}</td><td class="r mono">1.000</td>
+            <td class="r dash">ฐาน</td><td class="r mono">${nf(stk(mc),stk(mc)<10?1:0)}</td>
+            <td class="dash">—</td><td class="c"><span class="chip k-ok">ของหลัก</span></td></tr>
+          ${subs.map((p,i)=>{const d=diff(mc,p[1],p[3]);
+            return `<tr><td class="c seq">${i+1}</td><td class="c"><span class="pri">${p[2]}</span></td>
+            <td><span class="code">${p[1]}</span></td><td>${nm(p[1])}
+              <div style="font-size:11px;color:var(--mut);white-space:normal">${p[6]}</div></td>
+            <td class="sup">${sup(p[1])}</td>
+            <td class="r mono">${nf(pr(p[1]),2)}</td><td class="r mono">${p[3].toFixed(3)}</td>
+            <td class="r mono ${Math.abs(d)<0.005?'dash':(d>0?'up':'down')}">${Math.abs(d)<0.005?'เท่ากัน':sg(d)}</td>
+            <td class="r mono ${stk(p[1])?'':'dash'}">${stk(p[1])?nf(stk(p[1]),stk(p[1])<10?1:0):'ไม่มีของ'}</td>
+            <td><span class="chip ${AP[p[4]][1]}">${AP[p[4]][0]}</span></td>
+            <td class="c"><span class="chip ${ST[p[5]][1]}">${ST[p[5]][0]}</span></td></tr>`;}).join('')}
+        </tbody></table></div>
+      <div class="sect">เคยใช้จริง <small>ดึงจากประวัติการใช้ตัวแทน</small></div>
+      ${used.length?`<div class="tw" style="max-height:none"><table>
+        <thead><tr><th class="c" style="width:48px">#</th><th style="width:150px">วันที่</th>
+          <th style="width:140px">ใบสั่งผลิต</th><th style="width:160px">ใช้ตัวแทน</th>
+          <th class="r" style="width:120px">จำนวน</th><th class="r" style="width:125px">ผลต่อต้นทุน</th>
+          <th style="width:200px">ผู้อนุมัติ</th><th>เหตุผล</th></tr></thead>
+        <tbody>${used.map((l,i)=>{const im=logImp(l);
+          return `<tr><td class="c seq">${i+1}</td><td class="mono">${l[0]}</td>
+          <td><span class="code">${l[1]}</span></td><td><span class="code">${l[3]}</span></td>
+          <td class="r mono">${nf(l[4],l[4]<10?1:0)}</td>
+          <td class="r mono ${im>0.5?'up':(im<-0.5?'down':'dash')}">${Math.abs(im)<0.5?'—':sg(im,0)}</td>
+          <td class="sup">${l[5]}</td><td style="color:#4a6b86">${l[6]}</td></tr>`;}).join('')}</tbody></table></div>`
+        :`<div style="border:1px solid var(--line-d);border-radius:9px;padding:26px;text-align:center;color:var(--mut)">
+           ยังไม่เคยใช้ตัวแทนของวัตถุดิบนี้</div>`}
+      <div class="hint">อัตราแปลงคือจำนวนตัวแทนที่ต้องใช้ต่อของหลัก 1 หน่วย
+        เช่น 1.320 หมายถึงใช้ตัวแทน 1.32 หน่วยแทนของหลัก 1 หน่วย — ส่วนต่างต้นทุนคำนวณจากอัตรานี้แล้ว</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
+      ${subs.length} ตัวแทน · เปิดใช้งาน ${subs.filter(p=>p[5]==='on').length} · เคยใช้จริง ${used.length} ครั้ง</span>
+      <span><button class="btn">Excel</button><button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
+  </div></div>`;
+}
+function openEditPair(mc,sc){
+  const p=PAIRS.find(x=>x[0]===mc&&x[1]===sc);
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg sm">
+    <div class="dlg-hd"><h3>แก้ไขคู่วัตถุดิบทดแทน<small>${mc} → ${sc}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="chain">
+        <span class="node main"><b>${mc}</b><div class="m">${nm(mc)}</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>${sc}</b><div class="m">${nm(sc)}</div></span>
+      </div>
+      <div class="tw" style="max-height:none"><table>
+        <thead><tr><th class="c" style="width:48px">#</th><th style="width:190px">ค่า</th><th>กำหนด</th></tr></thead>
+        <tbody>
+          <tr><td class="c seq">1</td><td>ลำดับความสำคัญ</td>
+            <td><input class="inp" id="epPri" type="number" value="${p[2]}" style="width:90px" />
+              <span style="color:var(--mut);font-size:12px;margin-left:8px">เลขน้อย = หยิบก่อน</span></td></tr>
+          <tr><td class="c seq">2</td><td>อัตราแปลง (ตัวแทน : หลัก)</td>
+            <td><input class="inp" id="epRat" type="number" step="0.001" value="${p[3].toFixed(3)}" style="width:110px" />
+              <span style="color:var(--mut);font-size:12px;margin-left:8px">ตัวแทนกี่ ${un(sc)} ต่อของหลัก 1 ${un(mc)}</span></td></tr>
+          <tr><td class="c seq">3</td><td>เงื่อนไขอนุมัติ</td>
+            <td><select class="sel" id="epAp" style="width:220px">
+              ${Object.entries(AP).map(([k,v])=>`<option value="${k}" ${p[4]===k?'selected':''}>${v[0]}</option>`).join('')}
+            </select></td></tr>
+          <tr><td class="c seq">4</td><td>สถานะ</td>
+            <td><select class="sel" id="epSt" style="width:180px">
+              ${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${p[5]===k?'selected':''}>${v[0]}</option>`).join('')}
+            </select></td></tr>
+          <tr><td class="c seq">5</td><td>หมายเหตุ</td>
+            <td><input class="inp" id="epNote" value="${p[6]}" style="width:100%" /></td></tr>
+        </tbody></table></div>
+      <div class="hint">เปลี่ยนลำดับแล้ว MRP รอบถัดไปจะหยิบตัวแทนตามลำดับใหม่ทันที
+        ส่วนใบสั่งผลิตที่ออกไปแล้วจะไม่ถูกแก้ย้อนหลัง</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">${nm(mc)} → ${nm(sc)}</span>
+      <span><button class="btn" onclick="closeDlg()">ยกเลิก</button>
+      <button class="btn btn-p" onclick="savePair('${mc}','${sc}')">บันทึก</button></span></div>
+  </div></div>`;
+}
+function savePair(mc,sc){
+  const p=PAIRS.find(x=>x[0]===mc&&x[1]===sc);
+  p[2]=+g('epPri').value; p[3]=+g('epRat').value;
+  p[4]=g('epAp').value; p[5]=g('epSt').value; p[6]=g('epNote').value;
+  closeDlg(); renderPair(); renderShort();
+  toast(`บันทึกคู่ทดแทน ${mc} → ${sc} แล้ว`,'ok');
+}
+function closeDlg(){g('dlgRoot').innerHTML='';}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
+
+/* ═════════ แท็บ 3 : ประวัติ ═════════ */
+function renderLog(){
+  const tot=LOG.reduce((a,l)=>a+logImp(l),0);
+  g('lgCnt').innerHTML=`<b>${LOG.length}</b> ครั้งใน 30 วันล่าสุด ·
+    ผลต่อต้นทุนรวม <b style="color:${tot>0?'var(--red)':'var(--green)'}">${sg(tot,0)} ฿</b>`;
+  g('tbLog').innerHTML=LOG.map((l,i)=>{const im=logImp(l);
+    return `<tr>
+    <td class="c seq">${i+1}</td><td class="mono">${l[0]}</td>
+    <td><span class="code">${l[1]}</span></td>
+    <td><span class="code">${l[2]}</span></td>
+    <td><span class="code">${l[3]}</span></td>
+    <td class="r mono">${nf(l[4],l[4]<10?1:0)} ${un(l[2])}</td>
+    <td class="r mono ${im>0.5?'up':(im<-0.5?'down':'dash')}">${Math.abs(im)<0.5?'—':sg(im,0)}</td>
+    <td class="sup">${l[5]}</td>
+    <td style="color:#4a6b86;white-space:normal">${l[6]}</td></tr>`;}).join('');
+}
+
+g('tabs').onclick=e=>{const b=e.target.closest('.tab'); if(!b)return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+  ['pair','short','log'].forEach(t=>g('p-'+t).style.display=t===b.dataset.t?'':'none');};
+renderPair(); renderShort(); renderLog();
+</script>
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"วัตถุดิบทดแทน — APEX Circuit":"Substitute Materials — APEX Circuit",
+"วัตถุดิบทดแทน":"Substitute Materials",
+"อาทิตย์ สุดชาติ":"Arthit Sudchat",
+"กำหนดตัวแทนของวัตถุดิบหลัก พร้อมลำดับ อัตราแปลง และเงื่อนไขการอนุมัติ — MRP จะหยิบไปใช้เองเมื่อของหลักไม่พอ":"Define substitutes for each primary material with priority, conversion ratio, and approval conditions — MRP applies them automatically when the primary runs short",
+"เปิดฟอร์มเพิ่มคู่ทดแทนใหม่":"Opening form to add a new substitute pair",
+"+ เพิ่มคู่ทดแทน":"+ Add Substitute Pair",
+"คู่วัตถุดิบทดแทน":"Substitute Material Pairs",
+"ของขาด — หาตัวแทน":"Shortages — Find Substitutes",
+"ประวัติการใช้ตัวแทน":"Substitute Usage History",
+"ค้นหา รหัส / ชื่อ / ผู้ขาย":"Search code / name / supplier",
+"ทุกกลุ่มวัตถุดิบ":"All Material Groups",
+"ทุกเงื่อนไขอนุมัติ":"All Approval Conditions",
+"ใช้ได้ทันที":"Ready to Use",
+"ต้องผ่าน QA":"QA Approval Required",
+"ต้องให้ลูกค้าอนุมัติ":"Customer Approval Required",
+"ทุกสถานะ":"All Statuses",
+"เปิดใช้งาน":"Active",
+"รออนุมัติ":"Pending Approval",
+"ปิดใช้งาน":"Inactive",
+"วัตถุดิบหลัก":"Primary Material",
+"ชื่อวัตถุดิบหลัก":"Primary Material Name",
+"กลุ่ม":"Group",
+"ลำดับ":"Priority",
+"ตัวแทน":"Substitute",
+"ชื่อตัวแทน":"Substitute Name",
+"ผู้ขายตัวแทน":"Substitute Supplier",
+"อัตราแปลง":"Conversion Ratio",
+"ตัวแทน : หลัก":"sub : primary",
+"ส่วนต่างต้นทุน":"Cost Difference",
+"สต็อกตัวแทน":"Substitute Stock",
+"เงื่อนไขอนุมัติ":"Approval Condition",
+"แก้ไข":"Edit",
+"คลิกแถวเพื่อดูสายทดแทนทั้งหมดของวัตถุดิบหลัก":"Click a row to view the full substitute chain of the primary material",
+"ส่งออกรายการเป็นไฟล์ Excel":"Exporting list to Excel file",
+"ส่งออก Excel":"Export Excel",
+"ใช้ตัวแทนที่แนะนำทั้งหมดที่ใช้ได้ทันที":"Apply All Ready-to-Use Recommended Substitutes",
+"วัตถุดิบที่ขาด":"Short Material",
+"ชื่อวัตถุดิบ":"Material Name",
+"วันที่ต้องใช้":"Required Date",
+"ต้องการ":"Required",
+"คงเหลือ":"On Hand",
+"ขาด":"Short",
+"ตัวแทนที่แนะนำ":"Recommended Substitute",
+"ครอบคลุมได้":"Coverage",
+"ผลต่อต้นทุน":"Cost Impact",
+"ต้องทำอะไรก่อน":"Prerequisite",
+"ดำเนินการ":"Action",
+"ใบสั่งผลิต":"Work Order",
+"ของหลัก":"Primary",
+"ใช้ตัวแทน":"Use Substitute",
+"จำนวนที่ใช้":"Qty Used",
+"เหตุผล":"Reason",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"PREPREG FR-4 1080 (บาง)":"PREPREG FR-4 1080 (Thin)",
+"COPPER FOIL 1 Oz HTE (จีน)":"COPPER FOIL 1 Oz HTE (China)",
+"ALUMINUM SHEET 0.15mm (ในประเทศ)":"ALUMINUM SHEET 0.15mm (Domestic)",
+"CARTON BOX A4 Double Wall (ผู้ขายสำรอง)":"CARTON BOX A4 Double Wall (Backup Supplier)",
+"ผ่านทดสอบ Tg และ peel strength แล้ว":"Passed Tg and peel strength tests",
+"Halogen free ลูกค้ากลุ่มยานยนต์ต้องอนุมัติก่อน":"Halogen free — automotive customers must approve first",
+"อยู่ระหว่างส่งตัวอย่างให้ลูกค้า":"Customer sample submission in progress",
+"Tg เทียบเท่า 170–180°C":"Tg equivalent 170–180°C",
+"ต้องแจ้งลูกค้าล่วงหน้า 1 รอบผลิต":"Customer must be notified one production run in advance",
+"ลูกค้าปฏิเสธเมื่อ มี.ค. 2569 — เก็บไว้อ้างอิง":"Customer rejected in Mar 2026 — kept for reference",
+"สเปกเดียวกัน ต่างผู้ขาย":"Same spec, different supplier",
+"ผ้าบางกว่า ต้องเพิ่มจำนวนชั้น":"Thinner glass cloth — more plies required",
+"ความหนาต่างกัน 8%":"Thickness differs by 8%",
+"รอผลทดสอบ delamination":"Awaiting delamination test results",
+"ผู้ขายรับรองว่าใช้แทนกันได้":"Supplier certifies interchangeability",
+"RTF ผิวหยาบกว่า ใช้ได้ทุกงาน":"RTF surface is rougher; usable for all jobs",
+"ผู้ขายจีน ลูกค้าญี่ปุ่นต้องอนุมัติ":"Chinese supplier — Japanese customers must approve",
+"LP ใช้แทนได้ทุกกรณี":"LP substitutable in all cases",
+"ใช้ 1 Oz แทนแล้วกัดลดความหนา — เปลืองขึ้น":"Use 1 Oz and etch down to thickness — higher consumption",
+"ทดแทนได้เต็มรูปแบบ":"Fully substitutable",
+"ความบริสุทธิ์เทียบเท่า 99.99%":"Equivalent purity 99.99%",
+"เฉดสีต่างเล็กน้อย ต้องส่ง swatch ให้ลูกค้า":"Slight shade difference — send swatch to customer",
+"ความหนาเท่ากัน 1.5 MIL":"Same thickness 1.5 MIL",
+"ใช้เป็นแผ่นรองเจาะ ไม่ติดกับชิ้นงาน":"Used as drill backup sheet; does not bond to the panel",
+"ขนาดเดียวกัน":"Same size",
+"ระบบอัตโนมัติ":"Automatic (System)",
+"สมชาย ว. (QA) · ลูกค้า SEMCO":"Somchai W. (QA) · Customer SEMCO",
+"ลูกค้า SEMCO":"Customer SEMCO",
+"สมชาย ว. (QA)":"Somchai W. (QA)",
+"ปรีชา ก. (QA)":"Preecha K. (QA)",
+"ของหลักไม่พอ ตัวแทนใช้ได้ทันที":"Primary insufficient — substitute ready to use",
+"ผู้ขายหลักส่งช้า 12 วัน":"Primary supplier delivery 12 days late",
+"Dry film ล็อตหลักไม่ผ่าน incoming":"Primary dry film lot failed incoming inspection",
+"เร่งงานให้ทัน ETD ลูกค้า":"Expedited to meet customer ETD",
+"ทองล็อตหลักหมด รอของ 3 สัปดาห์":"Primary gold lot depleted — 3-week wait for supply",
+"ปรับจำนวนชั้นตามอัตราแปลง":"Ply count adjusted per conversion ratio",
+"เท่ากัน":"Equal",
+"ไม่มีของ":"Out of stock",
+"แก้ไขคู่ทดแทน":"Edit substitute pair",
+"ไม่พบคู่ทดแทนตามเงื่อนไข":"No substitute pairs match the filters",
+"คู่ · ครอบคลุมวัตถุดิบหลัก":"pairs · covering",
+"ครอบคลุมวัตถุดิบหลัก":"covering",
+"แสดง 1–":"Showing 1–",
+"แสดง":"Showing",
+"จาก":"of",
+"คู่":"pairs",
+"รายการที่ขาด":"Shortage Items",
+"จากการรัน MRP วันที่ 03-08-2026":"From MRP run on 03-08-2026",
+"มีตัวแทนครอบคลุมเต็ม":"Fully Covered by Substitutes",
+"ปิดช่องว่างได้ทั้งจำนวน":"Gap fully closed",
+"ครอบคลุมได้บางส่วน":"Partially Covered",
+"ยังต้องซื้อเพิ่มส่วนที่เหลือ":"Remainder must still be purchased",
+"ผลต่อต้นทุนรวม":"Total Cost Impact",
+"รายการยังไม่มีตัวแทน":"item(s) without a substitute",
+"ทุกรายการมีตัวแทน":"All items have substitutes",
+"รายการขาด · ปิดได้ด้วยตัวแทน":"shortage items · closable with substitutes:",
+"รายการขาด":"shortage items",
+"ปิดได้ด้วยตัวแทน":"closable with substitutes:",
+"ไม่มีตัวแทนพร้อมใช้":"No substitute available",
+"ต้องเร่งซื้อ":"Expedite purchase required",
+"ใช้ตัวแทนแล้ว":"Substitute Applied",
+"ขออนุมัติ":"Request Approval",
+"เร่งซื้อ":"Expedite",
+"ส่งคำขอเร่งซื้อ":"Expedite request for",
+"ให้ฝ่ายจัดซื้อแล้ว":"sent to Purchasing",
+"ไม่มีรายการที่ใช้ตัวแทนได้ทันทีเหลืออยู่":"No ready-to-use substitute items remaining",
+"ใช้ตัวแทนกับ":"Substitutes applied to",
+"รายการแล้ว":"item(s)",
+"รายการที่ต้องผ่าน QA หรือให้ลูกค้าอนุมัติ ระบบไม่แตะต้อง ต้องกดขออนุมัติทีละรายการ":"Items requiring QA or customer approval were left untouched — request approval for each one individually",
+"ยืนยันการใช้วัตถุดิบทดแทน":"Confirm Substitute Material Use",
+"ขออนุมัติใช้วัตถุดิบทดแทน":"Request Approval for Substitute Material",
+"· ต้องใช้":"· required by",
+"ต้องใช้":"required by",
+"มีของ":"On hand",
+"— ระบบจะสร้างคำขออนุมัติ":"— The system will create an approval request",
+"ระบบจะสร้างคำขออนุมัติ":"The system will create an approval request",
+"และยังไม่เปลี่ยน BOM ของใบสั่งผลิตจนกว่าจะได้รับอนุมัติ":"and will not change the work order BOM until approval is granted",
+"ค่า":"Value",
+"จำนวนที่ขาด":"Shortage Qty",
+"อัตราแปลง (ตัวแทน : หลัก)":"Conversion Ratio (sub : primary)",
+"ต้องใช้ตัวแทน":"Substitute Qty Required",
+"สต็อกตัวแทนคงเหลือ":"Substitute Stock on Hand",
+"ปิดช่องว่างได้":"Gap Closed",
+"ผลต่อต้นทุนใบสั่งผลิตนี้":"Cost Impact on This WO",
+"ตัวแทนปิดช่องว่างได้ไม่ครบ":"The substitute does not fully close the gap —",
+"ส่วนที่เหลือ":"the remaining",
+"ยังต้องเร่งซื้อของหลัก":"still requires an expedited purchase of the primary",
+"ระบบจะบันทึกการใช้ตัวแทนลงประวัติพร้อมผู้อนุมัติและเหตุผล":"The system logs substitute use to history with approver and reason,",
+"และส่งผลต่างต้นทุนเข้าไปคิดในต้นทุนจริงของใบสั่งผลิตนี้":"and posts the cost variance into this work order's actual cost",
+"ยืนยันใช้ตัวแทน":"Confirm Substitute Use",
+"ส่งคำขออนุมัติ":"Submit Approval Request",
+"ส่งคำขออนุมัติใช้ตัวแทนแทน":"Approval request submitted to substitute for",
+"ใช้ตัวแทนแทน":"Substitute applied for",
+"เรียบร้อย — บันทึกลงประวัติแล้ว":"successfully — logged to history",
+"แล้ว รอผลจาก QA / ลูกค้า":"— awaiting QA / customer decision",
+"สายวัตถุดิบทดแทน —":"Substitute Chain —",
+"สายวัตถุดิบทดแทน":"Substitute Chain",
+"· ผู้ขายหลัก":"· primary supplier",
+"ผู้ขายหลัก":"primary supplier",
+"· ราคา":"· price",
+"ราคา":"price",
+"ของหลัก · คงเหลือ":"Primary · on hand",
+"· คงเหลือ":"· on hand",
+"ตัวแทนทั้งหมด":"All Substitutes",
+"MRP จะไล่ตามลำดับจากน้อยไปมาก และข้ามตัวที่ปิดใช้งานหรือไม่มีของ":"MRP walks priorities in ascending order and skips inactive or out-of-stock substitutes",
+"รหัส":"Code",
+"ชื่อ":"Name",
+"ผู้ขาย":"Supplier",
+"ราคา (฿)":"Price (THB)",
+"หลัก":"Primary",
+"ฐาน":"Base",
+"เคยใช้จริง":"Actual Usage",
+"ดึงจากประวัติการใช้ตัวแทน":"Pulled from substitute usage history",
+"ยังไม่เคยใช้ตัวแทนของวัตถุดิบนี้":"No substitute has ever been used for this material",
+"อัตราแปลงคือจำนวนตัวแทนที่ต้องใช้ต่อของหลัก 1 หน่วย":"The conversion ratio is the substitute quantity needed per 1 unit of primary;",
+"เช่น 1.320 หมายถึงใช้ตัวแทน 1.32 หน่วยแทนของหลัก 1 หน่วย — ส่วนต่างต้นทุนคำนวณจากอัตรานี้แล้ว":"e.g. 1.320 means 1.32 substitute units replace 1 primary unit — the cost difference already reflects this ratio",
+"ตัวแทน · เปิดใช้งาน":"substitutes · active",
+"· เคยใช้จริง":"· actually used",
+"ครั้ง":"time(s)",
+"ครั้งใน 30 วันล่าสุด ·":"uses in the last 30 days ·",
+"ครั้งใน 30 วันล่าสุด":"uses in the last 30 days",
+"แก้ไขคู่วัตถุดิบทดแทน":"Edit Substitute Material Pair",
+"กำหนด":"Setting",
+"ลำดับความสำคัญ":"Priority",
+"เลขน้อย = หยิบก่อน":"Lower number = picked first",
+"ตัวแทนกี่":"How many substitute",
+"ต่อของหลัก 1":"per 1 primary",
+"ต่อของหลัก":"per primary",
+"เปลี่ยนลำดับแล้ว MRP รอบถัดไปจะหยิบตัวแทนตามลำดับใหม่ทันที":"After a priority change, the next MRP run immediately picks substitutes in the new order;",
+"ส่วนใบสั่งผลิตที่ออกไปแล้วจะไม่ถูกแก้ย้อนหลัง":"work orders already released are not changed retroactively",
+"บันทึกคู่ทดแทน":"Substitute pair",
+"แล้ว":"saved",
+"฿":"THB",
+"฿/":"THB/"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>
