@@ -250,6 +250,8 @@ html.embed .content{padding-top:14px}
         <svg viewBox="0 0 24 24"><path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4"/></svg></button>
       <button class="tb" title="ส่งออกภาพ" onclick="toast('ส่งออกแผนผังเป็นไฟล์ภาพ')">
         <svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg></button>
+      <button class="tb" title="พิมพ์รายงานสายเอกสาร" onclick="openDocMapReport()">
+        <svg viewBox="0 0 24 24"><path d="M7 8V3.5h10V8"/><rect x="4" y="8" width="16" height="8.5" rx="1.5"/><path d="M7 14h10v6H7z"/></svg></button>
       <button class="tb" title="ปิด" onclick="toast('ปิดหน้าต่างแผนผัง')">
         <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
@@ -320,58 +322,59 @@ const NODES=[
    {cust:'SEMCO',amount:7202000,items:[['A048T-168BJ','PCB SEMCO 4L Gold HDI',52000,52000,'บอร์ด']]}),
  N('SO2','SO','SO-26-0922','PCB SEMCO 4L Normal',0,1,'ยืนยันแล้ว','s-ok',
    [['ลูกค้า','SEMCO'],['ส่งมอบ','20-09-2026'],['จำนวน','31,000 บอร์ด']],
-   {cust:'SEMCO',amount:2246500,items:[['G120A-017A','PCB SEMCO 4L Normal',31000,31000,'บอร์ด']]}),
+   {cust:'SEMCO',amount:2247500,items:[['G120A-017A','PCB SEMCO 4L Normal',31000,31000,'บอร์ด']]}),
  N('SO3','SO','SO-26-0931','PCB TDK 4L Normal',0,2,'ยืนยันแล้ว','s-ok',
    [['ลูกค้า','TDK'],['ส่งมอบ','22-09-2026'],['จำนวน','24,500 บอร์ด']],
-   {cust:'TDK',amount:1881250,items:[['D617P-140S','PCB TDK 4L Normal',24500,24500,'บอร์ด']]}),
+   {cust:'TDK',amount:1880375,items:[['D617P-140S','PCB TDK 4L Normal',24500,24500,'บอร์ด']]}),
  N('FC1','FC','FC-2026-09','พยากรณ์เดือนกันยายน 2569',0,3,'ใช้ในการวางแผน','s-fc',
    [['ลูกค้า','SEMCO'],['เดือน','กันยายน 2569'],['จำนวน','18,000 บอร์ด']],
    {cust:'SEMCO',amount:475200,items:[['S158G-019E','PCB SEMCO 2L Normal',18000,18000,'บอร์ด']]}),
 
- N('MPS1','MPS','MPS-2608-01','แผนผลิตสัปดาห์ที่ 34',1,0,'ยืนยันแผนแล้ว','s-ok',
+ N('MPS1','MPS','MPS-2608-01','แผนผลิตสัปดาห์ที่ 38',1,0,'ยืนยันแผนแล้ว','s-ok',
    [['สินค้า','A048T-168BJ'],['โรงงาน','A3'],['จำนวน','52,000 บอร์ด']],
    {items:[['A048T-168BJ','PCB SEMCO 4L Gold HDI',52000,52000,'บอร์ด']]}),
- N('MPS2','MPS','MPS-2608-02','แผนผลิตสัปดาห์ที่ 35',1,1,'ยืนยันแผนแล้ว','s-ok',
+ N('MPS2','MPS','MPS-2608-02','แผนผลิตสัปดาห์ที่ 38',1,1,'ยืนยันแผนแล้ว','s-ok',
    [['สินค้า','G120A-017A'],['โรงงาน','A1'],['จำนวน','31,000 บอร์ด']],
    {items:[['G120A-017A','PCB SEMCO 4L Normal',31000,31000,'บอร์ด']]}),
- N('MPS3','MPS','MPS-2608-03','แผนผลิตสัปดาห์ที่ 36',1,2,'ยืนยันแผนแล้ว','s-ok',
+ N('MPS3','MPS','MPS-2608-03','แผนผลิตสัปดาห์ที่ 39',1,2,'ยืนยันแผนแล้ว','s-ok',
    [['สินค้า','D617P-140S'],['โรงงาน','A1'],['จำนวน','24,500 บอร์ด']],
    {items:[['D617P-140S','PCB TDK 4L Normal',24500,24500,'บอร์ด']]}),
- N('MPS4','MPS','MPS-2608-04','แผนผลิตสัปดาห์ที่ 37',1,3,'ร่างแผน','s-plan',
+ N('MPS4','MPS','MPS-2608-04','แผนผลิตสัปดาห์ที่ 39',1,3,'ร่างแผน','s-plan',
    [['สินค้า','S158G-019E'],['โรงงาน','A1'],['จำนวน','18,000 บอร์ด']],
    {items:[['S158G-019E','PCB SEMCO 2L Normal',18000,18000,'บอร์ด']]}),
 
- N('WO1','WO','WO-26080142','ผลิต A048T-168BJ',2,0,'กำลังผลิต','s-run',
-   [['โรงงาน','A3'],['ต้องใช้ CCL','18-09-2026'],['ใช้ CCL','4,472 SHT']],
-   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',4472,4472,'SHT']]}),
- N('WO2','WO','WO-26080155','ผลิต G120A-017A',2,1,'กำลังผลิต','s-run',
-   [['โรงงาน','A1'],['ต้องใช้ CCL','20-09-2026'],['ใช้ CCL','2,666 SHT']],
-   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2666,2666,'SHT']]}),
- N('WO3','WO','WO-26080177','ผลิต D617P-140S',2,2,'ปล่อยงานแล้ว','s-ok',
-   [['โรงงาน','A1'],['ต้องใช้ CCL','22-09-2026'],['ใช้ CCL','2,107 SHT']],
-   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2107,2107,'SHT']]}),
+ N('WO1','WO','WO-26080142','ผลิต A048T-168BJ',2,0,'ยืนยันแล้ว','s-ok',
+   [['โรงงาน','A3'],['ต้องใช้ CCL','18-09-2026'],['ใช้ CCL','6,141 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',6141,6141,'SHT']]}),
+ N('WO2','WO','WO-26080155','ผลิต G120A-017A',2,1,'ยืนยันแล้ว','s-ok',
+   [['โรงงาน','A1'],['ต้องใช้ CCL','20-09-2026'],['ใช้ CCL','3,661 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',3661,3661,'SHT']]}),
+ N('WO3','WO','WO-26080177','ผลิต D617P-140S',2,2,'รอปล่อยงาน','s-wait',
+   [['โรงงาน','A1'],['ต้องใช้ CCL','22-09-2026'],['ใช้ CCL','2,893 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2893,2893,'SHT']]}),
  N('WO4','WO','WO-26080191','ผลิต S158G-019E',2,3,'รอปล่อยงาน','s-wait',
-   [['โรงงาน','A1'],['ต้องใช้ CCL','25-09-2026'],['ใช้ CCL','1,548 SHT']],
-   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',1548,1548,'SHT']]}),
+   [['โรงงาน','A1'],['ต้องใช้ CCL','25-09-2026'],['ใช้ CCL','2,125 SHT']],
+   {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',2125,2125,'SHT']]}),
 
  N('PLN','PLN','PLN-2608-0142','แผนสั่งซื้อจากการรัน MRP',3,0,'แปลงเป็น PR แล้ว','s-ok',
    [['วัตถุดิบ','RM-CCL-S1000H'],['ต้องการสุทธิ','18,120 SHT'],['เสนอสั่ง','20,000 SHT']],
    {items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']],
     calc:[['ความต้องการรวมจาก 4 ใบสั่งผลิต',14820],['หัก สินค้าคงเหลือในคลัง',-5100],
           ['หัก ของที่สั่งแล้วกำลังจะเข้า',-2000],['บวก ยอดที่ถูกจองไว้',1400],
-          ['บวก สต็อกกันชน',9000],['ความต้องการสุทธิ',18120],['ปัดขึ้น 5 ล็อต × MOQ 4,000',20000]]}),
+          ['บวก สต็อกกันชน',9000],['ความต้องการสุทธิ',18120],['ปัดขึ้น 5 ล็อต × MOQ 4,000',20000],
+          ['Planner ปรับมือใน PR (ดูเหตุผลในเอกสาร)',12000]]}),
  N('PR','PR','PR-26080071','ขอซื้อ CCL S1000H',4,0,'อนุมัติแล้ว','s-ok',
-   [['ผู้ขาย','NAN YA PLASTICS'],['ออกเอกสาร','04-08-2026'],['จำนวน','20,000 SHT']],
-   {amount:5780000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']]}),
- N('PO','PO','PO-26080119','สั่งซื้อ CCL S1000H',5,0,'ส่งให้ผู้ขายแล้ว','s-run',
-   [['ผู้ขาย','NAN YA PLASTICS'],['กำหนดส่ง','18-09-2026'],['มูลค่า','5,780,000']],
-   {amount:5780000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',20000,20000,'SHT']]}),
- N('GR','GR','GR-26090203','รับสินค้าจาก NAN YA',6,0,'รับบางส่วน','s-wait',
-   [['ผู้ขาย','NAN YA PLASTICS'],['วันที่รับ','16-09-2026'],['รับแล้ว','14,000 / 20,000']],
-   {amount:4046000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',14000,20000,'SHT']]}),
- N('IN','IN','IN-0087','นำเข้าคลัง 01-RM',7,0,'บันทึกแล้ว','s-ok',
-   [['คลัง','01-RM คลังวัตถุดิบ'],['วันที่','16-09-2026'],['จำนวน','14,000 SHT']],
-   {amount:4046000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',14000,14000,'SHT']]}),
+   [['ผู้ขาย','NAN YA PLASTICS'],['ออกเอกสาร','03-08-2026'],['จำนวน','12,000 SHT (ปรับมือจาก 20,000)']],
+   {amount:3468000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',12000,12000,'SHT']]}),
+ N('PO','PO','PO (รอออกเลข)','สั่งซื้อ CCL S1000H',5,0,'รอเปิด PO','s-wait',
+   [['ผู้ขาย','NAN YA PLASTICS'],['กำหนดส่ง','18-09-2026'],['มูลค่า','3,468,000']],
+   {amount:3468000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',12000,12000,'SHT']]}),
+ N('GR','GR','GR (รอออกเลข)','รับสินค้าจาก NAN YA',6,0,'รอรับของ','s-wait',
+   [['ผู้ขาย','NAN YA PLASTICS'],['กำหนดรับ','16-09-2026'],['ตามแผน','12,000 SHT']],
+   {amount:3468000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',0,12000,'SHT']]}),
+ N('IN','IN','IN (รอออกเลข)','นำเข้าคลัง 01-RM',7,0,'รอนำเข้าคลัง','s-wait',
+   [['คลัง','01-RM คลังวัตถุดิบ'],['กำหนด','16-09-2026'],['ตามแผน','12,000 SHT']],
+   {amount:3468000,items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm',0,12000,'SHT']]}),
 ];
 const EDGES=[
  ['SO1','MPS1','ตั้งแผนผลิต'],['SO2','MPS2','ตั้งแผนผลิต'],['SO3','MPS3','ตั้งแผนผลิต'],['FC1','MPS4','ตั้งแผนผลิต'],
@@ -564,6 +567,31 @@ setTimeout(()=>{const h=g('hintbar'); if(h) h.style.display='none';},9000);
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานสายความสัมพันธ์เอกสาร ─── */
+function openDocMapReport(){
+  const rows=NODES.map((n,i)=>[i+1,n.code,TYPE[n.t][0],n.title,TYPE[n.t][3],n.st]);
+  const cnt=dep=>NODES.filter(n=>TYPE[n.t][3]===dep).length;
+  ApexReport.open({
+    docNo:'DOCMAP-26080071',
+    title:'รายงานสายความสัมพันธ์เอกสาร',
+    titleEn:'Document Relationship / Traceability Report',
+    meta:[['เลขที่รายงาน','DOCMAP-26080071'],['เอกสารตั้งต้น','PR-26080071 · ใบขอซื้อ'],
+          ['วัตถุดิบในสาย','RM-CCL-S1000H'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['จำนวนเอกสาร',NODES.length+' ฉบับ'],['เส้นเชื่อมโยง',EDGES.length+' เส้น'],
+           ['แผนกที่เกี่ยวข้อง',DEPS.length+' แผนก'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'เลขที่เอกสาร'},{t:'ประเภทเอกสาร'},{t:'รายละเอียด'},{t:'แผนก',a:'c'},{t:'สถานะ',a:'c'}],
+    rows,
+    totals:[['ฝ่ายขาย (SO · FC)',cnt('ขาย')+' ฉบับ'],['วางแผน (MPS · PLN)',cnt('วางแผน')+' ฉบับ'],
+            ['ผลิต (WO)',cnt('ผลิต')+' ฉบับ'],['จัดซื้อ (PR · PO)',cnt('จัดซื้อ')+' ฉบับ'],
+            ['คลังสินค้า (GR · IN)',cnt('คลังสินค้า')+' ฉบับ'],
+            ['รวมเอกสารทั้งสาย',NODES.length+' ฉบับ','b']],
+    note:'สายเอกสารทั้งหมดตรวจสอบย้อนกลับได้จากคำสั่งซื้อลูกค้า (SO) จนถึงการนำเข้าคลัง (IN) · เปิดดูแผนผังเชิงโต้ตอบได้จากหน้าจอแผนผังความสัมพันธ์เอกสาร',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "แผนผังความสัมพันธ์เอกสาร — APEX Circuit":"Document Relationship Map — APEX Circuit",
 "แผนผังความสัมพันธ์เอกสาร":"Document Relationship Map",
@@ -604,10 +632,8 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ใช้ในการวางแผน":"Used for Planning",
 "เดือน":"Month",
 "กันยายน 2569":"September 2026",
-"แผนผลิตสัปดาห์ที่ 34":"Production Plan — Week 34",
-"แผนผลิตสัปดาห์ที่ 35":"Production Plan — Week 35",
-"แผนผลิตสัปดาห์ที่ 36":"Production Plan — Week 36",
-"แผนผลิตสัปดาห์ที่ 37":"Production Plan — Week 37",
+"แผนผลิตสัปดาห์ที่ 38":"Production Plan — Week 38",
+"แผนผลิตสัปดาห์ที่ 39":"Production Plan — Week 39",
 "ยืนยันแผนแล้ว":"Plan Confirmed",
 "สินค้า":"Product",
 "โรงงาน":"Plant",
@@ -675,7 +701,35 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ไม่พบเอกสาร":"Document not found:",
 "ในแผนผังนี้":"in this map",
 "เลือก":"Selected",
-"เอกสาร":"documents"
+"เอกสาร":"documents",
+"12,000 SHT (ปรับมือจาก 20,000)":"12,000 SHT (manually adjusted from 20,000)",
+"Planner ปรับมือใน PR (ดูเหตุผลในเอกสาร)":"Planner manual override in PR (see reason in the document)",
+"รอออกเลข":"No. pending",
+"รอเปิด PO":"Awaiting PO",
+"รอรับของ":"Awaiting Receipt",
+"กำหนดรับ":"Expected Receipt",
+"ตามแผน":"Planned",
+"รอนำเข้าคลัง":"Awaiting Putaway",
+"กำหนด":"Due",
+"พิมพ์รายงานสายเอกสาร":"Print Traceability Report",
+"รายงานสายความสัมพันธ์เอกสาร":"Document Relationship Report",
+"เลขที่รายงาน":"Report No.",
+"เอกสารตั้งต้น":"Origin Document",
+"วัตถุดิบในสาย":"Material in Chain",
+"วันที่พิมพ์":"Print Date",
+"จำนวนเอกสาร":"Document Count",
+"เส้นเชื่อมโยง":"Links",
+"เส้น":"link(s)",
+"แผนกที่เกี่ยวข้อง":"Departments Involved",
+"แผนก":"Dept.",
+"ผู้พิมพ์":"Printed by",
+"อาทิตย์ สุดชาติ":"Artit Sudchat",
+"เลขที่เอกสาร":"Document No.",
+"ประเภทเอกสาร":"Document Type",
+"รายละเอียด":"Description",
+"ฝ่ายขาย":"Sales",
+"รวมเอกสารทั้งสาย":"Total Documents in Chain",
+"สายเอกสารทั้งหมดตรวจสอบย้อนกลับได้จากคำสั่งซื้อลูกค้า (SO) จนถึงการนำเข้าคลัง (IN) · เปิดดูแผนผังเชิงโต้ตอบได้จากหน้าจอแผนผังความสัมพันธ์เอกสาร":"The whole document chain is traceable from the customer sales order (SO) through to warehouse putaway (IN) · Open the interactive map from the Document Relationship Map screen"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

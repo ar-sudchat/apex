@@ -279,7 +279,7 @@ html.embed .content{padding-top:14px}
           <option>STD2026-Q3 · ต้นทุนมาตรฐาน ไตรมาส 3/2569</option>
           <option>STD2026-Q2 · ต้นทุนมาตรฐาน ไตรมาส 2/2569</option>
         </select>
-        <span class="warnchip">⚠ book นี้เริ่มใช้มาแล้ว 64 วัน (เกิน 60 วัน) — ตัวเลขอาจไม่สะท้อนราคาปัจจุบัน</span>
+        <span class="warnchip">⚠ book นี้เริ่มใช้ 01-07-2026 (34 วันแล้ว) — ราคาตลาด 4 กลุ่มขยับจาก book แล้ว ตัวเลขอาจไม่สะท้อนราคาปัจจุบัน</span>
         <span style="position:relative;display:inline-flex">
           <button class="ibtn" id="driftBtn" onclick="togDrift(event)"
             title="ราคาวัตถุดิบจริงขยับจาก book แล้ว 4 กลุ่ม — คลิกเพื่อดู">i<span class="bdg">4</span></button>
@@ -306,6 +306,7 @@ html.embed .content{padding-top:14px}
           <button class="btn btn-s btn-p">บันทึก</button>
           <button class="btn btn-s btn-d">ลบ</button>
           <button class="btn btn-s" onclick="openCompare()">เปรียบเทียบ</button>
+          <button class="btn btn-s" onclick="openShockReport()">พิมพ์รายงาน</button>
         </div>
       </div>
 
@@ -360,7 +361,7 @@ html.embed .content{padding-top:14px}
               <th class="r" style="width:95px">GP% เดิม</th><th class="r" style="width:125px">GP% ใหม่</th>
               <th class="r" style="width:112px">ขาย/เดือน<small>บอร์ด</small></th>
               <th class="r" style="width:150px">ผลกระทบ บาท/เดือน</th>
-              <th class="r" style="width:138px">ราคาแนะนำ<small>฿/บอร์ด</small></th>
+              <th class="r" style="width:138px">ราคาแนะนำ (รักษา GP เดิม)<small>฿/บอร์ด</small></th>
               <th class="r" style="width:165px" title="วัตถุดิบขึ้นได้อีกกี่ % ก่อน GP = 0">Break-even วัตถุดิบ +%</th>
             </tr></thead>
             <tbody id="tbRes"></tbody>
@@ -431,26 +432,33 @@ function apply(it,SH){
   const oh={...it.oh};
   const bump=(g,pct,baht)=>{ if(dm[g]===undefined||dm[g]===0) return;
     dm[g] = pct!=null ? dm[g]*(1+pct/100) : dm[g]+baht; };
-  let rfPct=0, rfHit=false;
+  /* โหมดบาทของ "วัตถุดิบทั้งหมด/รายสินค้า": กระจาย +บาท ตามสัดส่วนต้นทุนกลุ่มปัจจุบัน
+     (ไม่หารเฉลี่ยเท่ากันทุกกลุ่ม) — สินค้าที่ขาดบางกลุ่มก็ยังได้ +บาทเต็มจำนวน */
+  const spreadAll=(pct,baht)=>{
+    if(baht!=null){ const dmT=dmSum(dm); if(dmT>0) GRP.forEach(g=>bump(g,null,baht*(dm[g]||0)/dmT)); }
+    else GRP.forEach(g=>bump(g,pct,null));
+  };
+  let rfHit=false;
   SH.forEach(s=>{
     const v=parseFloat(s.v); if(isNaN(v)||v===0) return;
     const pct = s.u==='%' ? v : null, baht = s.u==='%' ? null : v;
     switch(s.d){
-      case 0: GRP.forEach(g=>bump(g,pct,baht!=null?baht/GRP.length:null));
-              if(s.rf){rfHit=true;rfPct=Math.max(rfPct,pct||0);} break;
+      case 0: spreadAll(pct,baht);
+              if(s.rf)rfHit=true; break;
       case 1: bump(s.t,pct,baht);
-              if(s.rf){rfHit=true;rfPct=Math.max(rfPct,pct||0);} break;
-      case 2: if(s.t===it.c){ GRP.forEach(g=>bump(g,pct,baht!=null?baht/GRP.length:null));
-                if(s.rf){rfHit=true;rfPct=Math.max(rfPct,pct||0);} } break;
+              if(s.rf)rfHit=true; break;
+      case 2: if(s.t===it.c){ spreadAll(pct,baht);
+                if(s.rf)rfHit=true; } break;
       case 3: dl = pct!=null ? dl*(1+pct/100) : dl+v; break;
       case 4: if(oh[s.t]!==undefined) oh[s.t] = pct!=null ? oh[s.t]*(1+pct/100) : oh[s.t]+v; break;
       case 5: (CUR[s.t]||[]).forEach(g=>bump(g,pct,null)); break;
     }
   });
-  /* ของเสียคิดจากวัตถุดิบ จึงขยับตามสัดส่วน DM · เครดิตขายเศษขยับเมื่อติ๊กไว้ */
+  /* ของเสียคิดจากวัตถุดิบ จึงขยับตามสัดส่วน DM · เครดิตขายเศษ (ติ๊กไว้) ขยับตามสัดส่วน DM
+     เช่นเดียวกัน — รองรับทั้งช็อกลบและช็อกแบบบาท */
   const dmOld=dmSum(it.dm), dmNew=dmSum(dm);
   if(dmOld>0) waste = it.waste*(dmNew/dmOld);
-  if(rfHit)   resell = it.resell*(1+rfPct/100);
+  if(rfHit&&dmOld>0) resell = it.resell*(dmNew/dmOld);
   const total = dmNew+osc+dl+oh[OHD[0]]+oh[OHD[1]]+waste-resell;
   return {dm,osc,dl,oh,waste,resell,dmTotal:dmNew,total};
 }
@@ -460,7 +468,9 @@ function calcRow(it,SH){
   const dp=o? (nw-o)/o*100 : 0;
   const imp=it.qty*(nw-o);
   const req=gpo>=100?nw:nw/(1-gpo/100);
-  const be = r.dmTotal>0 ? (it.price-nw)/r.dmTotal*100 : 0;   /* วัตถุดิบขึ้นได้อีกกี่ % ก่อน GP=0 */
+  /* วัตถุดิบขึ้นได้อีกกี่ % ก่อน GP=0 — ต้องรวม waste ที่ขยับตาม DM ด้วย
+     ทดสอบย้อนกลับได้: ใส่ % นี้เป็นช็อกวัตถุดิบทั้งหมด (ไม่ติ๊กเศษขยับตาม) แล้ว GP ลงมาที่ 0 พอดี */
+  const be = (r.dmTotal+r.waste)>0 ? (it.price-nw)/(r.dmTotal+r.waste)*100 : 0;
   return {it,r,o,nw,dp,gpo,gpn,imp,req,be};
 }
 
@@ -784,12 +794,45 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานผลการจำลองราคา (Price Shock) ─── */
+function openShockReport(){
+  const F=ApexReport.fmt;
+  const sg=(n,d)=> (n>0?'+':'')+F(n,d==null?1:d);
+  const res=ITEMS.map(it=>calcRow(it,SHOCKS));
+  const rows=res.map((x,i)=>[i+1,x.it.c,x.it.n,F(x.o,2),F(x.nw,2),sg(x.dp)+'%',
+    F(x.gpo,1)+'%',F(x.gpn,1)+'%',F(x.imp)]);
+  const shockTxt=SHOCKS.map(s=>{
+    const tgt=s.t&&s.t!=='—'?s.t:DRV[s.d].split(' (')[0];
+    return tgt+' '+(+s.v>0?'+':'')+s.v+(s.u==='%'?'%':' '+s.u);
+  }).join(' · ');
+  const risk=res.filter(x=>x.gpn<GPMIN).length;
+  ApexReport.open({
+    docNo:'SIM-260803-01',
+    title:'รายงานผลการจำลองราคา',
+    titleEn:'Price Shock Simulation Report — What-if Repricing',
+    meta:[['เลขที่รายงาน','SIM-260803-01'],['เล่มต้นทุนอ้างอิง','STD2026-Q3 · ไตรมาส 3/2569'],
+          ['เงื่อนไขช็อก',SHOCKS.length+' รายการ'],['GP ขั้นต่ำ',GPMIN+'%']],
+    meta2:[['จำนวนสินค้า',res.length+' รายการ'],['GP หลังช็อกต่ำกว่าเกณฑ์',risk+' รายการ'],
+           ['วันที่จำลอง','03-08-2026'],['ผู้จัดทำ','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสสินค้า'},{t:'ชื่อสินค้า'},{t:'ต้นทุนเดิม',a:'r'},{t:'ต้นทุนใหม่',a:'r'},
+          {t:'Δ%',a:'r'},{t:'GP เดิม',a:'r'},{t:'GP ใหม่',a:'r'},{t:'ผลกระทบ ฿/เดือน',a:'r'}],
+    rows,
+    totals:[['ต้นทุนเดิมรวม (ถ่วง qty)',F(res.reduce((a,x)=>a+x.o*x.it.qty,0))+' ฿/เดือน'],
+            ['ต้นทุนใหม่รวม (ถ่วง qty)',F(res.reduce((a,x)=>a+x.nw*x.it.qty,0))+' ฿/เดือน'],
+            ['ผลกระทบรวมทั้งบริษัท',sg(res.reduce((a,x)=>a+x.imp,0),0)+' ฿/เดือน','b']],
+    note:'เงื่อนไขช็อก: '+shockTxt+' · ราคาแนะนำ (รักษา GP เดิม) และ Break-even วัตถุดิบ ดูจากแท็บผลลัพธ์ของหน้าจอจำลองราคา',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายบัญชีต้นทุน','Cost Accounting'],['ผู้บริหารอนุมัติ','Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
 "จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ตัวเลขต่อ 1 บอร์ด · หน่วยขายเป็นชิ้น":"Price what-if across the standard cost book · figures per 1 board · selling unit: pcs",
 "STD2026-Q3 · ต้นทุนมาตรฐาน ไตรมาส 3/2569":"STD2026-Q3 · Standard Cost Q3/2026",
 "STD2026-Q2 · ต้นทุนมาตรฐาน ไตรมาส 2/2569":"STD2026-Q2 · Standard Cost Q2/2026",
-"⚠ book นี้เริ่มใช้มาแล้ว 64 วัน (เกิน 60 วัน) — ตัวเลขอาจไม่สะท้อนราคาปัจจุบัน":"⚠ This book has been in use for 64 days (over 60) — figures may not reflect current prices",
+"⚠ book นี้เริ่มใช้ 01-07-2026 (34 วันแล้ว) — ราคาตลาด 4 กลุ่มขยับจาก book แล้ว ตัวเลขอาจไม่สะท้อนราคาปัจจุบัน":"⚠ This book took effect 01-07-2026 (34 days ago) — market prices in 4 groups have drifted from the book; figures may not reflect current prices",
 "ราคาวัตถุดิบจริงขยับจาก book แล้ว 4 กลุ่ม — คลิกเพื่อดู":"Actual material prices have drifted from the book in 4 groups — click to view",
 "ราคาจริงขยับจาก book แล้ว":"Actual Prices Drifted from Book",
 "ราคาวัตถุดิบวันนี้ต่างจากราคา ณ วันคำนวณ book — กด “ใส่เป็น shock” เพื่อจำลองตามจริง":"Today's material prices differ from the book calculation date — click “Add as shock” to simulate actuals",
@@ -921,7 +964,28 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "เกณฑ์ GP ขั้นต่ำ":"Min GP threshold",
 "ใส่":"Added",
 "% เป็นเงื่อนไขแล้ว — ตารางผลลัพธ์คำนวณใหม่":"% as a shock — results table recalculated",
-"฿) ·":"THB) ·"
+"฿) ·":"THB) ·",
+"ราคาแนะนำ (รักษา GP เดิม)":"Suggested Price (keep current GP)",
+"รายงานผลการจำลองราคา":"Price Shock Simulation Report",
+"เลขที่รายงาน":"Report No.",
+"เล่มต้นทุนอ้างอิง":"Reference Cost Book",
+"STD2026-Q3 · ไตรมาส 3/2569":"STD2026-Q3 · Q3/2026",
+"เงื่อนไขช็อก":"Shock Conditions",
+"GP ขั้นต่ำ":"Min GP",
+"จำนวนสินค้า":"Products",
+"GP หลังช็อกต่ำกว่าเกณฑ์":"Below Threshold After Shock",
+"วันที่จำลอง":"Simulation Date",
+"GP เดิม":"GP Before",
+"GP ใหม่":"GP After",
+"ผลกระทบ ฿/เดือน":"Impact THB/Month",
+"ต้นทุนเดิมรวม (ถ่วง qty)":"Total Old Cost (qty-weighted)",
+"ต้นทุนใหม่รวม (ถ่วง qty)":"Total New Cost (qty-weighted)",
+"ผลกระทบรวมทั้งบริษัท":"Total Company-wide Impact",
+"และ Break-even วัตถุดิบ ดูจากแท็บผลลัพธ์ของหน้าจอจำลองราคา":"and material Break-even are shown on the Results tab of the simulator screen",
+"ฝ่ายบัญชีต้นทุน":"Cost Accounting",
+"ผู้บริหารอนุมัติ":"Approved by",
+"วัตถุดิบทั้งหมด":"All Materials",
+"ค่าแรง":"Labor"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

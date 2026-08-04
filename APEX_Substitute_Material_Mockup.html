@@ -214,7 +214,10 @@ html.embed .content{padding-top:14px}
       <div class="page-head">
         <div><div class="page-title">วัตถุดิบทดแทน</div>
           <div class="page-sub">กำหนดตัวแทนของวัตถุดิบหลัก พร้อมลำดับ อัตราแปลง และเงื่อนไขการอนุมัติ — MRP จะหยิบไปใช้เองเมื่อของหลักไม่พอ</div></div>
-        <button class="btn btn-p" onclick="toast('เปิดฟอร์มเพิ่มคู่ทดแทนใหม่')">+ เพิ่มคู่ทดแทน</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="openSubReport()">พิมพ์รายงาน</button>
+          <button class="btn btn-p" onclick="toast('เปิดฟอร์มเพิ่มคู่ทดแทนใหม่')">+ เพิ่มคู่ทดแทน</button>
+        </div>
       </div>
 
       <div class="tabs" id="tabs">
@@ -293,7 +296,7 @@ html.embed .content{padding-top:14px}
             <th style="width:130px">ใบสั่งผลิต</th>
             <th style="width:150px">ของหลัก</th>
             <th style="width:150px">ใช้ตัวแทน</th>
-            <th class="r" style="width:120px">จำนวนที่ใช้</th>
+            <th class="r" style="width:120px">จำนวน (หน่วยวัตถุดิบหลัก)</th>
             <th class="r" style="width:125px">ผลต่อต้นทุน</th>
             <th style="width:165px">ผู้อนุมัติ</th>
             <th>เหตุผล</th>
@@ -331,8 +334,8 @@ const M={
  'RM-CU-FOIL05B':['COPPER FOIL 0.5 Oz LP','Copper mat','FURUKAWA ELECTRIC','KG',1462.00],
  'RM-CU-ANODE'  :['COPPER ANODE Micrograin Ø50','Copper mat','NIKKO METALS','KG',428.00],
  'RM-CU-ANODE-B':['COPPER ANODE Phosphorized Ø50','Copper mat','MITSUBISHI MATERIALS','KG',441.00],
- 'RM-AU-SALT'   :['GOLD SALT KAu(CN)2','Precious metal','TANAKA KIKINZOKU','KG',64220.00],
- 'RM-AU-SALT-B' :['GOLD SALT KAu(CN)2 (Metalor)','Precious metal','METALOR TECHNOLOGIES','KG',65840.00],
+ 'RM-AU-SALT'   :['GOLD PLATING SOLUTION 2% Au','Precious metal','TANAKA KIKINZOKU','KG',64220.00],
+ 'RM-AU-SALT-B' :['GOLD PLATING SOLUTION 2% Au (Metalor)','Precious metal','METALOR TECHNOLOGIES','KG',65840.00],
  'RM-NM-SM-GRN' :['SOLDER MASK Green HF/LF (2K)','Non-market mat','TAIYO INK MFG.','KG',1850.00],
  'RM-NM-SM-GRN2':['SOLDER MASK Green PSR-4000','Non-market mat','GOO CHEMICAL','KG',1742.00],
  'RM-NM-DF'     :['DRY FILM E9415DI 1.5 MIL','Non-market mat','ASAHI KASEI','ROLL',4120.00],
@@ -369,7 +372,7 @@ const PAIRS=[
  ['RM-CU-FOIL1','RM-CU-FOIL1B',1,1.000,'free','on','RTF ผิวหยาบกว่า ใช้ได้ทุกงาน'],
  ['RM-CU-FOIL1','RM-CU-FOIL1C',2,1.000,'cust','on','ผู้ขายจีน ลูกค้าญี่ปุ่นต้องอนุมัติ'],
  ['RM-CU-FOIL05','RM-CU-FOIL05B',1,1.000,'free','on','LP ใช้แทนได้ทุกกรณี'],
- ['RM-CU-FOIL05','RM-CU-FOIL1',2,0.500,'qa','on','ใช้ 1 Oz แทนแล้วกัดลดความหนา — เปลืองขึ้น'],
+ ['RM-CU-FOIL05','RM-CU-FOIL1',2,2.000,'qa','wait','ใช้ 1 Oz แทนแล้วกัดลดความหนา — เปลืองขึ้น รอ QA อนุมัติ'],
  ['RM-CU-ANODE','RM-CU-ANODE-B',1,1.000,'free','on','ทดแทนได้เต็มรูปแบบ'],
  ['RM-AU-SALT','RM-AU-SALT-B',1,1.000,'qa','on','ความบริสุทธิ์เทียบเท่า 99.99%'],
  ['RM-NM-SM-GRN','RM-NM-SM-GRN2',1,1.040,'cust','on','เฉดสีต่างเล็กน้อย ต้องส่ง swatch ให้ลูกค้า'],
@@ -437,7 +440,7 @@ function renderPair(){
       <td class="sup">${sup(sc)}</td>
       <td class="r mono">${ratio.toFixed(3)}</td>
       <td class="r mono ${Math.abs(d)<0.005?'dash':(d>0?'up':'down')}">${Math.abs(d)<0.005?'เท่ากัน':sg(d)}</td>
-      <td class="r mono ${s?'':'dash'}">${s?nf(s)+' '+un(sc):'ไม่มีของ'}</td>
+      <td class="r mono ${s?'':'dash'}">${s?nf(s,s<10?1:0)+' '+un(sc):'ไม่มีของ'}</td>
       <td><span class="chip ${AP[ap][1]}">${AP[ap][0]}</span></td>
       <td class="c"><span class="chip ${ST[st][1]}">${ST[st][0]}</span></td>
       <td class="c"><button class="ib ib-e" title="แก้ไขคู่ทดแทน"
@@ -700,6 +703,36 @@ renderPair(); renderShort(); renderLog();
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานทะเบียนวัตถุดิบทดแทน ─── */
+function openSubReport(){
+  const Fm=ApexReport.fmt;
+  const rows=PAIRS.map((p,i)=>{
+    const [mc,sc,seq,ratio,ap,st]=p;
+    return [i+1,mc,M[mc][0],seq,sc,M[sc][0],Fm(ratio,3),Fm(STOCK[sc]||0),AP[ap][0],ST[st][0]];
+  });
+  const cnt=(idx,key)=>PAIRS.filter(p=>p[idx]===key).length;
+  ApexReport.open({
+    docNo:'SUB-260803',
+    title:'รายงานทะเบียนวัตถุดิบทดแทน',
+    titleEn:'Substitute Material Master Report',
+    meta:[['เลขที่รายงาน','SUB-260803'],['จำนวนคู่ทดแทน',PAIRS.length+' คู่'],
+          ['วัตถุดิบหลักที่มีตัวแทน',new Set(PAIRS.map(p=>p[0])).size+' รายการ'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['เปิดใช้งาน',cnt(5,'on')+' คู่'],['รออนุมัติ',cnt(5,'wait')+' คู่'],
+           ['ปิดใช้งาน',cnt(5,'off')+' คู่'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'30px'},{t:'วัตถุดิบหลัก'},{t:'ชื่อวัตถุดิบหลัก'},{t:'ลำดับ',a:'c'},
+          {t:'ตัวแทน'},{t:'ชื่อตัวแทน'},{t:'อัตราแปลง',a:'r'},{t:'สต็อกตัวแทน',a:'r'},{t:'เงื่อนไขอนุมัติ'},{t:'สถานะ',a:'c'}],
+    rows,
+    totals:[['ใช้ได้ทันที',cnt(4,'free')+' คู่'],
+            ['ต้องผ่าน QA',cnt(4,'qa')+' คู่'],
+            ['ต้องให้ลูกค้าอนุมัติ',cnt(4,'cust')+' คู่'],
+            ['รวมคู่ทดแทนทั้งหมด',PAIRS.length+' คู่','b']],
+    note:'MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว) · ประวัติการใช้จริงดูจากแท็บประวัติของหน้าจอ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายวางแผน','Planning'],['QA อนุมัติ','QA Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "วัตถุดิบทดแทน — APEX Circuit":"Substitute Materials — APEX Circuit",
 "วัตถุดิบทดแทน":"Substitute Materials",
@@ -887,7 +920,19 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "บันทึกคู่ทดแทน":"Substitute pair",
 "แล้ว":"saved",
 "฿":"THB",
-"฿/":"THB/"
+"฿/":"THB/",
+"จำนวน (หน่วยวัตถุดิบหลัก)":"Qty (Primary Material Unit)",
+"ใช้ 1 Oz แทนแล้วกัดลดความหนา — เปลืองขึ้น รอ QA อนุมัติ":"Use 1 Oz and etch down to thickness — higher consumption; awaiting QA approval",
+"รายงานทะเบียนวัตถุดิบทดแทน":"Substitute Material Master Report",
+"เลขที่รายงาน":"Report No.",
+"จำนวนคู่ทดแทน":"Substitute Pairs",
+"วัตถุดิบหลักที่มีตัวแทน":"Primaries with Substitutes",
+"วันที่พิมพ์":"Print Date",
+"ผู้พิมพ์":"Printed by",
+"รวมคู่ทดแทนทั้งหมด":"Total Substitute Pairs",
+"MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว) · ประวัติการใช้จริงดูจากแท็บประวัติของหน้าจอ":"MRP applies substitutes automatically in priority order when the primary runs short (only pairs that are active with approval conditions already met) · actual usage history is on the History tab of this screen",
+"ฝ่ายวางแผน":"Planning",
+"QA อนุมัติ":"QA Approved by"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

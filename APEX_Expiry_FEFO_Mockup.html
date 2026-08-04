@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex, nofollow" />
-<title>วัตถุดิบที่ไม่มีใครจอง — APEX Circuit</title>
+<title>บริหารวัตถุดิบใกล้หมดอายุ (FEFO) — APEX Circuit</title>
 <link rel="icon" type="image/png" href="apex-logo.png" />
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
@@ -192,10 +191,10 @@ html.embed .content{padding-top:14px}
       <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
       <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
       <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
-      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
       <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
       <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
-      <a class="mi active"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
       <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
       <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
     </nav>
@@ -205,579 +204,229 @@ html.embed .content{padding-top:14px}
     </div>
   </header>
 
-  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
+  <div class="topstrip">Tuesday, July 28, 2026 (apex production)</div>
+<style>
+/* ── ส่วนเฉพาะหน้า FEFO (ใช้โทเคนสีจากธีมหลัก) ── */
+.content{padding:20px 24px 30px}
+.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:18px 22px;margin-bottom:16px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:4px}
+.page-title{font-size:22px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:12.5px;color:var(--mut);margin-top:3px}
+.hbtn{border:1.5px solid #d5e2ef;background:#fff;border-radius:18px;padding:6px 14px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);cursor:pointer}
+.hbtn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.alertsel{border:1.5px solid #d5e2ef;border-radius:18px;padding:5px 10px;font-family:inherit;font-size:12.5px;color:#2b567c;background:#fbfdff}
+.sumrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 4px}
+.sc{border:1px solid #e3ecf5;border-left:4px solid var(--blue);border-radius:8px;padding:10px 14px;cursor:pointer;transition:.15s}
+.sc:hover{background:#f7fbff}.sc.on{outline:2px solid var(--blue);outline-offset:-1px;background:#f2f8fd}
+.sc .v{font-size:20px;font-weight:700}.sc .t{font-size:12.5px;font-weight:600;color:#3a5773;margin-top:1px}
+.sc .d{font-size:11px;color:var(--mut);margin-top:2px}
+.sc.c-amb{border-left-color:var(--amber)}.sc.c-red{border-left-color:var(--red)}
+.sc.c-org{border-left-color:var(--orange)}.sc.c-gry{border-left-color:#8aa3b8}
+.fbar{display:flex;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.fbar input,.fbar select{border:1.5px solid #dfe7f0;border-radius:8px;padding:7px 11px;font-family:inherit;font-size:12.5px;background:#fbfdff;outline:none}
+.fbar input{width:220px}
+.cnt{margin-left:auto;font-size:12.5px;color:var(--mut)}
+table.ft{width:100%;border-collapse:collapse;font-size:12.5px}
+.ft th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid #dfe7f0;white-space:nowrap}
+.ft td{padding:8px 10px;border-bottom:1px solid #eef3f8;white-space:nowrap}
+.ft tr.clk{cursor:pointer}.ft tr.clk:hover td{background:#f7fbff}
+.ft .r{text-align:right}.ft .c{text-align:center}
+.code{font-weight:700;color:var(--blue)}
+.ft small{display:block;color:var(--mut);font-size:10.5px}
+.bdg{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
+.b-ok{background:#e9f8f0;color:#1a7a42}.b-amb{background:#fdf3dc;color:#8a6a00}
+.b-red{background:#fdeceb;color:#b32b2b}.b-org{background:#fdeadd;color:#b25012}
+.b-gry{background:#eef2f7;color:#5b7590}
+.dleft{font-weight:700}
+.reco{font-size:12px;font-weight:600}
+.reco.a{color:var(--blue)}.reco.w{color:#a06a00}.reco.r{color:#c62828}
+.note{margin-top:12px;padding:10px 14px;border-left:3px solid var(--blue);background:#f4f9fe;font-size:12px;color:#3a5773;border-radius:0 6px 6px 0}
+/* dialog */
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.38);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:56px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:10px;box-shadow:0 14px 44px rgba(15,40,80,.3);width:760px;max-width:94%;overflow:hidden}
+.dlg-hd{background:#2b6cb8;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;gap:14px}
+.dlg-hd h3{font-size:15px;font-weight:600;margin:0}.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;font-family:inherit}
+.dlg-bd{padding:15px 18px;max-height:62vh;overflow:auto}
+.kv4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kv4>div{background:#f7fafd;border-radius:7px;padding:8px 12px;font-size:11.5px;color:var(--mut)}
+.kv4 b{display:block;font-size:14px;color:#1a3a5c;margin-top:2px}
+.dtb{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:7px 10px;border-bottom:1px solid #dfe7f0}
+.dtb td{padding:7px 10px;border-bottom:1px solid #eef3f8}
+.dlg-ft{padding:11px 18px;border-top:1px solid #e8eef5;display:flex;justify-content:flex-end;gap:8px;background:#fbfdff}
+.exf{margin-top:12px;background:#fdf9ef;border:1px solid #e3cf8f;border-radius:8px;padding:11px 14px;display:none}
+.exf textarea{width:100%;box-sizing:border-box;border:1.5px solid #dfd0a2;border-radius:7px;padding:8px;font-family:inherit;font-size:12.5px;min-height:56px}
+.toastw{position:fixed;right:18px;bottom:18px;z-index:400}
+.tst{background:#1a7a42;color:#fff;border-radius:8px;padding:10px 16px;font-size:12.5px;margin-top:8px;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+</style>
 
-  <div class="content">
-
-    <!-- ═══ พาดหัว ═══ -->
-    <div class="card">
-      <div class="page-head">
-        <div>
-          <div class="page-title">วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง</div>
-          <div class="page-sub">จาก Sale Forecast + MPS ล่วงหน้า <b id="hz">4</b> เดือน · <span id="asof"></span></div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span class="flabel">ช่วงที่ดู</span>
-          <select class="sel" id="hzSel">
-            <option value="3">ล่วงหน้า 3 เดือน</option>
-            <option value="4" selected>ล่วงหน้า 4 เดือน</option>
-          </select>
-          <button class="btn">ส่งออก Excel</button>
-          <button class="btn" onclick="openIdleReport()">พิมพ์รายงาน</button>
-          <button class="btn btn-p">ส่งให้จัดซื้อ</button>
-        </div>
+<div class="content">
+  <div class="card">
+    <div class="page-head">
+      <div>
+        <div class="page-title">บริหารวัตถุดิบใกล้หมดอายุ (FEFO)</div>
+        <div class="page-sub">ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน · ข้อมูล ณ 28 ก.ค. 26</div>
       </div>
-
-      <div class="hero">
-        <div class="hero-main">
-          <div class="lbl">มูลค่าวัตถุดิบที่ไม่มีใครจอง</div>
-          <div class="big" id="heroBig">—</div>
-          <div class="sub" id="heroSub">—</div>
-        </div>
-        <div class="hero-cards" id="cards"></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:12px;color:var(--mut)">เตือนล่วงหน้า</span>
+        <select class="alertsel" id="alertSel"><option>7 วัน</option><option>14 วัน</option><option selected>30 วัน</option><option>60 วัน</option></select>
+        <button class="hbtn" onclick="toast('ส่งออก fefo-lots.xlsx เรียบร้อย (เดโม)')">ส่งออก Excel</button>
+        <button class="hbtn pri" onclick="toast('ส่งรายการให้ผู้วางแผนแล้ว (เดโม)')">ส่งให้ผู้วางแผน</button>
       </div>
     </div>
 
-    <!-- ═══ กราฟ ═══ -->
-    <div class="card">
-      <div class="charts">
-        <div class="chart">
-          <h4>มูลค่าแยกตามกลุ่มวัตถุดิบ</h4>
-          
-          <div id="chGrp"></div>
-        </div>
-        <div class="chart">
-          <h4>มูลค่าแยกตามระยะเวลาที่ไม่ได้เบิกใช้</h4>
-          
-          <div id="chAge"></div>
-        </div>
-      </div>
+    <div class="sumrow" id="sumrow"></div>
+
+    <div class="fbar">
+      <input id="q" placeholder="ค้นหารหัส / ชื่อ / เลข Lot" />
+      <select id="fGrp"><option value="">ทุกกลุ่ม</option><option>CCL mat</option><option>PP mat</option><option>Non-market mat</option><option>Precious metal</option></select>
+      <select id="fWhs"><option value="">ทุกคลัง</option><option>WH-01 คลังกลาง</option><option>WH-02 คลังเคมี</option><option>WH-03 คลังห้องเย็น</option></select>
+      <select id="fSt"><option value="">ทุกสถานะ</option><option value="expd">หมดอายุแล้ว</option><option value="miss">จะหมดอายุก่อนแผนใช้</option><option value="fefo">ผิดคิว FEFO</option><option value="near">ใกล้หมดอายุ</option><option value="ok">ปกติ</option></select>
+      <span class="cnt" id="cnt"></span>
     </div>
 
-    <!-- ═══ ตาราง ═══ -->
-    <div class="card">
-      <div class="fbar">
-        <div class="search">
-          <span class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
-          <input id="q" placeholder="ค้นหารหัส / ชื่อ" />
-        </div>
-        <select class="sel" id="fGrp"><option value="">ทุกกลุ่ม</option></select>
-        <select class="sel" id="fSup"><option value="">ทุกผู้ขาย</option></select>
-        <select class="sel" id="fWhs"><option value="">ทุกคลัง</option></select>
-        <select class="sel" id="fAge">
-          <option value="">ไม่จำกัดเวลาที่ค้าง</option>
-          <option value="0">ค้างไม่เกิน 3 เดือน</option>
-          <option value="1">ค้าง 3 – 6 เดือน</option>
-          <option value="2+">ค้างเกิน 6 เดือน</option>
-          <option value="3">ค้างเกิน 12 เดือน</option>
-        </select>
-        <select class="sel" id="fMin">
-          <option value="0">ไม่จำกัดมูลค่า</option>
-          <option value="100000">มูลค่า ≥ ฿100,000</option>
-          <option value="500000">มูลค่า ≥ ฿500,000</option>
-          <option value="1000000">มูลค่า ≥ ฿1 ล้าน</option>
-          <option value="3000000">มูลค่า ≥ ฿3 ล้าน</option>
-        </select>
-        <button class="btn" onclick="clearF()">ล้าง</button>
-        <span class="cnt" id="cnt"></span>
-      </div>
-      <div class="tblwrap">
-        <table>
-          <thead><tr>
-            <th class="c" style="width:52px">#</th>
-            <th data-s="code" style="width:150px">Item Code<span class="sm"></span></th>
-            <th data-s="name" style="width:230px">Item Name<span class="sm"></span></th>
-            <th data-s="grp" style="width:135px">กลุ่ม<span class="sm"></span></th>
-            <th data-s="whs" style="width:135px">คลัง<span class="sm"></span></th>
-            <th class="r" data-s="stock" style="width:130px">คงเหลือ<span class="sm"></span></th>
-            <th class="r" data-s="use" style="width:158px">ถูกจองไว้แล้ว<small>ใบสั่งผลิต + Forecast <span id="hzT">4</span> ด.</small><span class="sm"></span></th>
-            <th class="r" data-s="idle" style="width:142px">ไม่มีใครจอง<span class="sm"></span></th>
-            <th class="r" data-s="val" style="width:145px">มูลค่าเงินจม<span class="sm"></span></th>
-            <th class="c" data-s="last" style="width:130px">เบิกครั้งล่าสุด<span class="sm"></span></th>
-            <th class="c" data-s="cat" style="width:130px">ประเภท<span class="sm"></span></th>
-            <th style="width:150px">แนะนำให้ทำ</th>
-          </tr></thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-      <div class="note" id="note"></div>
-    </div>
+    <table class="ft">
+      <thead><tr>
+        <th class="c">#</th><th>Item</th><th>Lot No.</th><th>คลัง</th><th>รับเข้า</th><th>หมดอายุ</th>
+        <th class="c">เหลือ (วัน)</th><th class="r">คงเหลือ</th><th class="r">จองให้ใบสั่งผลิต</th><th>แผนใช้</th><th class="c">สถานะ</th><th>คำแนะนำ</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
 
+    <div class="note"><b>กติกา FEFO:</b> ล็อตที่หมดอายุก่อนวันที่แผนจะใช้ ถูกตัดออกจากยอดที่ใช้ได้และแสดงเป็น "จะหมดอายุก่อนแผนใช้" ·
+      การจ่ายของยึดล็อตหมดอายุเร็วก่อนเสมอ การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · item ที่ไม่ควบคุม Batch ไม่อยู่ในหน้าจอนี้</div>
   </div>
-
-  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
 </div>
+
+<footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
 <div id="dlgRoot"></div>
+<div class="toastw" id="toastw"></div>
 
 <script>
-/* ══════════════════════════════════════════════════════════
-   ข้อมูลจำลอง — วัตถุดิบพร้อมราคาต่อหน่วยและแผนใช้รายเดือน
-   ══════════════════════════════════════════════════════════ */
-const TODAY=new Date(2026,7,3);
-const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const addM=(d,n)=>new Date(d.getFullYear(),d.getMonth()+n,1);
-const addD=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
-const fmtMY=d=>`${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
-const fmtD=d=>`${d.getDate()} ${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
-function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-function rng(seed){let s=hash(String(seed));return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
-const pk=(a,r)=>a[Math.floor(r()*a.length)];
-const ni=n=>Math.round(n).toLocaleString('en-US');
-function baht(n){
-  if(n>=1e6) return '฿'+(n/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ล.';
-  if(n>=1e3) return '฿'+Math.round(n/1e3).toLocaleString()+'K';
-  return '฿'+Math.round(n).toLocaleString();
-}
-const bahtFull=n=>'฿'+Math.round(n).toLocaleString('en-US');
-
-/* ราคาต่อหน่วย + อัตราใช้ต่อเดือน — ข้อมูลจำลองให้ใกล้เคียงโรงงาน PCB ขนาดกลาง */
-const GRP=[
- {g:'CCL mat',p:'RM-CCL',u:'SHT',n:34,price:[180,430],use:[800,6000],batch:true,shelf:365,
-  base:['CCL FR-4 S1000H 0.36mm','CCL HIGH TG IT-180A','CCL HALOGEN FREE S1150G','CCL CEM-3 EM-225','CCL FR-4 S1000-2M']},
- {g:'PP mat',p:'RM-PP',u:'ROLL',n:26,price:[4500,9200],use:[15,120],batch:true,shelf:90,
-  base:['PREPREG FR-4 7628','PREPREG FR-4 2116','PREPREG 1080','PREPREG HIGH TG 3313','PREPREG HF 106']},
- {g:'Copper mat',p:'RM-CU',u:'KG',n:20,price:[380,1450],use:[200,1500],batch:false,shelf:null,
-  base:['COPPER FOIL 1 Oz LF/HF','COPPER FOIL 0.5 Oz HTE','COPPER FOIL 2 Oz STD','COPPER ANODE Micrograin']},
- {g:'AL mat',p:'RM-AL',u:'SHT',n:14,price:[22,68],use:[3000,20000],batch:false,shelf:null,
-  base:['ALUMINUM SHEET MVC-1240','ALUMINUM ENTRY 0.15mm','AL BACKUP BOARD']},
- {g:'Non-market mat',p:'RM-NM',u:'KG',n:28,price:[900,3200],use:[50,600],batch:true,shelf:180,
-  base:['SOLDER MASK Green HF/LF','SOLDER MASK Black','DRY FILM E9415DI','LEGEND INK White','MICRO ETCHANT','DESMEAR CHEMICAL']},
- {g:'Precious metal',p:'RM-AU',u:'KG',n:6,price:[42000,78000],use:[3,26],batch:true,shelf:365,
-  base:['GOLD PLATING SOLUTION 2% Au','GOLD REPLENISHER','PALLADIUM ACTIVATOR']},
- {g:'Packaging mat',p:'PKG',u:'SET',n:16,price:[12,95],use:[2000,15000],batch:false,shelf:null,
-  base:['CARTON BOX A4 Double Wall','VACUUM BAG PE 0.08mm','DESICCANT 50g','STRETCH FILM 500mm','PALLET WOOD']},
+/* ── ข้อมูลจำลอง: ล็อตของ item ที่ควบคุม Batch ── */
+const TODAY=new Date(2026,6,28);
+const fmt=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
+const addD=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
+const nf=n=>n.toLocaleString('en-US');
+const L=(code,name,grp,unit,whs,lot,recvAgo,expIn,qty,price,mo,useIn)=>({code,name,grp,unit,whs,lot,recvAgo,expIn,qty,price,mo,useIn});
+const LOTS=[
+ L('RM-PP-7628','PREPREG FR-4 S1000HB 7628','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2605-C',81,9,18,6800,'MO-26080142',14),
+ L('RM-PP-7628','PREPREG FR-4 S1000HB 7628','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2606-A',52,38,11,6800,'MO-26080177',22),
+ L('RM-PP-2116','PREPREG FR-4 S1000HB 2116','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2606-B',47,43,9,7200,null,null),
+ L('RM-DF-E9415','DRY FILM E9415DI 1.5 MIL','Non-market mat','ROLL','WH-02 คลังเคมี','DF-2512-A',236,-6,9,9400,null,null),
+ L('RM-DF-E9415','DRY FILM E9415DI 1.5 MIL','Non-market mat','ROLL','WH-02 คลังเคมี','DF-2602-B',89,47,12,9400,'MO-26080191',30),
+ L('RM-SM-GRN','SOLDER MASK Green HF/LF (2K)','Non-market mat','KG','WH-02 คลังเคมี','SM-2601-B',103,23,22,2900,'MO-26080155',18),
+ L('RM-SM-GRN','SOLDER MASK Green HF/LF (2K)','Non-market mat','KG','WH-02 คลังเคมี','SM-2604-A',41,86,35,2900,'MO-26080203',12),
+ L('RM-SM-BLK','SOLDER MASK Black','Non-market mat','KG','WH-02 คลังเคมี','SB-2603-A',66,58,14,3100,null,null),
+ L('RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2508-A',34,61,240,410,'MO-26080142',26),
+ L('RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2510-B',12,118,480,410,null,null),
+ L('RM-CCL-IT180A','CCL HIGH TG IT-180A 0.51mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2507-D',58,28,105,530,null,null),
+ L('RM-CCL-IT180A','CCL HIGH TG IT-180A 0.51mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2509-E',20,90,150,530,'MO-26080168',25),
+ L('RM-INK-W','LEGEND INK White','Non-market mat','KG','WH-02 คลังเคมี','IK-2602-C',71,15,7,1800,'MO-26080196',35),
+ L('RM-ETCH-MA','MICRO ETCHANT ACID','Non-market mat','KG','WH-02 คลังเคมี','ET-2606-A',33,11,120,950,'MO-26080149',8),
+ L('RM-AU-SALT','GOLD SALT KAu(CN)2','Precious metal','KG','WH-02 คลังเคมี','AU-2601-A',95,64,1.6,72000,'MO-26090012',40),
+ L('RM-DEV-NA','DEVELOPER Na2CO3','Non-market mat','KG','WH-02 คลังเคมี','DV-2607-A',18,96,260,420,null,null),
+ L('RM-PP-1080','PREPREG FR-4 1080','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2604-D',88,4,6,7900,null,null),
 ];
-const SUP={'CCL mat':['NAN YA PLASTICS','SHENGYI TECHNOLOGY','KINGBOARD LAMINATES'],
- 'PP mat':['SHENGYI TECHNOLOGY','ITEQ CORPORATION'],'Copper mat':['FURUKAWA ELECTRIC','MITSUI MINING'],
- 'AL mat':['UACJ (THAILAND)'],'Non-market mat':['TAIYO INK MFG.','ASAHI KASEI','ATOTECH'],
- 'Precious metal':['METALOR TECHNOLOGIES','TANAKA KIKINZOKU'],'Packaging mat':['THAI CONTAINERS GROUP','SCG PACKAGING']};
-const WHS=['WH-01 คลังกลาง','WH-02 คลังเคมี','WH-03 คลังห้องเย็น','WH-04 คลังบรรจุ','WH-05 คลังของค้าง'];
-/* คลังที่เหมาะสมตามชนิดวัตถุดิบ — แผ่น/ม้วนโลหะอยู่คลังกลางหรือคลังของค้าง, PP ต้องแช่เย็น, เคมี/โลหะมีค่าอยู่คลังเคมี, บรรจุภัณฑ์อยู่คลังบรรจุ */
-const WHOPT={
- 'CCL mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
- 'Copper mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
- 'AL mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
- 'PP mat':['WH-03 คลังห้องเย็น'],
- 'Non-market mat':['WH-02 คลังเคมี'],
- 'Precious metal':['WH-02 คลังเคมี'],
- 'Packaging mat':['WH-04 คลังบรรจุ']};
-
-const ITEMS=[];
-GRP.forEach(G=>{for(let i=0;i<G.n;i++){
-  const r=rng(G.p+'idle'+i);
-  const step=G.price[1]>1000?10:1;
-  const price=Math.round((G.price[0]+r()*(G.price[1]-G.price[0]))/step)*step;
-  const monthly=Math.round(G.use[0]+r()*(G.use[1]-G.use[0]));   // อัตราใช้ปกติต่อเดือน
-  const roll=r();
-  // 12% ไม่มีแผนใช้เลย · 18% ของเกินแผน · ที่เหลือปกติ
-  const kind = roll<0.12 ? 'dead' : (roll<0.30 ? 'over' : 'ok');
-  const fc=[0,1,2,3].map(()=> kind==='dead' ? 0 : Math.round(monthly*(0.55+r()*0.95)) );
-  const cover = kind==='dead' ? 1.0+r()*3.0
-              : kind==='over' ? 4.4+r()*3.0
-              : 0.6+r()*2.0;                                     // เดือนของสต๊อกที่ถืออยู่
-  const stock=Math.max(1,Math.round(monthly*cover/5)*5);
-  const lastUsed = kind==='dead' ? 100+Math.floor(r()*480) : Math.floor(r()*150);
-  ITEMS.push({code:`${G.p}-${1000+i*11+Math.floor(r()*7)}${String.fromCharCode(65+Math.floor(r()*26))}`,
-    name:pk(G.base,r), grp:G.g, unit:G.u, price, stock, fc, monthly, lastUsed,
-    sup:pk(SUP[G.g],r), whs:WHOPT[G.g][WHS.indexOf(pk(WHS,r))%WHOPT[G.g].length], batch:G.batch, shelf:G.shelf,
-    // วันหมดอายุมีเฉพาะ item ที่ควบคุม Batch เท่านั้น
-    expIn: G.batch? Math.floor(r()*G.shelf) : null });
-}});
-
-/* ══════════════════════════════════════════════════════════
-   คำนวณ
-   ══════════════════════════════════════════════════════════ */
-let HZ=4;
-const ACTS={
- ret:{t:'คืนผู้ขาย',c:'act'},
- sub:{t:'ใช้ทดแทนรุ่นอื่น',c:'act'},
- sell:{t:'เร่งระบาย / เสนอขาย',c:'act-w'},
- off:{t:'ตัดจำหน่าย',c:'act-r'},
- hold:{t:'ทบทวนกับ Sales',c:'act-w'},
-};
-function compute(){
-  ITEMS.forEach(it=>{
-    const use=it.fc.slice(0,HZ).reduce((a,b)=>a+b,0);
-    const idle=Math.max(0,it.stock-use);
-    it.use=use; it.idle=idle; it.val=idle*it.price;
-    it.mos = use>0 ? it.stock/(use/HZ) : Infinity;
-    // จะหมดอายุก่อนได้ใช้หรือไม่ — ดูเฉพาะ item ที่ควบคุม Batch
-    const willExpire = it.batch && it.expIn!=null && it.expIn < HZ*30 && idle>0;
-    it.cat = use===0 ? 'dead' : (willExpire ? 'exp' : (idle>0 ? 'exc' : 'ok'));
-    if(willExpire && use>0) it.cat='exp';
-    it.act = it.cat==='ok' ? null
-           : it.expIn!=null && it.expIn<=0 ? 'off'
-           : it.expIn!=null && it.expIn<HZ*30 ? 'sell'
-           : it.lastUsed>270 ? 'ret'
-           : (it.grp==='Precious metal' && use===0) ? 'ret'
-           : it.mos>12 ? 'sub' : 'hold';
+/* สถานะ: expd หมดอายุแล้ว · miss จะหมดอายุก่อนแผนใช้ · fefo ผิดคิว (มีล็อตเก่ากว่ายังว่างแต่ล็อตใหม่ถูกจอง) · near ≤เกณฑ์เตือน · ok */
+function classify(alertDays){
+  LOTS.forEach(l=>{l.st = l.expIn<0?'expd' : (l.useIn!=null&&l.expIn<l.useIn)?'miss' : l.expIn<=alertDays?'near':'ok';});
+  const byItem={};
+  LOTS.forEach(l=>{(byItem[l.code]=byItem[l.code]||[]).push(l);});
+  Object.values(byItem).forEach(ls=>{
+    ls.sort((a,b)=>a.expIn-b.expIn);
+    const freeOld=ls.find(l=>!l.mo&&l.expIn>=0);
+    ls.forEach(l=>{ if(l.mo&&freeOld&&l.expIn>freeOld.expIn&&l.st==='ok') l.st='fefo'; });
   });
 }
-const ageBucket=d=> d<=90?0 : d<=180?1 : d<=365?2 : 3;
-const AGES=['ไม่เกิน 3 เดือน','3 – 6 เดือน','6 – 12 เดือน','เกิน 12 เดือน'];
-const AGECOL=['#7fb3e0','#e0a90c','#e07b39','#c62828'];
-const GRPCOL=['#4f9de6','#7a4fd3','#1e9e50','#7d8ea0','#e0a90c','#c62828','#31a5a5'];
-const CATS=[
- {k:'dead',cls:'hc-dead',t:'ไม่มีใครจองเลย',d:'ไม่ถูกจองโดยใบสั่งผลิตหรือ Forecast'},
- {k:'exc', cls:'hc-exc', t:'เหลือค้างเกินแผน',d:'ของมากกว่าที่จะใช้'},
- {k:'exp', cls:'hc-exp', t:'จะหมดอายุก่อนใช้',d:'เฉพาะ item ควบคุม Batch'},
-];
-
-/* ══════════════════════════════════════════════════════════
-   เรนเดอร์
-   ══════════════════════════════════════════════════════════ */
-let fCat='', fQ='', fGrp='', fAct='', fSup='', fWhs='', fAge='', fMin=0, fShelf='',
-    sortKey='val', sortDir=-1;
-const idleItems=()=>ITEMS.filter(i=>i.cat!=='ok');
-
-function renderHero(){
-  const all=idleItems();
-  const total=all.reduce((a,b)=>a+b.val,0);
-  const stockTotal=ITEMS.reduce((a,b)=>a+b.stock*b.price,0);
-  document.getElementById('heroBig').textContent=baht(total);
-  document.getElementById('heroSub').innerHTML=
-    `<b>${all.length}</b> รายการ · <b>${(total/stockTotal*100).toFixed(0)}%</b> ของสต๊อกทั้งหมด ${baht(stockTotal)}<br>
-     ${fmtMY(addM(TODAY,1))} – ${fmtMY(addM(TODAY,HZ))}`;
-  document.getElementById('cards').innerHTML=CATS.map(c=>{
-    const g=all.filter(i=>i.cat===c.k), v=g.reduce((a,b)=>a+b.val,0);
-    return `<button class="hc ${c.cls} ${fCat===c.k?'on':''}" onclick="setCat('${c.k}')">
-      <div class="v">${baht(v)}</div><div class="t">${c.t}</div>
-      <div class="d">${g.length} รายการ · ${c.d}</div></button>`;}).join('');
-  document.getElementById('asof').textContent=`ข้อมูล ณ ${fmtD(TODAY)}`;
-  document.getElementById('hz').textContent=HZ;
-  document.getElementById('hzT').textContent=HZ;
+const ST={expd:['หมดอายุแล้ว','b-gry'],miss:['จะหมดอายุก่อนแผนใช้','b-red'],fefo:['ผิดคิว FEFO','b-org'],near:['ใกล้หมดอายุ','b-amb'],ok:['ปกติ','b-ok']};
+const RECO={expd:['แยกกลุ่ม รอตัดจำหน่าย','r'],miss:['เร่งใช้ก่อน / เสนอสลับแผน','r'],fefo:['สลับคิวไปใช้ล็อตเก่าก่อน','w'],near:['จัดคิวผลิตให้ใช้ล็อตนี้ก่อน','w'],ok:['—','a']};
+let fQ='',fGrp='',fWhs='',fSt='',fCard='';
+function alertDays(){return parseInt(document.getElementById('alertSel').value);}
+function list(){
+  let l=LOTS.slice();
+  if(fQ){const q=fQ.toLowerCase();l=l.filter(x=>(x.code+x.name+x.lot).toLowerCase().includes(q));}
+  if(fGrp)l=l.filter(x=>x.grp===fGrp);
+  if(fWhs)l=l.filter(x=>x.whs===fWhs);
+  const st=fSt||fCard; if(st)l=l.filter(x=>x.st===st);
+  return l.sort((a,b)=>a.expIn-b.expIn);
 }
-
-function bars(el,rows,colors){
-  const max=Math.max(...rows.map(r=>r.v),1);
-  const tot=rows.reduce((a,b)=>a+b.v,0)||1;
-  /* เปอร์เซ็นต์แบบ largest remainder — ปัดแล้วรวมได้ 100% พอดี */
-  const pct=rows.map(r=>Math.floor(r.v/tot*100));
-  const rem=100-pct.reduce((a,b)=>a+b,0);
-  rows.map((r,i)=>[r.v/tot*100-pct[i],i]).sort((a,b)=>b[0]-a[0])
-    .slice(0,Math.max(0,Math.min(rem,rows.length))).forEach(([,i])=>pct[i]++);
-  document.getElementById(el).innerHTML=rows.map((r,i)=>`
-    <div class="brow">
-      <span class="nm" title="${r.n}">${r.n}</span>
-      <span class="track"><span class="fill" style="width:${r.v/max*100}%;background:${colors[i%colors.length]}"></span></span>
-      <span class="val">${baht(r.v)}</span>
-      <span class="pct">${pct[i]}%</span>
-    </div>`).join('');
+function render(){
+  classify(alertDays());
+  const sum=(st)=>LOTS.filter(l=>l.st===st);
+  const val=ls=>ls.reduce((a,l)=>a+l.qty*l.price,0);
+  const near=LOTS.filter(l=>l.expIn>=0&&l.expIn<=30);
+  const cards=[
+   ['near','c-amb',`฿${nf(Math.round(val(near)))}`,'ใกล้หมดอายุ ≤ 30 วัน',`${near.length} ล็อต · เร่งจัดคิวใช้`],
+   ['miss','c-red',`฿${nf(Math.round(val(sum('miss'))))}`,'จะหมดอายุก่อนแผนใช้',`${sum('miss').length} ล็อต · ตัดจากยอดใช้ได้แล้ว`],
+   ['fefo','c-org',`${sum('fefo').length} ล็อต`,'ผิดคิว FEFO',`ล็อตใหม่ถูกจองก่อนล็อตเก่า`],
+   ['expd','c-gry',`฿${nf(Math.round(val(sum('expd'))))}`,'หมดอายุแล้ว',`${sum('expd').length} ล็อต · แยกกลุ่ม รอตัดจำหน่าย`]];
+  document.getElementById('sumrow').innerHTML=cards.map(([k,c,v,t,d])=>
+    `<div class="sc ${c} ${fCard===k?'on':''}" onclick="fCard=fCard==='${k}'?'':'${k}';render()"><div class="v">${v}</div><div class="t">${t}</div><div class="d">${d}</div></div>`).join('');
+  const l=list();
+  document.getElementById('tb').innerHTML=l.map((x,i)=>{
+    const s=ST[x.st],r=RECO[x.st];
+    const dl=x.expIn<0?`<span class="dleft" style="color:#8aa3b8">${x.expIn}</span>`:
+      x.expIn<=14?`<span class="dleft" style="color:#c62828">${x.expIn}</span>`:
+      x.expIn<=30?`<span class="dleft" style="color:#a06a00">${x.expIn}</span>`:`<span class="dleft" style="color:#1a7a42">${x.expIn}</span>`;
+    return `<tr class="clk" onclick="openLot(${LOTS.indexOf(x)})">
+      <td class="c" style="color:var(--mut)">${i+1}</td>
+      <td><span class="code">${x.code}</span> <span class="bdg b-amb" style="font-size:9.5px">Batch</span><small>${x.name} · ${x.grp}</small></td>
+      <td><b>${x.lot}</b></td><td>${x.whs.split(' ')[0]}</td>
+      <td>${fmt(addD(TODAY,-x.recvAgo))}</td><td>${fmt(addD(TODAY,x.expIn))}</td>
+      <td class="c">${dl}</td><td class="r">${nf(x.qty)} <span style="color:var(--mut);font-size:10.5px">${x.unit}</span></td>
+      <td class="r">${x.mo?`<b>${x.mo}</b>`:'<span style="color:#b6c3d1">ยังไม่ถูกจอง</span>'}</td>
+      <td>${x.useIn!=null?fmt(addD(TODAY,x.useIn)):'—'}</td>
+      <td class="c"><span class="bdg ${s[1]}">${s[0]}</span></td>
+      <td><span class="reco ${r[1]}">${r[0]}</span></td></tr>`;
+  }).join('');
+  document.getElementById('cnt').textContent=`แสดง ${l.length} จาก ${LOTS.length} ล็อต · เฉพาะ item ควบคุม Batch`;
 }
-function renderCharts(){
-  const all=idleItems();
-  const g={}; all.forEach(i=>g[i.grp]=(g[i.grp]||0)+i.val);
-  bars('chGrp',Object.entries(g).map(([n,v])=>({n,v})).sort((a,b)=>b.v-a.v),GRPCOL);
-  const a=[0,0,0,0]; all.forEach(i=>a[ageBucket(i.lastUsed)]+=i.val);
-  bars('chAge',a.map((v,i)=>({n:AGES[i],v})),AGECOL);
-}
-
-const SORT={code:(a,b)=>a.code.localeCompare(b.code),name:(a,b)=>a.name.localeCompare(b.name),
- grp:(a,b)=>a.grp.localeCompare(b.grp),whs:(a,b)=>a.whs.localeCompare(b.whs),
- stock:(a,b)=>a.stock-b.stock,use:(a,b)=>a.use-b.use,idle:(a,b)=>a.idle-b.idle,
- val:(a,b)=>a.val-b.val,last:(a,b)=>a.lastUsed-b.lastUsed,
- cat:(a,b)=>a.cat.localeCompare(b.cat)};
-function filtered(){
-  let l=idleItems();
-  if(fCat) l=l.filter(i=>i.cat===fCat);
-  if(fGrp) l=l.filter(i=>i.grp===fGrp);
-  if(fAct) l=l.filter(i=>i.act===fAct);
-  if(fSup) l=l.filter(i=>i.sup===fSup);
-  if(fWhs) l=l.filter(i=>i.whs===fWhs);
-  if(fAge==='2+') l=l.filter(i=>ageBucket(i.lastUsed)>=2);
-  else if(fAge!=='') l=l.filter(i=>ageBucket(i.lastUsed)===+fAge);
-  if(fMin) l=l.filter(i=>i.val>=fMin);
-  if(fShelf==='y') l=l.filter(i=>i.batch);
-  if(fShelf==='n') l=l.filter(i=>!i.batch);
-  if(fQ){const q=fQ.toLowerCase();
-    l=l.filter(i=>(i.code+' '+i.name+' '+i.grp+' '+i.sup+' '+i.whs).toLowerCase().includes(q));}
-  return l.sort((a,b)=>SORT[sortKey](a,b)*sortDir);
-}
-function renderTable(){
-  const l=filtered(), tot=l.reduce((a,b)=>a+b.val,0);
-  document.getElementById('rows').innerHTML = l.length ? l.map((i,ix)=>{
-    const c=CATS.find(x=>x.k===i.cat);
-    const a=ACTS[i.act]||{t:'—',c:'act'};
-    return `<tr onclick="openItem('${i.code}')">
-      <td class="c seq">${ix+1}</td>
-      <td><span class="code">${i.code}</span></td>
-      <td>${i.name}</td>
-      <td>${i.grp}</td>
-      <td>${i.whs}</td>
-      <td class="r">${ni(i.stock)} <span style="color:var(--mut);font-size:11px">${i.unit}</span></td>
-      <td class="r">${i.use===0?'<span style="color:var(--red);font-weight:700">ไม่มีใครจอง</span>':ni(i.use)+' '+i.unit}</td>
-      <td class="r">${ni(i.idle)} <span style="color:var(--mut);font-size:11px">${i.unit}</span></td>
-      <td class="r money ${i.val>2000000?'m-hi':''}">${bahtFull(i.val)}</td>
-      <td class="c">${i.lastUsed>365?'<span style="color:var(--red)">เกิน 1 ปี</span>':fmtD(addD(TODAY,-i.lastUsed))}</td>
-      <td class="c"><span class="tag t-${i.cat}">${c.t}</span></td>
-      <td><span class="${a.c}">${a.t}</span></td></tr>`;}).join('')
-    : `<tr><td colspan="12" class="empty">ไม่พบรายการตามเงื่อนไข</td></tr>`;
-  document.getElementById('cnt').innerHTML=`แสดง <b>${l.length}</b> รายการ · รวม <b>${bahtFull(tot)}</b>`;
-  document.querySelectorAll('thead th[data-s]').forEach(th=>{
-    th.querySelector('.sm').textContent = sortKey===th.dataset.s ? (sortDir>0?'▲':'▼') : '';
-  });
-  // สรุปท้ายตาราง
-  const dead=idleItems().filter(i=>i.cat==='dead');
-  const top=[...idleItems()].sort((a,b)=>b.val-a.val)[0];
-  document.getElementById('note').innerHTML=
-    `“ไม่มีใครจอง” = ของในคลังส่วนที่ไม่ถูกจองให้ใบสั่งผลิตใด และไม่ถูกกันไว้ตาม Sale Forecast ${HZ} เดือนข้างหน้า —
-     ยอดนี้ตรงกับแถว “คงเหลือที่ยังไม่ถูกจอง” ในกระดานวางแผนวัตถุดิบ · หัก Safety Stock ออกแล้ว`;
-}
-function renderAll(){ compute(); renderHero(); renderCharts(); renderTable(); }
-
-/* ── โต้ตอบ ── */
-function setCat(k){ fCat = fCat===k?'':k; renderHero(); renderTable(); }
-function clearF(){
-  fCat=fQ=fGrp=fAct=fSup=fWhs=fAge=fShelf=''; fMin=0;
-  ['q','fGrp','fSup','fWhs','fAge'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('fMin').value='0';
-  renderHero(); renderTable();
-}
-document.getElementById('hzSel').onchange=e=>{HZ=+e.target.value; renderAll();};
-let qT; document.getElementById('q').addEventListener('input',e=>{
-  clearTimeout(qT); qT=setTimeout(()=>{fQ=e.target.value.trim(); renderTable();},150);});
-document.getElementById('fGrp').onchange=e=>{fGrp=e.target.value; renderTable();};
-document.getElementById('fSup').onchange=e=>{fSup=e.target.value; renderTable();};
-document.getElementById('fWhs').onchange=e=>{fWhs=e.target.value; renderTable();};
-document.getElementById('fAge').onchange=e=>{fAge=e.target.value; renderTable();};
-document.getElementById('fMin').onchange=e=>{fMin=+e.target.value; renderTable();};
-document.querySelectorAll('thead th[data-s]').forEach(th=>{
-  th.onclick=()=>{const k=th.dataset.s; sortDir = sortKey===k?-sortDir:-1; sortKey=k; renderTable();};});
-(function init(){
-  const g=document.getElementById('fGrp');
-  GRP.forEach(x=>{const o=document.createElement('option');o.value=x.g;o.textContent=x.g;g.appendChild(o);});
-  const add=(id,arr)=>{const el=document.getElementById(id);
-    arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});};
-  add('fSup',[...new Set(ITEMS.map(i=>i.sup))].sort());
-  add('fWhs',[...new Set(ITEMS.map(i=>i.whs))].sort());
-})();
-
-/* ── รายละเอียดรายการ ── */
-function openItem(code){
-  const i=ITEMS.find(x=>x.code===code);
-  const max=Math.max(...i.fc.slice(0,HZ),1);
-  const months=[1,2,3,4].map(k=>fmtMY(addM(TODAY,k)));
-  const c=CATS.find(x=>x.k===i.cat), a=ACTS[i.act]||{t:'—'};
+function openLot(i){
+  const x=LOTS[i],s=ST[x.st],r=RECO[x.st];
   document.getElementById('dlgRoot').innerHTML=`
   <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
-    <div class="dlg-hd"><h3>${i.name}
-      <small>${i.code} · ${i.grp} · ${i.sup} · ${i.whs}</small></h3>
+    <div class="dlg-hd"><div><h3>Lot ${x.lot} — ${x.code}</h3><small>${x.name} · ${x.grp} · ${x.whs}</small></div>
       <button class="dlg-x" onclick="closeDlg()">×</button></div>
     <div class="dlg-bd">
       <div class="kv4">
-        <div>คงเหลือ<b>${ni(i.stock)} ${i.unit}</b></div>
-        <div>ราคาต่อหน่วย<b>${bahtFull(i.price)}</b></div>
-        <div>มูลค่าคงเหลือ<b>${bahtFull(i.stock*i.price)}</b></div>
-        <div>มูลค่าที่ไม่มีใครจอง<b style="color:var(--red)">${bahtFull(i.val)}</b></div>
+        <div>รับเข้า<b>${fmt(addD(TODAY,-x.recvAgo))}</b></div>
+        <div>หมดอายุ<b style="color:${x.expIn<=14?'#c62828':x.expIn<=30?'#a06a00':'#1a7a42'}">${fmt(addD(TODAY,x.expIn))} (${x.expIn<0?'เลยมา '+(-x.expIn):'อีก '+x.expIn} วัน)</b></div>
+        <div>คงเหลือ<b>${nf(x.qty)} ${x.unit}</b></div>
+        <div>มูลค่า<b>฿${nf(Math.round(x.qty*x.price))}</b></div>
       </div>
-      <div style="font-size:13px;font-weight:700;color:#3a5773;margin-bottom:4px">แผนการใช้ ${HZ} เดือนข้างหน้า</div>
-      <div style="font-size:11.5px;color:var(--mut);margin-bottom:6px">ดึงจาก Sale Forecast + MPS</div>
-      <div class="fcbar">${i.fc.slice(0,HZ).map(v=>`<div class="fcb">
-        ${v>0?`<div class="bx" style="height:${Math.max(4,v/max*88)}px"></div>`:`<div class="zero"></div>`}
-      </div>`).join('')}</div>
-      <div class="fclab">${months.slice(0,HZ).map((m,k)=>`<div>${m}<b>${i.fc[k]>0?ni(i.fc[k])+' '+i.unit:'ไม่มีแผน'}</b></div>`).join('')}</div>
-
-      <div class="kv4" style="margin-top:16px">
-        <div>เบิกครั้งล่าสุด<b>${i.lastUsed>365?'เกิน 1 ปี':fmtD(addD(TODAY,-i.lastUsed))}</b></div>
-        <div>อัตราใช้ปกติ<b>${ni(i.monthly)} ${i.unit}/เดือน</b></div>
-        <div>ของพอใช้ไปอีก<b>${i.mos===Infinity?'ไม่มีกำหนด':i.mos.toFixed(1)+' เดือน'}</b></div>
-        <div>วันหมดอายุ (ราย Lot)<b>${i.batch?(i.expIn<=0?'หมดอายุแล้ว':'อีก '+i.expIn+' วัน'):'ไม่ควบคุม Batch'}</b></div>
-      </div>
-      <div class="note" style="margin-top:6px">
-        <b>ประเภท: ${c.t}</b> — ${c.d}<br>
-        <b>แนะนำให้ทำ: ${a.t}</b>
-        ${i.act==='ret'?' — ของยังไม่เปิดใช้และค้างนาน ลองเจรจาคืนผู้ขายหรือแลกเป็นรุ่นที่ใช้อยู่'
-         :i.act==='sub'?' — ตรวจ BOM ว่ามีรุ่นอื่นที่ใช้แทนกันได้ จะได้ระบายของก้อนนี้ก่อน'
-         :i.act==='sell'?' — เหลือเวลาไม่มาก ควรจัดคิวผลิตให้ใช้ก่อน หรือเสนอขายให้โรงงานอื่น'
-         :i.act==='off'?' — เลยวันหมดอายุแล้ว ควรตัดออกจากบัญชีเพื่อให้มูลค่าสต๊อกสะท้อนความจริง'
-         :' — ทบทวนกับ Sales ว่ามีโอกาสได้ออเดอร์ที่ใช้วัสดุนี้ไหม ก่อนตัดสินใจ'}
+      <b style="font-size:13px;color:#3a5773">การจองและแผนการใช้</b>
+      <table class="dtb"><thead><tr><th>ใบสั่งผลิต</th><th>วันที่แผนจะใช้</th><th class="r">จำนวนที่จอง</th><th>คิว FEFO</th></tr></thead>
+      <tbody>${x.mo?`<tr><td><b>${x.mo}</b></td><td>${fmt(addD(TODAY,x.useIn))}</td><td class="r">${nf(x.qty)} ${x.unit}</td>
+        <td>${x.st==='fefo'?'<span class="bdg b-org">ข้ามล็อตเก่ากว่า</span>':x.st==='miss'?'<span class="bdg b-red">หมดอายุก่อนวันใช้</span>':'<span class="bdg b-ok">ตามคิว</span>'}</td></tr>`
+        :`<tr><td colspan="4" style="color:#8aa3b8;text-align:center;padding:14px">ยังไม่มีใบสั่งผลิตจองล็อตนี้</td></tr>`}</tbody></table>
+      <div style="margin-top:12px;font-size:12.5px"><b style="color:#3a5773">คำแนะนำของระบบ:</b> <span class="reco ${r[1]}">${r[0]}</span></div>
+      <div class="exf" id="exf">
+        <b style="font-size:12.5px;color:#8a6a00">ขออนุมัติข้อยกเว้น FEFO — ต้องระบุเหตุผล</b>
+        <textarea id="exReason" placeholder="เช่น ล็อตเก่าติดรอผล QA · ลูกค้ากำหนดสเปกล็อตผลิตใหม่"></textarea>
+        <div style="text-align:right;margin-top:8px"><button class="hbtn pri" onclick="toast('บันทึกคำขอข้อยกเว้น FEFO พร้อมเหตุผลแล้ว รอผู้มีสิทธิ์อนุมัติ (เดโม)');closeDlg()">ส่งคำขอ</button></div>
       </div>
     </div>
-    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">ราคาต่อหน่วยจากราคาซื้อล่าสุด</span>
-      <span><button class="btn" onclick="closeDlg()">ปิด</button>
-      <button class="btn btn-p" onclick="closeDlg()">ส่งให้จัดซื้อพิจารณา</button></span></div>
+    <div class="dlg-ft">
+      <button class="hbtn" onclick="document.getElementById('exf').style.display='block'">ขอข้อยกเว้น FEFO</button>
+      <button class="hbtn" onclick="toast('ส่งคำขอเร่งใช้ล็อตนี้ให้ผู้วางแผนแล้ว (เดโม)')">เสนอเร่งใช้ก่อน</button>
+      <button class="hbtn pri" onclick="closeDlg()">ปิด</button>
+    </div>
   </div></div>`;
 }
 function closeDlg(){document.getElementById('dlgRoot').innerHTML='';}
+function toast(m){const d=document.createElement('div');d.className='tst';d.textContent=m;
+  document.getElementById('toastw').appendChild(d);setTimeout(()=>d.remove(),3800);}
+document.getElementById('q').addEventListener('input',e=>{fQ=e.target.value.trim();render();});
+['fGrp','fWhs','fSt'].forEach(id=>document.getElementById(id).onchange=e=>{window['f'+id.slice(1)]=e.target.value;render();});
+document.getElementById('alertSel').onchange=()=>render();
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
-
-renderAll();
+render();
 </script>
 <script>
-/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
-<script src="apex-report.js"></script>
-<script>
-/* ─── รายงานวัตถุดิบที่ไม่มีแผนใช้ (เงินจมในคลัง) ─── */
-function openIdleReport(){
-  const F=ApexReport.fmt, MAX=45;
-  const l=filtered();                       /* ใช้ตัวกรองปัจจุบันบนหน้าจอ */
-  const shown=l.slice(0,MAX);
-  const rows=shown.map((it,i)=>{
-    const c=CATS.find(x=>x.k===it.cat);
-    return [i+1,it.code,it.name,it.grp,it.whs.split(' ')[0],F(it.stock),F(it.use),F(it.idle),
-      F(it.val),c?c.t:'—',it.act&&ACTS[it.act]?ACTS[it.act].t:'—'];
-  });
-  const tot=l.reduce((a,b)=>a+b.val,0);
-  const catSum=k=>l.filter(i=>i.cat===k).reduce((a,b)=>a+b.val,0);
-  ApexReport.open({
-    docNo:'IDLE-260803',
-    title:'รายงานวัตถุดิบที่ไม่มีแผนใช้',
-    titleEn:'Idle Material — Dead Stock Value Report',
-    meta:[['เลขที่รายงาน','IDLE-260803'],['ข้อมูล ณ วันที่','03-08-2026'],
-          ['ช่วงที่พิจารณา','ล่วงหน้า '+HZ+' เดือน (Forecast + MPS)'],['จำนวนรายการ',F(l.length)+' รายการ']],
-    meta2:[['ไม่มีแผนใช้เลย',F(l.filter(i=>i.cat==='dead').length)+' รายการ'],
-           ['เหลือค้างเกินแผน',F(l.filter(i=>i.cat==='exc').length)+' รายการ'],
-           ['จะหมดอายุก่อนใช้',F(l.filter(i=>i.cat==='exp').length)+' รายการ'],
-           ['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
-    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัส'},{t:'ชื่อวัตถุดิบ'},{t:'กลุ่ม'},{t:'คลัง',a:'c'},
-          {t:'คงเหลือ',a:'r'},{t:'แผนใช้',a:'r'},{t:'ไม่มีแผนใช้',a:'r'},{t:'มูลค่าจม (฿)',a:'r'},{t:'ประเภท'},{t:'แนะนำ'}],
-    rows,
-    totals:[['มูลค่าจม — ไม่มีแผนใช้เลย',F(catSum('dead'))+' ฿'],
-            ['มูลค่าจม — เหลือค้างเกินแผน',F(catSum('exc'))+' ฿'],
-            ['มูลค่าจม — จะหมดอายุก่อนใช้',F(catSum('exp'))+' ฿'],
-            ['มูลค่าเงินจมรวมทั้งสิ้น',F(tot)+' ฿','b']],
-    note:(l.length>MAX?'แสดง '+MAX+' รายการมูลค่าสูงสุดจากทั้งหมด '+F(l.length)+' รายการ (ตามตัวกรองปัจจุบัน) · ':'')+
-      'เรียงตามมูลค่าเงินจม · คำแนะนำการจัดการ (คืนผู้ขาย / ระบาย / ตัดจำหน่าย) ประเมินจากอายุการเบิกใช้และอายุจัดเก็บ',
-    signs:[['ผู้จัดทำ','Prepared by'],['ผู้จัดการคลัง','Warehouse Manager'],['ผู้อนุมัติ','Approved by']]
-  });
-}
-</script>
-<script id="apexI18nDict">window.APEX_I18N_PAGE = {
-"วัตถุดิบที่ไม่มีใครจอง — APEX Circuit":"Unreserved Materials — APEX Circuit",
-"อาทิตย์ สุดชาติ":"Arthit Sudchat",
-"วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง":"Unreserved Materials — Tied-Up Capital in Stock",
-"จาก Sale Forecast + MPS ล่วงหน้า":"From Sales Forecast + MPS, next",
-"เดือน ·":"months ·",
-"ช่วงที่ดู":"Horizon",
-"ล่วงหน้า 3 เดือน":"Next 3 Months",
-"ล่วงหน้า 4 เดือน":"Next 4 Months",
-"ส่งออก Excel":"Export Excel",
-"ส่งให้จัดซื้อ":"Send to Purchasing",
-"มูลค่าวัตถุดิบที่ไม่มีใครจอง":"Value of Unreserved Materials",
-"มูลค่าแยกตามกลุ่มวัตถุดิบ":"Value by Material Group",
-"มูลค่าแยกตามระยะเวลาที่ไม่ได้เบิกใช้":"Value by Time Since Last Issue",
-"ค้นหารหัส / ชื่อ":"Search code / name",
-"ทุกกลุ่ม":"All Groups",
-"ทุกผู้ขาย":"All Suppliers",
-"ทุกคลัง":"All Warehouses",
-"ไม่จำกัดเวลาที่ค้าง":"Any Idle Age",
-"ค้างไม่เกิน 3 เดือน":"Idle ≤ 3 Months",
-"ค้าง 3 – 6 เดือน":"Idle 3 – 6 Months",
-"ค้างเกิน 6 เดือน":"Idle > 6 Months",
-"ค้างเกิน 12 เดือน":"Idle > 12 Months",
-"ไม่จำกัดมูลค่า":"Any Value",
-"มูลค่า ≥ ฿100,000":"Value ≥ THB 100,000",
-"มูลค่า ≥ ฿500,000":"Value ≥ THB 500,000",
-"มูลค่า ≥ ฿1 ล้าน":"Value ≥ THB 1M",
-"มูลค่า ≥ ฿3 ล้าน":"Value ≥ THB 3M",
-"ล้าง":"Clear",
-"กลุ่ม":"Group",
-"คลัง":"Warehouse",
-"คงเหลือ":"On-Hand",
-"ถูกจองไว้แล้ว":"Reserved",
-"ใบสั่งผลิต + Forecast":"WO + Forecast",
-"ด.":"mo.",
-"ไม่มีใครจอง":"Unreserved",
-"มูลค่าเงินจม":"Tied-Up Value",
-"เบิกครั้งล่าสุด":"Last Issue",
-"ประเภท":"Category",
-"แนะนำให้ทำ":"Recommended Action",
-"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
-"ม.ค.":"Jan",
-"ก.พ.":"Feb",
-"มี.ค.":"Mar",
-"เม.ย.":"Apr",
-"พ.ค.":"May",
-"มิ.ย.":"Jun",
-"ก.ค.":"Jul",
-"ส.ค.":"Aug",
-"ก.ย.":"Sep",
-"ต.ค.":"Oct",
-"พ.ย.":"Nov",
-"ธ.ค.":"Dec",
-"฿":"THB",
-"ล.":"M",
-"WH-01 คลังกลาง":"WH-01 Central Warehouse",
-"WH-02 คลังเคมี":"WH-02 Chemical Warehouse",
-"WH-03 คลังห้องเย็น":"WH-03 Cold Storage",
-"WH-04 คลังบรรจุ":"WH-04 Packaging Warehouse",
-"WH-05 คลังของค้าง":"WH-05 Idle Stock Warehouse",
-"อัตราใช้ปกติต่อเดือน":"normal usage rate per month",
-"เดือนของสต๊อกที่ถืออยู่":"months of stock on hand",
-"คืนผู้ขาย":"Return to Supplier",
-"ใช้ทดแทนรุ่นอื่น":"Use as Substitute",
-"เร่งระบาย / เสนอขาย":"Expedite Use / Offer for Sale",
-"ตัดจำหน่าย":"Write Off",
-"ทบทวนกับ Sales":"Review with Sales",
-"ไม่เกิน 3 เดือน":"≤ 3 Months",
-"3 – 6 เดือน":"3 – 6 Months",
-"6 – 12 เดือน":"6 – 12 Months",
-"เกิน 12 เดือน":"> 12 Months",
-"ไม่มีใครจองเลย":"Not Reserved at All",
-"ไม่ถูกจองโดยใบสั่งผลิตหรือ Forecast":"Not reserved by any WO or forecast",
-"เหลือค้างเกินแผน":"Excess over Plan",
-"ของมากกว่าที่จะใช้":"More stock than will be used",
-"จะหมดอายุก่อนใช้":"Expiring Before Use",
-"เฉพาะ item ควบคุม Batch":"Batch-controlled items only",
-"รายการ ·":"items ·",
-"ของสต๊อกทั้งหมด":"of total stock",
-"ข้อมูล ณ":"Data as of",
-"เกิน 1 ปี":"> 1 Year",
-"ไม่พบรายการตามเงื่อนไข":"No items match the filters",
-"แสดง":"Showing",
-"รายการ · รวม":"items · Total",
-"“ไม่มีใครจอง” = ของในคลังส่วนที่ไม่ถูกจองให้ใบสั่งผลิตใด และไม่ถูกกันไว้ตาม Sale Forecast":"“Unreserved” = on-hand stock not reserved for any work order and not set aside per the sales forecast for the next",
-"เดือนข้างหน้า —":"months —",
-"ยอดนี้ตรงกับแถว “คงเหลือที่ยังไม่ถูกจอง” ในกระดานวางแผนวัตถุดิบ · หัก Safety Stock ออกแล้ว":"this figure matches the “Unreserved On-Hand” row on the material planning board · Safety stock already deducted",
-"ราคาต่อหน่วยจากราคาซื้อล่าสุด":"Unit price based on latest purchase price",
-"ราคาต่อหน่วย":"Unit Price",
-"มูลค่าคงเหลือ":"On-Hand Value",
-"มูลค่าที่ไม่มีใครจอง":"Unreserved Value",
-"แผนการใช้":"Usage Plan — Next",
-"เดือนข้างหน้า":"Months",
-"ดึงจาก Sale Forecast + MPS":"Pulled from Sales Forecast + MPS",
-"ไม่มีแผน":"No Plan",
-"อัตราใช้ปกติ":"Normal Usage Rate",
-"/เดือน":"/month",
-"ของพอใช้ไปอีก":"Stock Lasts Another",
-"ไม่มีกำหนด":"Indefinite",
-"เดือน":"months",
-"วันหมดอายุ (ราย Lot)":"Expiry Date (per Lot)",
-"หมดอายุแล้ว":"Expired",
-"อีก":"in",
-"วัน":"days",
-"ไม่ควบคุม Batch":"Not Batch-Controlled",
-"— ของยังไม่เปิดใช้และค้างนาน ลองเจรจาคืนผู้ขายหรือแลกเป็นรุ่นที่ใช้อยู่":"— stock is unopened and long idle; negotiate a return to the supplier or exchange for a grade in use",
-"— ตรวจ BOM ว่ามีรุ่นอื่นที่ใช้แทนกันได้ จะได้ระบายของก้อนนี้ก่อน":"— check the BOM for interchangeable grades so this lot can be consumed first",
-"— เหลือเวลาไม่มาก ควรจัดคิวผลิตให้ใช้ก่อน หรือเสนอขายให้โรงงานอื่น":"— little time left; schedule production to consume it first, or offer it for sale to another plant",
-"— เลยวันหมดอายุแล้ว ควรตัดออกจากบัญชีเพื่อให้มูลค่าสต๊อกสะท้อนความจริง":"— already past expiry; write it off so stock value reflects reality",
-"— ทบทวนกับ Sales ว่ามีโอกาสได้ออเดอร์ที่ใช้วัสดุนี้ไหม ก่อนตัดสินใจ":"— review with Sales whether an order using this material is likely before deciding",
-"ส่งให้จัดซื้อพิจารณา":"Send to Purchasing for Review",
-"รายงานวัตถุดิบที่ไม่มีแผนใช้":"Idle Material Report",
-"เลขที่รายงาน":"Report No.",
-"ข้อมูล ณ วันที่":"Data as of",
-"ช่วงที่พิจารณา":"Period Considered",
-"ล่วงหน้า":"next",
-"จำนวนรายการ":"Item Count",
-"ไม่มีแผนใช้เลย":"No Planned Use at All",
-"ไม่มีแผนใช้":"No Planned Use",
-"แผนใช้":"Planned Use",
-"ผู้พิมพ์":"Printed by",
-"รหัส":"Code",
-"ชื่อวัตถุดิบ":"Material Name",
-"มูลค่าจม (฿)":"Tied-Up Value (THB)",
-"มูลค่าจม — ไม่มีแผนใช้เลย":"Tied-Up — No Planned Use at All",
-"มูลค่าจม — เหลือค้างเกินแผน":"Tied-Up — Excess over Plan",
-"มูลค่าจม — จะหมดอายุก่อนใช้":"Tied-Up — Expiring Before Use",
-"มูลค่าเงินจมรวมทั้งสิ้น":"Total Tied-Up Value",
-"แนะนำ":"Action",
-"รายการมูลค่าสูงสุดจากทั้งหมด":"highest-value items out of",
-"ตามตัวกรองปัจจุบัน":"per current filters",
-"เรียงตามมูลค่าเงินจม · คำแนะนำการจัดการ (คืนผู้ขาย / ระบาย / ตัดจำหน่าย) ประเมินจากอายุการเบิกใช้และอายุจัดเก็บ":"Sorted by tied-up value · recommended actions (return / liquidate / write off) assessed from last-issue age and storage age",
-"ผู้จัดการคลัง":"Warehouse Manager"
-};</script>
-<script src="apex-i18n.js"></script>
 </body>
 </html>

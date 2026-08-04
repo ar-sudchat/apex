@@ -229,6 +229,7 @@ html.embed .content{padding-top:14px}
           <div class="page-sub">MOQ · Lead Time · Safety Stock · Firm Zone — ค่าที่ MRP ใช้คำนวณว่าจะสั่งอะไร เท่าไร เมื่อไร</div></div>
         <div style="display:flex;gap:8px">
           <button class="btn" onclick="openImport()"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M4 19h16"/></svg>นำเข้า Excel</button>
+          <button class="btn" onclick="openParamReport()"><svg viewBox="0 0 24 24"><path d="M7 8V3.5h10V8"/><rect x="4" y="8" width="16" height="8.5" rx="1.5"/><path d="M7 14h10v6H7z"/></svg>พิมพ์รายงาน</button>
           <button class="btn btn-p" onclick="saveAll()">บันทึกการแก้ไข</button>
         </div>
       </div>
@@ -310,7 +311,7 @@ const DATA=[
  R('RM-CU-FOIL05','COPPER FOIL 0.5 Oz HTE','Copper mat','MITSUI MINING','01-RM คลังวัตถุดิบ','KG',48,600,1500,'MOQ',0,48,0,68),
  R('RM-CU-FOIL2','COPPER FOIL 2 Oz LF','Copper mat','FURUKAWA ELECTRIC','01-RM คลังวัตถุดิบ','KG',42,400,0,'MOQ',0,42,0,31),
  R('RM-CU-ANODE','COPPER ANODE Micrograin Ø50','Copper mat','NIKKO METALS','01-RM คลังวัตถุดิบ','KG',35,500,1250,'MOQ',0,35,0,42),
- R('RM-AU-SALT','GOLD SALT KAu(CN)2','Precious metal','TANAKA KIKINZOKU','12-AU ตู้นิรภัย','KG',28,2,4.5,'L4L',0,28,365,0.16),
+ R('RM-AU-SALT','GOLD PLATING SOLUTION 2% Au','Precious metal','TANAKA KIKINZOKU','12-AU ตู้นิรภัย','KG',28,2,4.5,'L4L',0,28,365,0.16),
  R('RM-AG-SALT','SILVER SALT AgNO3 (Immersion)','Precious metal','METALOR TECHNOLOGIES','12-AU ตู้นิรภัย','KG',30,5,11,'L4L',0,30,365,0.38),
  R('RM-PD-SALT','PALLADIUM SALT (Activator)','Precious metal','UMICORE','12-AU ตู้นิรภัย','KG',38,1,null,'L4L',0,38,365,0.07),
  R('RM-SN-SOL','TIN PLATING SOLUTION','Non-market mat','ATOTECH','04-CHEM คลังเคมี','KG',30,200,460,'MOQ',0,30,270,17),
@@ -382,7 +383,7 @@ function renderStrip(){
   const n=x=>DATA.filter(r=>stOf(r)===x).length;
   const S=[['','ทั้งหมด',DATA.length,'c-all'],['ok','ตั้งค่าครบ ใช้ได้',n('ok'),'c-ok'],
     ['none','ยังตั้งค่าไม่ครบ',n('none'),'c-none'],['warn','ค่าน่าสงสัย ควรทบทวน',n('warn'),'c-warn'],
-    ['edit','แก้ไขใน 30 วัน',DATA.filter(r=>r.at!=='—').length,'c-edit']];
+    ['edit','มีการแก้ไขล่าสุด',DATA.filter(r=>r.at!=='—').length,'c-edit']];
   g('strip').innerHTML=S.map(([k,t,v,c])=>
     `<button class="sc ${c} ${fs===k?'on':''}" onclick="setStat('${k}')"><div class="n">${v}</div><div class="t">${t}</div></button>`).join('');
 }
@@ -604,7 +605,7 @@ function applyBulk(mode){
 
 /* ═════════ Dialog: เกณฑ์ตรวจ / นำเข้า ═════════ */
 function openRules(){
-  const RS=[['ยังตั้งค่าไม่ครบ','Lead Time · MOQ · Safety Stock ช่องใดช่องหนึ่งว่าง','ระบบข้ามรายการนี้ตอนรัน MRP'],
+  const RS=[['ยังตั้งค่าไม่ครบ','Lead Time · MOQ · Safety Stock ช่องใดช่องหนึ่งว่าง','MRP ใช้ค่า default แทนช่องที่ว่าง — ควรเติมให้ครบก่อนวางใจผลลัพธ์'],
    ['Lead Time เกิน 90 วัน','ค่า Lead Time > 90','มักเกิดจากกรอกหน่วยผิด หรือคัดลอกจากผู้ขายเก่า'],
    ['กลุ่มวิกฤตแต่ Safety Stock = 0','กลุ่ม CCL · Copper · Precious metal','กลุ่มราคาผันผวนไม่ควรไม่มีกันชน'],
    ['MOQ สั่งครั้งเดียวใช้เกิน 6 เดือน','MOQ ÷ อัตราใช้ต่อวัน > 180','เสี่ยงเงินจมและของค้างเกินอายุ'],
@@ -635,10 +636,10 @@ function openImport(){
   const rows=[['RM-CCL-S1000H','45','4,000','9,000','MOQ','ผ่าน',''],
     ['RM-CCL-EM370','58','1,500','3,300','MOQ','ผ่าน','เติม Safety Stock ที่ยังว่าง'],
     ['RM-PP-106','72','25','160','MOQ','ผ่าน','เดิม Safety Stock = 0'],
-    ['RM-NM-STRIP','28','300','620','FIX','ผ่าน','เติม Safety Stock ที่ยังว่าง'],
-    ['RM-AU-SALT','280','2','4.5','L4L','ไม่ผ่าน','Lead Time 280 วัน เกินเกณฑ์ 90 วัน'],
+    ['RM-NM-STRIP','28','300','620','FIX','ผ่าน','ปรับ Safety Stock 700 → 620 ตามอัตราใช้ล่าสุด'],
+    ['RM-AU-SALT','280','2','4.5','L4L','ไม่ผ่าน','Lead Time 280 วัน เกินเพดานนำเข้า 180 วัน — ตรวจหน่วยข้อมูล'],
     ['RM-XX-9901','30','100','250','MOQ','ไม่ผ่าน','ไม่พบรหัสวัตถุดิบนี้ในระบบ'],
-    ['PKG-LABEL','9','20,000','24,000','L4L','ผ่าน','เติม Safety Stock ที่ยังว่าง']];
+    ['PKG-LABEL','9','20,000','5,500','L4L','ผ่าน','เติม Safety Stock ที่ยังว่าง']];
   const ok=rows.filter(r=>r[5]==='ผ่าน').length;
   g('dlgRoot').innerHTML=`
   <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
@@ -673,6 +674,33 @@ renderStrip(); render(); syncSel();
 <script>
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานพารามิเตอร์การวางแผน ─── */
+function openParamReport(){
+  const F=ApexReport.fmt;
+  const rows=DATA.map((r,i)=>[i+1,r.code,r.name,r.grp,r.unit,
+    r.lt+' วัน',F(r.moq),r.ss==null?'—':F(r.ss),r.rule,r.fz+' วัน',r.shelf?r.shelf+' วัน':'—']);
+  const missing=DATA.filter(r=>r.ss==null||!r.lt||!r.moq).length;
+  ApexReport.open({
+    docNo:'PARAM-260803',
+    title:'รายงานพารามิเตอร์การวางแผน',
+    titleEn:'Planning Parameter Master Report (MOQ · Lead Time · Safety Stock · Firm Zone)',
+    meta:[['เลขที่รายงาน','PARAM-260803'],['จำนวนวัตถุดิบ',DATA.length+' รายการ'],
+          ['กลุ่มวัตถุดิบ',GRP.length+' กลุ่ม'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['คลัง',WHS.length+' คลัง'],['ค่ายังไม่ครบ',missing+' รายการ'],
+           ['ใช้กับระบบ','MRP · MPS'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสวัตถุดิบ'},{t:'ชื่อวัตถุดิบ'},{t:'กลุ่ม'},{t:'หน่วย',a:'c'},
+          {t:'Lead Time',a:'r'},{t:'MOQ',a:'r'},{t:'Safety',a:'r'},{t:'วิธีสั่ง',a:'c'},{t:'Firm Zone',a:'r'},{t:'อายุจัดเก็บ',a:'r'}],
+    rows,
+    totals:[['พารามิเตอร์ครบถ้วน',(DATA.length-missing)+' รายการ'],
+            ['ยังไม่ครบ / ควรทบทวน',missing+' รายการ'],
+            ['รวมทั้งหมด',DATA.length+' รายการ','b']],
+    note:'ค่าในรายงานนี้คือค่าที่ MRP ใช้คำนวณว่าจะสั่งอะไร เท่าไร เมื่อไร · การแก้ไขทุกครั้งถูกบันทึกในประวัติ (ปุ่มประวัติท้ายแถว)',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "ตั้งค่าพารามิเตอร์การวางแผน — APEX Circuit":"Planning Parameter Setup — APEX Circuit",
@@ -740,7 +768,7 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "เลือกสั่งตามรอบเวลาแต่ยังไม่ระบุรอบ":"Fixed-period ordering selected but no cycle specified",
 "ตั้งค่าครบ ใช้ได้":"Complete, ready to use",
 "ค่าน่าสงสัย ควรทบทวน":"Suspect values, review needed",
-"แก้ไขใน 30 วัน":"Edited in last 30 days",
+"มีการแก้ไขล่าสุด":"Recently edited",
 "ยังไม่ตั้ง":"Not set",
 "ใช้ได้":"OK",
 "ยังไม่ครบ":"Incomplete",
@@ -806,7 +834,7 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ปรับ":"Updated",
 "รายการแล้ว — ตรวจดูช่องสีเหลืองก่อนกดบันทึก":"items — review the yellow cells before saving",
 "Lead Time · MOQ · Safety Stock ช่องใดช่องหนึ่งว่าง":"Any of Lead Time · MOQ · Safety Stock left blank",
-"ระบบข้ามรายการนี้ตอนรัน MRP":"The system skips this item during the MRP run",
+"MRP ใช้ค่า default แทนช่องที่ว่าง — ควรเติมให้ครบก่อนวางใจผลลัพธ์":"MRP substitutes default values for the blank fields — fill them in before trusting the results",
 "Lead Time เกิน 90 วัน":"Lead Time over 90 days",
 "ค่า Lead Time > 90":"Lead Time value > 90",
 "มักเกิดจากกรอกหน่วยผิด หรือคัดลอกจากผู้ขายเก่า":"Usually a wrong unit entry or values copied from a former supplier",
@@ -833,7 +861,8 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ไม่ผ่าน":"Failed",
 "เติม Safety Stock ที่ยังว่าง":"Fills blank Safety Stock",
 "เดิม Safety Stock = 0":"Previously Safety Stock = 0",
-"Lead Time 280 วัน เกินเกณฑ์ 90 วัน":"Lead Time 280 days exceeds the 90-day limit",
+"Lead Time 280 วัน เกินเพดานนำเข้า 180 วัน — ตรวจหน่วยข้อมูล":"Lead Time 280 days exceeds the 180-day import ceiling — check the data units",
+"ปรับ Safety Stock 700 → 620 ตามอัตราใช้ล่าสุด":"Adjusts Safety Stock 700 → 620 per the latest usage rate",
 "ไม่พบรหัสวัตถุดิบนี้ในระบบ":"Material code not found in the system",
 "นำเข้าพารามิเตอร์จาก Excel — ตรวจสอบก่อนนำเข้า":"Import Parameters from Excel — Review Before Import",
 "ไฟล์ planning_parameter_2026Q3.xlsx ·":"File planning_parameter_2026Q3.xlsx ·",
@@ -852,7 +881,19 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ค่า Lead Time":"Lead Time value",
 "MOQ ÷ อัตราใช้ต่อวัน":"MOQ ÷ daily usage",
 "MOQ ÷ อัตราใช้":"MOQ ÷ usage rate",
-"อายุจัดเก็บ (เฉพาะ item ควบคุม Batch)":"shelf life (batch-controlled items only)"
+"อายุจัดเก็บ (เฉพาะ item ควบคุม Batch)":"shelf life (batch-controlled items only)",
+"รายงานพารามิเตอร์การวางแผน":"Planning Parameter Report",
+"เลขที่รายงาน":"Report No.",
+"จำนวนวัตถุดิบ":"Material Count",
+"กลุ่มวัตถุดิบ":"Material Groups",
+"วันที่พิมพ์":"Print Date",
+"ค่ายังไม่ครบ":"Incomplete Values",
+"ใช้กับระบบ":"Used By",
+"ผู้พิมพ์":"Printed By",
+"พารามิเตอร์ครบถ้วน":"Parameters Complete",
+"ยังไม่ครบ / ควรทบทวน":"Incomplete / Review Needed",
+"รวมทั้งหมด":"Grand Total",
+"ค่าในรายงานนี้คือค่าที่ MRP ใช้คำนวณว่าจะสั่งอะไร เท่าไร เมื่อไร · การแก้ไขทุกครั้งถูกบันทึกในประวัติ (ปุ่มประวัติท้ายแถว)":"These are the values MRP uses to decide what to order, how much, and when · every edit is recorded in history (History button at the end of each row)"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

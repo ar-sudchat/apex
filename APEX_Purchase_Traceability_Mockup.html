@@ -253,8 +253,11 @@ html.embed .content{padding-top:14px}
     <div class="card">
       <div class="page-head">
         <div><div class="page-title">ที่มาของการสั่งซื้อ</div>
-          <div class="page-sub">ทุกใบสั่งซื้อสาวกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้าราย และคำนวณจำนวนมาจากอะไร</div></div>
-        <button class="btn" onclick="toast('ส่งออกรายการเป็นไฟล์ Excel')">ส่งออก Excel</button>
+          <div class="page-sub">ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="toast('ส่งออกรายการเป็นไฟล์ Excel')">ส่งออก Excel</button>
+          <button class="btn btn-p" onclick="openTraceReport()">พิมพ์รายงาน</button>
+        </div>
       </div>
 
       <div class="frow">
@@ -285,7 +288,7 @@ html.embed .content{padding-top:14px}
           <th style="width:190px">ลูกค้าปลายทาง</th>
           <th class="c" style="width:80px">ที่มา</th>
         </tr></thead><tbody id="tb"></tbody></table></div>
-      <div class="pager"><span id="pg"></span><span>คลิกแถวเพื่อสาวกลับที่มาทั้งสาย</span></div>
+      <div class="pager"><span id="pg"></span><span>คลิกแถวเพื่อตรวจสอบย้อนกลับที่มาทั้งสาย</span></div>
     </div>
   </div>
   <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
@@ -317,7 +320,7 @@ const RM={
  'RM-CU-FOIL1'  :['COPPER FOIL 1 Oz LF/HF 1040mm','Copper mat','FURUKAWA ELECTRIC','KG',42,800,2100],
  'RM-CU-FOIL05' :['COPPER FOIL 0.5 Oz HTE','Copper mat','MITSUI MINING','KG',48,600,1500],
  'RM-CU-ANODE'  :['COPPER ANODE Micrograin Ø50','Copper mat','NIKKO METALS','KG',35,500,1250],
- 'RM-AU-SALT'   :['GOLD SALT KAu(CN)2','Precious metal','TANAKA KIKINZOKU','KG',28,2,4.5],
+ 'RM-AU-SALT'   :['GOLD PLATING SOLUTION 2% Au','Precious metal','TANAKA KIKINZOKU','KG',28,2,4.5],
  'RM-AG-SALT'   :['SILVER SALT AgNO3 (Immersion)','Precious metal','METALOR TECHNOLOGIES','KG',30,5,11],
  'RM-NM-SM-GRN' :['SOLDER MASK Green HF/LF (2K)','Non-market mat','TAIYO INK MFG.','KG',35,300,720],
  'RM-NM-DF'     :['DRY FILM E9415DI 1.5 MIL','Non-market mat','ASAHI KASEI','ROLL',40,50,120],
@@ -396,6 +399,15 @@ const ORD=[
 const P=s=>{const[a,b,c]=s.split('-').map(Number);return new Date(c,b-1,a);};
 const F=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()}`;
 const minus=(s,n)=>{const d=P(s);d.setDate(d.getDate()-n);return d;};
+/* ISO week number ของวันที่ dd-mm-yyyy */
+const wkOf=s=>{const d=P(s);d.setDate(d.getDate()+4-(d.getDay()||7));
+  return Math.ceil(((d-new Date(d.getFullYear(),0,1))/86400000+1)/7);};
+/* ปัดเศษแบบ largest remainder ให้ผลรวมเท่ากับ target (หน่วยจำนวนเต็ม) พอดี */
+const lrRound=(raw,target)=>{const fl=raw.map(Math.floor);
+  let rem=target-fl.reduce((a,b)=>a+b,0);
+  const ord=raw.map((v,i)=>[v-fl[i],i]).sort((a,b)=>b[0]-a[0]);
+  for(let k=0;k<Math.abs(rem);k++)fl[ord[rem>0?k%ord.length:ord.length-1-k%ord.length][1]]+=rem>0?1:-1;
+  return fl;};
 const TODAY=new Date(2026,7,3);
 ORD.forEach(o=>{
   o.net=Math.max(0,o.gross-o.onhand-o.openpo+o.alloc+ss(o.c));
@@ -408,6 +420,10 @@ ORD.forEach(o=>{
   const t=o.dem.reduce((a,x)=>a+x.qty,0);
   o.dem.forEach(x=>x.pct=x.qty/t*100);
   o.cust=[...new Set(o.dem.map(x=>x.cust))];
+  /* ปริมาณ/สัดส่วนราย WO ปัดเศษให้รวมเท่ายอด Gross และ 100.0% พอดี */
+  const dpw=o.qty<100?2:0, mw=Math.pow(10,dpw);
+  o.woQ=lrRound(o.dem.map(x=>o.gross*x.pct/100*mw),Math.round(o.gross*mw)).map(v=>v/mw);
+  o.woP=lrRound(o.dem.map(x=>x.pct*10),1000).map(v=>v/10);
 });
 
 /* ═════════ ตาราง ═════════ */
@@ -443,7 +459,7 @@ function render(){
       <td><span class="code">${w.wo}</span>
         <span style="color:var(--mut);font-size:11.5px"> +${o.dem.length-1} ใบ</span></td>
       <td class="sup">${o.cust.join(' · ')}</td>
-      <td class="c"><button class="ib ib-e" title="สาวกลับที่มา"
+      <td class="c"><button class="ib ib-e" title="ตรวจสอบย้อนกลับที่มา"
         onclick="event.stopPropagation();openTrace('${o.doc}')">${IC_TREE}</button></td>
     </tr>`;}).join('') : `<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--mut)">ไม่พบเอกสารตามเงื่อนไข</td></tr>`;
   g('cnt').innerHTML=`แสดง <b>${l.length}</b> จาก ${ORD.length} รายการ`;
@@ -460,7 +476,7 @@ g('fCust').onchange=e=>{fc=e.target.value;render();};
 document.querySelectorAll('thead th.s').forEach(th=>{
   th.onclick=()=>{const k=th.dataset.s;sortD=sortK===k?-sortD:1;sortK=k;render();};});
 
-/* ═════════ Dialog: สาวกลับที่มา ═════════ */
+/* ═════════ Dialog: ตรวจสอบย้อนกลับที่มา ═════════ */
 function closeDlg(){g('dlgRoot').innerHTML='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
 function openTrace(doc){
@@ -473,7 +489,7 @@ function openTrace(doc){
     {d:o.rel,t:'ต้องออกใบสั่งซื้อ',g:`ย้อนจากวันต้องใช้ ลบ Lead Time ${lt(o.c)} วัน`,late:o.late,done:o.st!=='plan'},
     {d:F(minus(o.need,Math.round(lt(o.c)*0.55))),t:'ผู้ขายเริ่มผลิต / เตรียมของ',g:'ประมาณการจากรอบผลิตของผู้ขาย',done:o.st==='rcv'},
     {d:F(minus(o.need,3)),t:'ของถึงคลัง + ตรวจรับ',g:'เผื่อ 3 วันสำหรับ incoming inspection',done:o.st==='rcv'},
-    {d:o.need,t:'วันที่ต้องใช้ในการผลิต',g:`ตามใบสั่งผลิต ${o.dem.length} ใบ`,done:false},
+    {d:o.need,t:'วันที่ต้องใช้ในการผลิต',g:`อ้างอิงแผนผลิต ${o.dem.length} ใบ และระดับ Safety Stock`,done:false},
   ];
   const line=(op,label,memo,val,cls='')=>
     `<div class="row ${cls}"><span class="op">${op}</span>
@@ -495,12 +511,12 @@ function openTrace(doc){
   let gNodes='', gEdges='';
   const docY=yOf(0,1), docX=3*SW;
   o.dem.forEach((x,i)=>{
-    const y=yOf(i,rows), pull=o.gross*x.pct/100;
+    const y=yOf(i,rows), pull=o.woQ[i];
     gNodes+=card(0,y, x.src==='SO'?'g-so':'g-fc', x.src==='SO'?ICO.so:ICO.fc,
       x.src==='SO'?'คำสั่งซื้อจากลูกค้า':'พยากรณ์การขาย', x.sdoc, x.cust,
       nf(x.qty)+' บอร์ด', x.date, '', i);
     gNodes+=card(SW,y,'g-mps',ICO.mps,'แผนผลิตสินค้าสำเร็จรูป','MPS-2608 · '+x.fg,
-      'สัปดาห์ที่ '+(34+i)+' · โรงงาน '+(i%2?'A1':'A3'), nf(x.qty)+' บอร์ด', x.date, '', i);
+      'สัปดาห์ที่ '+wkOf(x.date)+' · โรงงาน '+(Number(x.wo.replace(/\D/g,'').slice(-3))%2?'A1':'A3'), nf(x.qty)+' บอร์ด', x.date, '', i);
     gNodes+=card(2*SW,y,'g-wo',ICO.wo,'ใบสั่งผลิต',x.wo, x.fg+' · '+nf(x.qty)+' บอร์ด',
       nf(pull,dp)+' '+u, x.date,
       `<div class="gbar"><i style="width:${x.pct}%"></i></div>`, i);
@@ -580,14 +596,19 @@ function openTrace(doc){
         ${steps.map(s=>`<div class="tstep ${s.late?'late':(s.done?'done':'')}">
           <div class="d">${s.d}</div><div class="t">${s.t}</div><div class="g">${s.g}</div></div>`).join('')}
       </div></div>
-      ${o.late?`<div class="hint" style="border-left-color:var(--red);background:#fdf7f7;color:#b32b2b">
+      ${o.late&&(o.st==='plan'||o.st==='pr')?`<div class="hint" style="border-left-color:var(--red);background:#fdf7f7;color:#b32b2b">
         วันที่ต้องออกใบสั่งซื้อคือ ${o.rel} ซึ่งผ่านมาแล้ว ${Math.abs(o.days)} วัน —
         ถ้าออกวันนี้ ของจะถึงคลังช้ากว่าวันที่ต้องใช้ ต้องเร่งผู้ขายหรือเลื่อนแผนผลิต</div>`
+      :o.late?`<div class="hint" style="border-left-color:var(--red);background:#fdf7f7;color:#b32b2b">
+        เอกสารนี้ออกช้ากว่ากำหนด (กำหนดออก ${o.rel} ผ่านมาแล้ว ${Math.abs(o.days)} วัน) —
+        ของเสี่ยงถึงช้ากว่าวันที่ต้องใช้ ควรเร่งรัดผู้ขายให้ส่งเร็วขึ้นหรือเตรียมแผนสำรอง</div>`
+      :o.st==='rcv'?`<div class="hint">รับของเข้าคลังเรียบร้อยแล้ว — เส้นเวลานี้เก็บไว้เพื่อย้อนดูการคำนวณ</div>`
+      :o.st==='po'?`<div class="hint">ออกใบสั่งซื้อแล้วภายในกำหนด (กำหนดออก ${o.rel}) — รอของเข้า</div>`
       :`<div class="hint">เหลือเวลาอีก ${o.days} วันก่อนถึงวันที่ต้องออกใบสั่งซื้อ</div>`}
       </div>
 
       <div class="dpane" data-k="wo" style="display:none">
-      <div class="sect">แยกตามใบสั่งผลิต <small>สัดส่วนที่แต่ละใบดึงไปจากยอดสั่งนี้</small></div>
+      <div class="sect">แยกตามใบสั่งผลิต <small>ความต้องการวัตถุดิบของแต่ละใบ — รวมเป็นยอด Gross ${nf(o.gross,dp)} ${u} ก่อนหักสต๊อกและปัด MOQ</small></div>
       <div class="tw" style="max-height:none"><table>
         <thead><tr><th class="c" style="width:48px">#</th><th style="width:145px">ใบสั่งผลิต</th>
           <th style="width:145px">สินค้า</th><th style="width:180px">ลูกค้า</th>
@@ -603,9 +624,9 @@ function openTrace(doc){
           <td><span class="chip ${x.src==='SO'?'k-rcv':'k-sub'}">${x.src==='SO'?'ออเดอร์จริง':'พยากรณ์'}</span>
             <span style="color:var(--mut);font-size:11.5px"> ${x.sdoc}</span></td>
           <td class="r mono">${nf(x.qty)}</td>
-          <td class="r mono" style="font-weight:600">${nf(o.gross*x.pct/100,dp)} ${u}</td>
+          <td class="r mono" style="font-weight:600">${nf(o.woQ[i],dp)} ${u}</td>
           <td class="c mono">${x.date}</td>
-          <td class="r mono">${nf(x.pct,1)}%</td></tr>`).join('')}
+          <td class="r mono">${nf(o.woP[i],1)}%</td></tr>`).join('')}
           <tr style="background:#f7fafd"><td colspan="5" style="font-weight:700;text-align:right">รวม</td>
             <td class="r mono" style="font-weight:700">${nf(o.dem.reduce((a,x)=>a+x.qty,0))}</td>
             <td class="r mono" style="font-weight:700">${nf(o.gross,dp)} ${u}</td>
@@ -620,7 +641,7 @@ function openTrace(doc){
     </div>
     <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
       ${o.dem.length} ใบสั่งผลิต · ${o.cust.length} ลูกค้า · ${sos.length} ออเดอร์จริง · ${fcs.length} พยากรณ์</span>
-      <span><button class="btn">Excel</button><button class="btn">PDF</button>
+      <span><button class="btn">Excel</button><button class="btn" onclick="openTracePdf('${o.doc}')">PDF</button>
       <button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
   </div></div>`;
 }
@@ -652,10 +673,62 @@ render();
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานที่มาของการสั่งซื้อ (ทั้งหมด) ─── */
+function openTraceReport(){
+  const Fm=ApexReport.fmt;
+  const rows=ORD.map((o,i)=>[i+1,o.doc,ST[o.st][0]+(o.late?' · ล่าช้า':''),o.c,nm(o.c),sup(o.c),
+    Fm(o.qty)+' '+un(o.c),o.rel,o.need,lt(o.c)+' วัน',o.cust.join(', ')]);
+  ApexReport.open({
+    docNo:'TRACE-260803',
+    title:'รายงานที่มาของการสั่งซื้อ',
+    titleEn:'Purchase Traceability Report — PR/PO Pegging',
+    meta:[['เลขที่รายงาน','TRACE-260803'],['ข้อมูล ณ วันที่','03-08-2026'],
+          ['จำนวนเอกสาร',ORD.length+' ฉบับ'],['ล่าช้ากว่ากำหนดออกสั่ง',ORD.filter(o=>o.late).length+' ฉบับ']],
+    meta2:[['ยังเป็นแผน',ORD.filter(o=>o.st==='plan').length+' ฉบับ'],
+           ['ออก PR แล้ว',ORD.filter(o=>o.st==='pr').length+' ฉบับ'],
+           ['ออก PO แล้ว',ORD.filter(o=>o.st==='po').length+' ฉบับ'],
+           ['รับของแล้ว',ORD.filter(o=>o.st==='rcv').length+' ฉบับ']],
+    cols:[{t:'#',a:'c',w:'30px'},{t:'เลขที่เอกสาร'},{t:'สถานะ'},{t:'รหัสวัตถุดิบ'},{t:'ชื่อวัตถุดิบ'},
+          {t:'ผู้ขาย'},{t:'จำนวนสั่ง',a:'r'},{t:'วันออกสั่ง',a:'c'},{t:'วันต้องใช้',a:'c'},{t:'LT',a:'r'},{t:'ลูกค้าปลายทาง'}],
+    rows,
+    totals:[['เอกสารทั้งหมด',ORD.length+' ฉบับ'],
+            ['ใบสั่งผลิตปลายทางรวม',ORD.reduce((a,o)=>a+o.dem.length,0)+' ใบ'],
+            ['ล่าช้า — ต้องเร่งดำเนินการ',ORD.filter(o=>o.late).length+' ฉบับ','b']],
+    note:'ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม "ตรวจสอบย้อนกลับที่มา" ในหน้าจอเพื่อดูแผนภาพและสูตรคำนวณจำนวน',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายจัดซื้อ','Purchasing'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+
+/* ─── PDF รายใบ — จาก modal ตรวจสอบย้อนกลับที่มา ─── */
+function openTracePdf(doc){
+  const Fm=ApexReport.fmt;
+  const o=ORD.find(x=>x.doc===doc); if(!o) return;
+  const rows=o.dem.map((d,i)=>[i+1,d.wo,d.fg,d.cust,d.src+' · '+d.sdoc,Fm(d.qty),d.date,Fm(o.woP[i],1)+'%']);
+  ApexReport.open({
+    docNo:o.doc,
+    title:'ใบแสดงที่มาของการสั่งซื้อ',
+    titleEn:'Purchase Order Traceability — '+o.doc,
+    meta:[['เลขที่เอกสาร',o.doc],['สถานะ',ST[o.st][0]],['รหัสวัตถุดิบ',o.c],['ชื่อวัตถุดิบ',nm(o.c)]],
+    meta2:[['ผู้ขาย',sup(o.c)],['จำนวนสั่ง',Fm(o.qty)+' '+un(o.c)],
+           ['วันออกสั่ง → ต้องใช้',o.rel+' → '+o.need],['Lead Time',lt(o.c)+' วัน']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'ใบสั่งผลิต'},{t:'สินค้า FG'},{t:'ลูกค้า'},{t:'เอกสารต้นทาง'},
+          {t:'จำนวนบอร์ด',a:'r'},{t:'วันต้องใช้',a:'c'},{t:'สัดส่วน',a:'r'}],
+    rows,
+    totals:[['ความต้องการรวม (Gross)',Fm(o.gross)+' '+un(o.c)],
+            ['คงคลัง + PO ค้างรับ',Fm(o.onhand+o.openpo)+' '+un(o.c)],
+            ['ความต้องการสุทธิ (Net)',Fm(o.net)+' '+un(o.c)],
+            ['จำนวนสั่งจริง ('+o.lots+' lot × MOQ '+Fm(moq(o.c))+')',Fm(o.qty)+' '+un(o.c),'b']],
+    note:'จำนวนสั่ง = ปัดขึ้นตาม MOQ ของผู้ขาย · Safety Stock '+Fm(ss(o.c))+' '+un(o.c)+' รวมอยู่ในการคำนวณ Net แล้ว',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายจัดซื้อ','Purchasing'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "ที่มาของการสั่งซื้อ — APEX Circuit":"Purchase Traceability — APEX Circuit",
 "ที่มาของการสั่งซื้อ":"Purchase Traceability",
-"ทุกใบสั่งซื้อสาวกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้าราย และคำนวณจำนวนมาจากอะไร":"Trace every purchase order back to its work orders, end customers, and how the quantity was calculated",
+"ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร":"Trace every purchase order back to its work orders, end customers, and how the quantity was calculated",
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
 "ส่งออกรายการเป็นไฟล์ Excel":"Export list as an Excel file",
 "ส่งออก Excel":"Export Excel",
@@ -677,10 +750,10 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "มาจากใบสั่งผลิต":"From Work Order",
 "ลูกค้าปลายทาง":"End Customer",
 "ที่มา":"Trace",
-"คลิกแถวเพื่อสาวกลับที่มาทั้งสาย":"Click a row to trace the full chain",
+"คลิกแถวเพื่อตรวจสอบย้อนกลับที่มาทั้งสาย":"Click a row to trace the full chain",
 "Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
 "(บาง)":"(thin)",
-"สาวกลับที่มา":"Trace Origin",
+"ตรวจสอบย้อนกลับที่มา":"Trace Origin",
 "ไม่พบเอกสารตามเงื่อนไข":"No documents match the filters",
 "แสดง":"Showing",
 "จาก":"of",
@@ -725,7 +798,8 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ระบบคำนวณจากความต้องการสุทธิ แล้วปัดขึ้นตาม MOQ":"System computes net requirement, then rounds up per MOQ",
 "เส้นเวลาย้อนกลับ":"Backward Timeline",
 "คิดจากวันที่ต้องใช้ ถอยหลังตาม Lead Time":"Calculated backward from the required date by lead time",
-"สัดส่วนที่แต่ละใบดึงไปจากยอดสั่งนี้":"Share each work order pulls from this order",
+"ความต้องการวัตถุดิบของแต่ละใบ — รวมเป็นยอด Gross":"Material requirement of each work order — totalling a gross of",
+"ก่อนหักสต๊อกและปัด MOQ":"before stock netting and MOQ rounding",
 "คำสั่งซื้อจากลูกค้า":"Customer Sales Order",
 "พยากรณ์การขาย":"Sales Forecast",
 "บอร์ด":"boards",
@@ -760,7 +834,41 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "วันที่ต้องออกใบสั่งซื้อคือ":"The PO release date was",
 "ซึ่งผ่านมาแล้ว":"— overdue by",
 "ถ้าออกวันนี้ ของจะถึงคลังช้ากว่าวันที่ต้องใช้ ต้องเร่งผู้ขายหรือเลื่อนแผนผลิต":"if released today, goods will arrive after the required date — expedite the supplier or reschedule production",
-"สั่ง":"Order"
+"สั่ง":"Order",
+"อ้างอิงแผนผลิต":"Based on",
+"ใบ และระดับ Safety Stock":"production plan(s) and the Safety Stock level",
+"เอกสารนี้ออกช้ากว่ากำหนด (กำหนดออก":"This document was released later than planned (release due",
+"ผ่านมาแล้ว":"— overdue by",
+"วัน) —":"day(s)) —",
+"ของเสี่ยงถึงช้ากว่าวันที่ต้องใช้ ควรเร่งรัดผู้ขายให้ส่งเร็วขึ้นหรือเตรียมแผนสำรอง":"goods may arrive after the required date — expedite the supplier or prepare a contingency plan",
+"รับของเข้าคลังเรียบร้อยแล้ว — เส้นเวลานี้เก็บไว้เพื่อย้อนดูการคำนวณ":"Goods have been received into the warehouse — this timeline is kept for reviewing the calculation",
+"ออกใบสั่งซื้อแล้วภายในกำหนด (กำหนดออก":"Purchase order released on time (release due",
+") — รอของเข้า":") — awaiting goods receipt",
+"รายงานที่มาของการสั่งซื้อ":"Purchase Traceability Report",
+"ใบแสดงที่มาของการสั่งซื้อ":"Purchase Order Traceability Sheet",
+"เลขที่รายงาน":"Report No.",
+"ข้อมูล ณ วันที่":"Data as of",
+"จำนวนเอกสาร":"Documents",
+"ล่าช้ากว่ากำหนดออกสั่ง":"Overdue for release",
+"ฉบับ":"doc(s)",
+"ล่าช้า":"Late",
+"วันออกสั่ง → ต้องใช้":"Release → Required Date",
+"วันออกสั่ง":"Release Date",
+"วันต้องใช้":"Required Date",
+"เอกสารทั้งหมด":"Total documents",
+"ใบสั่งผลิตปลายทางรวม":"Destination work orders",
+"ล่าช้า — ต้องเร่งดำเนินการ":"Late — action required",
+"ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม":"Every purchase order traces back to its work orders, customers, and source documents (SO / Forecast) · click the",
+"ในหน้าจอเพื่อดูแผนภาพและสูตรคำนวณจำนวน":"button on the screen to view the diagram and quantity calculation",
+"ฝ่ายจัดซื้อ":"Purchasing",
+"สินค้า FG":"FG Product",
+"เอกสารต้นทาง":"Source Document",
+"ความต้องการรวม (Gross)":"Gross requirement",
+"คงคลัง + PO ค้างรับ":"On hand + open PO inbound",
+"ความต้องการสุทธิ (Net)":"Net requirement",
+"จำนวนสั่งจริง":"Actual order qty",
+"จำนวนสั่ง = ปัดขึ้นตาม MOQ ของผู้ขาย · Safety Stock":"Order qty = rounded up per supplier MOQ · Safety Stock",
+"รวมอยู่ในการคำนวณ Net แล้ว":"already included in the Net calculation"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

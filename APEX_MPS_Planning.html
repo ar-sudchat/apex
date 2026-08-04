@@ -395,7 +395,7 @@ html.embed .content{padding-top:14px}
     </div>
   </header>
 
-  <div class="strip">Tuesday, July 28, 2026 (apex production)</div>
+  <div class="strip">Monday, August 3, 2026 (apex production)</div>
 
   <div class="content">
     <div class="card">
@@ -412,6 +412,7 @@ html.embed .content{padding-top:14px}
           <button class="btn btn-run"><i>✓</i> RUN</button>
           <button class="btn btn-plan"><i>▸</i> Planning</button>
           <button class="btn btn-clear"><i>↺</i> Clear</button>
+          <button class="btn btn-plan" onclick="openMpsReport()"><i>⎙</i> พิมพ์รายงาน</button>
           <button class="icon-btn" title="History">
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 2"/></svg>
           </button>
@@ -442,12 +443,12 @@ html.embed .content{padding-top:14px}
           </div>
         </div>
         <div class="f"><label>Start</label>
-          <div class="ctrl"><input id="fStart" value="28-07-2026" readonly />
+          <div class="ctrl"><input id="fStart" value="03-08-2026" readonly />
             <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></span>
           </div>
         </div>
         <div class="f"><label>End Date</label>
-          <div class="ctrl"><input id="fEnd" value="10-08-2026" readonly />
+          <div class="ctrl"><input id="fEnd" value="16-08-2026" readonly />
             <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button></span>
           </div>
         </div>
@@ -497,7 +498,7 @@ html.embed .content{padding-top:14px}
         <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> Projected Outbound (ส่งมอบลูกค้า)</span>
         <span><i style="background:var(--p-green);border:1px solid #c3e8d3"></i> Net Balance ≥ Min</span>
         <span><i style="background:#fdf7e2;border:1px solid #ecdba6"></i> ต่ำกว่า Min</span>
-        <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> ติดลบ / Stock-out</span>
+        <span><i style="background:#c62828;border:1px solid #a02121"></i> ติดลบ / Stock-out</span>
       </div>
 
     </div>
@@ -511,8 +512,8 @@ html.embed .content{padding-top:14px}
 /* ══════════════════════════════════════════════════════════════
    APEX MPS — Finished Goods
    ══════════════════════════════════════════════════════════════ */
-const TODAY  = new Date(2026, 6, 28);          // 28 Jul 2026
-const ORIGIN = new Date(2026, 6, 28);          // จุดเริ่ม horizon
+const TODAY  = new Date(2026, 7, 3);           // 3 Aug 2026
+const ORIGIN = new Date(2026, 7, 3);           // จุดเริ่ม horizon
 const HORIZON = 200;                            // จำนวนวันที่ generate ไว้
 
 // daily = ปริมาณส่งมอบเฉลี่ยต่อ "วันปฏิทิน"
@@ -520,7 +521,7 @@ const HORIZON = 200;                            // จำนวนวันท�
 const ITEMS = [
   { code:'W054Q-062A',  name:'PCB HITACHI ASTEMO 2L Normal', spec:'1 BRD : 6 PNL : 3 PCS · HASL', unit:'PCS', pnl:6, pcs:3,
     plant:'A1', cust:'HITACHI ASTEMO', min:500,  max:5000, opening:1200,
-    daily:520,  lotEvery:7,  lotQty:3800, lotOffset:0 },
+    daily:520,  lotEvery:7,  lotQty:3650, lotOffset:0 },
 
   { code:'A048T-168BJ', name:'PCB SEMCO 4L Gold HDI', spec:'1 BRD : 16 PNL : 4 PCS · Laser Via · Gold', unit:'PCS', pnl:16, pcs:4,
     plant:'A3', cust:'SEMCO', min:300,  max:3000, opening:450,
@@ -536,7 +537,7 @@ const ITEMS = [
 
   { code:'K129B-036A',  name:'PCB Western Digital 2L Tin', spec:'1 BRD : 8 PNL : 2 PCS · Immersion Tin', unit:'PCS', pnl:8, pcs:2,
     plant:'A1', cust:'WESTERN DIGITAL', min:800,  max:8000, opening:600,
-    daily:640,  lotEvery:6,  lotQty:3700, lotOffset:0 },
+    daily:640,  lotEvery:6,  lotQty:3900, lotOffset:0 },
 ];
 
 /* ── date helpers ─────────────────────────────────────────── */
@@ -566,7 +567,10 @@ function series(it){
     const w = addDays(ORIGIN,i).getDay();               // 0=Sun 6=Sat
     const f = w===0 ? 0 : (w===6 ? 0.636 : 1.273);      // รวมทั้งสัปดาห์ = 7 × daily
     if(f) outb[i] = -Math.round(it.daily * f * (0.82 + rnd()*0.36));
-    if(i >= it.lotOffset && (i - it.lotOffset) % it.lotEvery === 0) inb[i] = it.lotQty;
+    if(i >= it.lotOffset && (i - it.lotOffset) % it.lotEvery === 0){
+      const t = w===0 ? i+1 : i;                      // รับเข้าไม่ลงวันอาทิตย์ — เลื่อนไปวันจันทร์
+      if(t < HORIZON) inb[t] += it.lotQty;
+    }
   }
   return { inb, outb };
 }
@@ -713,10 +717,8 @@ function render(){
       ${isOff ? TD(C.open, nf(openBal), 'v-net') : TD(C.open)}
       ${isOff ? netRow : blank}
     </tr>
-    <tr class="sub s${idx}">${subHead('Available Inventory')}${TD(C.open)}${blank}</tr>
     <tr class="sub s${idx}">${subHead('Projected Inbound Inventory')}${TD(C.open,'','v-open')}${row(it.inb,'v-in','inb')}</tr>
     <tr class="sub s${idx}">${subHead('Projected Outbound Inventory')}${TD(C.open)}${row(it.outb,'v-out','outb')}</tr>
-    <tr class="sub s${idx}">${subHead('Issued Inventory')}${TD(C.open)}${blank}</tr>
     <tr class="sub row-net s${idx}">${subHead('Net Inventory Balance')}${TD(C.open, nf(openBal), 'v-net')}${netRow}</tr>`;
   }).join('');
 
@@ -839,11 +841,16 @@ function openCell(idx,key,from,to){
 function openDemand(idx,rowNo){
   const it=ITEMS[idx], x=DLG[0].rows[rowNo], r=rng(x.doc);
   const woN=1+Math.floor(r()*3), wos=[]; let sp=0,spd=0;
+  let remain=x.qty;                      // รวมแผนทุก WO ให้เท่ายอดส่งมอบพอดี
   for(let j=0;j<woN;j++){
-    const pq=Math.round((200+r()*1800)/10)*10;
-    const pd=Math.round(pq*(0.55+r()*0.6)), sc=Math.round(pq*r()*0.03);
+    const pq=(j===woN-1)?remain:Math.max(10,Math.round(remain*(0.35+r()*0.3)/10)*10);
+    remain-=pq;
+    const st=addDays(x.date,-Math.floor(r()*9)-1);
+    const started=st<=TODAY;             // WO ที่ยังไม่เริ่ม → Produced/Scrap = 0
+    const pd=started?Math.min(pq,Math.round(pq*(0.55+r()*0.5))):0;
+    const sc=started?Math.round(pq*r()*0.03):0;
     wos.push({c:dnum('WO',r), m:`${it.plant}-${PROC[Math.floor(r()*PROC.length)]}-0${1+Math.floor(r()*4)}`,
-              pq, pd, sc, st:addDays(x.date,-Math.floor(r()*9)-1)});
+              pq, pd, sc, st});
     sp+=pq; spd+=pd;
   }
   const st = spd>=sp*1.02?'<span class="st-over">Over</span>'
@@ -903,6 +910,9 @@ const PROCN = {CUT:'ตัดแผ่น',DRI:'เจาะรู',PLT:'ชุ�
 const FLOWDEF={A1:['CUT','DRI','PLT','SOM','AOI','PAK'],
                A2:['CUT','DRI','PLT','DFO','SOM','AOI','PAK'],
                A3:['CUT','DRI','LAS','PLT','DFO','SOM','AOI','PAK']};
+/* เลขที่ Sale Order อ้างอิงต่อสินค้า (ห้ามใช้เลขเดียวกันทุกลูกค้า) */
+const SONO={ 'W054Q-062A':'SO-26-0905','A048T-168BJ':'SO-26-0918','A188D-023A':'SO-26-0911',
+             'G120A-017A':'SO-26-0922','K129B-036A':'SO-26-0926' };
 let WO=null, woSeq=13;
 
 function woToast(m,c=''){
@@ -914,17 +924,23 @@ const woFmt = d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1
 const woNum = n=>Number(n||0).toLocaleString('en-US');
 
 /* คลิกช่อง Net Inventory Balance → เตรียมใบสั่งงานให้เลย */
+function woStart(due){
+  const s=new Date(due.getFullYear(),due.getMonth(),due.getDate()-3,8,0);
+  const t=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate(),8,0);
+  return s<t?t:s;                 // เริ่มงานไม่ย้อนหลังกว่าวันนี้ 08:00
+}
 function openWO(idx, dayTo, net){
   const it=ITEMS[idx];
   const due=addDays(ORIGIN,dayTo);
-  const start=new Date(due.getFullYear(),due.getMonth(),due.getDate()-3,8,0);
-  /* ขาดเท่าไรก็เสนอผลิตเท่านั้น ปัดขึ้นหลักร้อย · ถ้ายังไม่ขาดใช้ยอดเติมถึง Min */
+  const start=woStart(due);
+  /* ขาดเท่าไรก็เสนอผลิตเท่านั้น ปัดขึ้นหลักร้อย · ถ้ายังไม่ขาดใช้ยอดเติมถึง Min · เกิน Min ใช้ lot มาตรฐาน */
   const need = net<0 ? Math.ceil((Math.abs(net)+it.min)/100)*100
-                     : Math.max(100, Math.ceil((it.min-net)/100)*100 || it.min);
+             : net<it.min ? Math.max(100, Math.ceil((it.min-net)/100)*100)
+             : it.lotQty;
   const flow = FLOWDEF[it.plant];
   woSeq++;
   WO={
-    code:`MO2608-${String(woSeq).padStart(3,'0')}`,
+    code:`MO${yy(due)}${String(due.getMonth()+1).padStart(2,'0')}-${String(woSeq).padStart(3,'0')}`,
     cus:it.cust, due, so:null, tab:'detail',
     flow:[...flow], sel:flow[Math.max(0,flow.length-3)],
     side:false,
@@ -947,7 +963,7 @@ function addMachine(silent){
   const cap=[260,320,410][WO.machines.length%3];
   const m={mc, qty:remainQty(), std:cap, pct:100,
            wh:WHS[1], whTo:WHS[3], color:COLORS[0], remark:'',
-           start:new Date(WO.due.getFullYear(),WO.due.getMonth(),WO.due.getDate()-3,8,0)};
+           start:woStart(WO.due)};
   calcEnd(m); WO.machines.push(m);
   if(!silent) drawWO();
 }
@@ -1020,8 +1036,9 @@ function drawWO(){
   const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
   const dtV=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}T${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 
+  const alt=ITEMS.find((x,i)=>i!==it.idx&&x.cust===P.cust);   // สินค้าอื่นของลูกค้าเดียวกัน (ถ้ามี)
   const SOROWS=[[P.code,P.name,Math.round(it.qty*1.35),Math.round(it.qty*0.35),Math.round(it.qty)],
-    [ITEMS[(it.idx+1)%ITEMS.length].code,ITEMS[(it.idx+1)%ITEMS.length].name,900,300,600]];
+    alt?[alt.code,alt.name,900,300,600]:[P.code,P.name+' (งวดส่งถัดไป)',900,300,600]];
 
   document.getElementById('dlgRoot').innerHTML=`
   <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg full">
@@ -1132,7 +1149,7 @@ function drawWO(){
         <div class="sb">${WO.tab==='detail'?`
           <div class="lb">Ref.SO / Forecast</div>
           <div class="fld"><div class="ig">
-            <input value="${WO.so||'SO-26-0918 | '+WO.cus+' | Due '+woFmt(WO.due).slice(0,10)}" readonly />
+            <input value="${WO.so||(SONO[P.code]||'SO-26-0918')+' | '+WO.cus+' | Due '+woFmt(WO.due).slice(0,10)}" readonly />
             <button class="igb" title="เลือกเอกสาร" onclick="woToast('เปิดหน้าเลือก Sale Order')">⋯</button></div></div>
           <table class="sotb">
             <thead><tr><th style="width:30px"></th><th style="width:118px">Item</th><th>ชื่อสินค้า</th>
@@ -1193,6 +1210,34 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeHistory();});
 <script>
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานแผนผลิตสินค้าสำเร็จรูป (MPS) ─── */
+function openMpsReport(){
+  const F=ApexReport.fmt;
+  const s=document.getElementById('fStart')?.value||'03-08-2026';
+  const e=document.getElementById('fEnd')?.value||'16-08-2026';
+  const rows=ITEMS.map((it,i)=>[i+1,it.code,it.name,it.unit,it.plant,it.cust,
+    F(it.min),F(it.max),F(it.opening),F(it.daily),F(it.lotQty)]);
+  ApexReport.open({
+    docNo:'MPS-260803-01',
+    title:'รายงานแผนผลิตสินค้าสำเร็จรูป',
+    titleEn:'Master Production Schedule (MPS) Report',
+    meta:[['เลขที่รายงาน','MPS-260803-01'],['วันที่วางแผน','03-08-2026'],
+          ['ช่วงแผน',s+' – '+e],['สถานะ','ยืนยันแล้ว']],
+    meta2:[['โรงงาน','A1 · A2 · A3'],['ประเภทสินค้า','FG — PCB'],
+           ['แหล่งความต้องการ','Sales Order · Sale Forecast'],['ผู้วางแผน','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสสินค้า'},{t:'ชื่อสินค้า'},{t:'หน่วย',a:'c'},{t:'โรงงาน',a:'c'},
+          {t:'ลูกค้า'},{t:'Min',a:'r'},{t:'Max',a:'r'},{t:'ยอดยกมา',a:'r'},{t:'แผน/วัน',a:'r'},{t:'Lot Size',a:'r'}],
+    rows,
+    totals:[['จำนวนสินค้าในแผน',ITEMS.length+' รายการ'],
+            ['ยอดยกมารวม',F(ITEMS.reduce((a,x)=>a+x.opening,0))+' PCS'],
+            ['กำลังผลิตรวมต่อวัน',F(ITEMS.reduce((a,x)=>a+x.daily,0))+' PCS','b']],
+    note:'แผนผลิตเทียบ Sales Order / Forecast ช่วง '+s+' ถึง '+e+' · รายละเอียดรายวัน-สัปดาห์-เดือน ดูจากกระดานวางแผน MPS',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติแผน','Approved by']]
+  });
+}
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Artit Sudchat",
@@ -1326,7 +1371,32 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "· สถานะ Draft":"· status Draft",
 "ต้องการล้างข้อมูล ใช่หรือไม่? ยืนยัน เพื่อเริ่มต้นเอกสารใหม่":"Clear all data? Confirm to start a new document",
 "เลือกใบสั่งงานเพื่อพิมพ์รายงาน":"Select a work order to print the report",
-"จำนวนวันที่ generate ไว้":"number of generated days"
+"จำนวนวันที่ generate ไว้":"number of generated days",
+"รายงานแผนผลิตสินค้าสำเร็จรูป":"Master Production Schedule (MPS) Report",
+"เลขที่รายงาน":"Report No.",
+"วันที่วางแผน":"Planning Date",
+"ช่วงแผน":"Plan Period",
+"ยืนยันแล้ว":"Confirmed",
+"โรงงาน":"Plant",
+"ประเภทสินค้า":"Item Type",
+"แหล่งความต้องการ":"Demand Source",
+"ผู้วางแผน":"Planner",
+"รหัสสินค้า":"Item Code",
+"ยอดยกมา":"Opening Balance",
+"แผน/วัน":"Plan/Day",
+"จำนวนสินค้าในแผน":"Items in Plan",
+"ยอดยกมารวม":"Total Opening Balance",
+"กำลังผลิตรวมต่อวัน":"Total Capacity per Day",
+"แผนผลิตเทียบ Sales Order / Forecast ช่วง":"Production plan vs Sales Order / Forecast from",
+"ถึง":"to",
+"· รายละเอียดรายวัน-สัปดาห์-เดือน ดูจากกระดานวางแผน MPS":"· daily / weekly / monthly details are on the MPS planning board",
+"ผู้อนุมัติแผน":"Plan Approver",
+"(งวดส่งถัดไป)":"(next delivery lot)",
+"รับเข้าไม่ลงวันอาทิตย์ — เลื่อนไปวันจันทร์":"receipts skip Sunday — shifted to Monday",
+"รวมแผนทุก WO ให้เท่ายอดส่งมอบพอดี":"total WO plan equals the delivery qty exactly",
+"WO ที่ยังไม่เริ่ม":"WO not yet started",
+"เริ่มงานไม่ย้อนหลังกว่าวันนี้":"start not earlier than today",
+"สินค้าอื่นของลูกค้าเดียวกัน (ถ้ามี)":"another item of the same customer (if any)"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

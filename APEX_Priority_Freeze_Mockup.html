@@ -279,6 +279,7 @@ html.embed .content{padding-top:14px}
           <span class="demo">ตัวอย่างหน้าจอ · ข้อมูลจำลอง</span>
           <button class="btn" onclick="openNewMO()">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8.5v5M12 16.6v.1"/></svg>ดูตัวอย่าง: ของไม่พอแล้วทำอย่างไร</button>
+          <button class="btn" onclick="openPfReport()"><svg viewBox="0 0 24 24"><path d="M7 8V3.5h10V8"/><rect x="4" y="8" width="16" height="8.5" rx="1.5"/><path d="M7 14h10v6H7z"/></svg>พิมพ์รายงาน</button>
         </div>
       </div>
 
@@ -585,7 +586,7 @@ function openTrace(id){
 function openNewMO(){
   const k='RM-CU-FOIL1', info=RM[k];
   const same=RES.filter(r=>r.rm===k);
-  const used=same.reduce((a,r)=>a+r.qty,0), need=180, free=info.stock-used, shortQty=need-free;
+  const used=same.reduce((a,r)=>a+r.qty,0), need=95, free=info.stock-used, shortQty=need-free;
   const victim=same[same.length-1];
   const OPTS=[
    {t:'เลื่อนงานที่ลำดับท้ายสุดออกไป',
@@ -645,6 +646,43 @@ draw();
 <script>
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานลำดับความสำคัญและช่วงล็อกแผน ─── */
+function openPfReport(){
+  const F=ApexReport.fmt;
+  const rows=[]; let seq=0;
+  Object.keys(RM).forEach(k=>{
+    const info=RM[k];
+    RES.filter(r=>r.rm===k).forEach((r,i)=>{
+      rows.push([++seq,i+1,r.rm,r.mo,r.fg,r.cust,salesOf(r),
+        F(r.qty,r.qty<10?2:0)+' '+info.u,fmt(addD(TODAY,r.day)),
+        r.lot||'—',isFz(r)?'ล็อก':'ยังปรับได้']);
+    });
+  });
+  const fzN=RES.filter(isFz).length, lotN=RES.filter(r=>r.lot).length;
+  const over=Object.keys(RM).filter(k=>
+    RES.filter(r=>r.rm===k).reduce((a,r)=>a+r.qty,0)>RM[k].stock).length;
+  ApexReport.open({
+    docNo:'PF-260803',
+    title:'รายงานลำดับความสำคัญและช่วงล็อกแผน',
+    titleEn:'Priority & Freeze Report',
+    meta:[['เลขที่รายงาน','PF-260803'],['วันที่วางแผน','03-08-2026'],
+          ['Freeze Window',FZ+' วัน'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['จำนวนวัตถุดิบ',Object.keys(RM).length+' รายการ'],['รอบรัน MRP','ทุกวันจันทร์'],
+           ['กฎผูก Lot','FEFO — หมดอายุก่อนใช้ก่อน'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'30px'},{t:'คิว',a:'c',w:'34px'},{t:'วัตถุดิบ'},{t:'ใบสั่งผลิต'},{t:'สินค้า'},
+          {t:'ลูกค้า'},{t:'พนักงานขาย'},{t:'จองไว้',a:'r'},{t:'ต้องใช้',a:'c'},{t:'Lot ที่ผูก'},{t:'สถานะ',a:'c'}],
+    rows,
+    totals:[['อยู่ในช่วงล็อก',fzN+' รายการ'],
+            ['ผูก Lot แล้ว (FEFO)',lotN+' รายการ'],
+            ['วัตถุดิบที่จองเกินของ',over+' รายการ'],
+            ['รวมรายการจองทั้งหมด',RES.length+' รายการ','b']],
+    note:'ลำดับคิวคือสิทธิ์ได้ของเมื่อวัตถุดิบไม่พอ — ตัวบนได้ของก่อน · รายการในช่วงล็อกถูกผูก Lot แบบ FEFO และแก้ไขไม่ได้ · วัตถุดิบที่จองเกินของต้องตัดสินใจโดยผู้วางแผน (ซื้อเพิ่ม / ใช้ตัวแทน / เลื่อนงาน / แบ่งตามสัดส่วน)',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "จัดลำดับและล็อกแผน — APEX Circuit":"Priority & Plan Freeze — APEX Circuit",
@@ -792,7 +830,19 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ต้องแลกกับอะไร":"What It Costs",
 "วัตถุดิบทดแทน ↗":"Substitute Materials ↗",
 "· ภาพรวมของที่ถูกจองและที่ยังว่างดูได้ที่":"· For an overview of reserved vs free stock, see the",
-"กระดานวางแผนวัตถุดิบ (MRP) ↗":"Material Planning Board (MRP) ↗"
+"กระดานวางแผนวัตถุดิบ (MRP) ↗":"Material Planning Board (MRP) ↗",
+"รายงานลำดับความสำคัญและช่วงล็อกแผน":"Priority & Freeze Report",
+"เลขที่รายงาน":"Report No.",
+"วันที่วางแผน":"Plan Date",
+"วันที่พิมพ์":"Print Date",
+"ผู้พิมพ์":"Printed by",
+"จำนวนวัตถุดิบ":"Material Count",
+"กฎผูก Lot":"Lot Assignment Rule",
+"FEFO — หมดอายุก่อนใช้ก่อน":"FEFO — First Expired, First Out",
+"วัตถุดิบ":"Material",
+"ผูก Lot แล้ว (FEFO)":"Lot-linked (FEFO)",
+"รวมรายการจองทั้งหมด":"Total Reservations",
+"ลำดับคิวคือสิทธิ์ได้ของเมื่อวัตถุดิบไม่พอ — ตัวบนได้ของก่อน · รายการในช่วงล็อกถูกผูก Lot แบบ FEFO และแก้ไขไม่ได้ · วัตถุดิบที่จองเกินของต้องตัดสินใจโดยผู้วางแผน (ซื้อเพิ่ม / ใช้ตัวแทน / เลื่อนงาน / แบ่งตามสัดส่วน)":"Queue order is the right to material when stock runs short — top rows get material first · Items inside the freeze window are lot-linked by FEFO and can no longer be changed · Over-reserved materials require a planner decision (buy more / use a substitute / push a job out / split pro-rata)"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

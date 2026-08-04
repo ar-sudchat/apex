@@ -202,7 +202,7 @@ function updateBtn(){
   b.title=lang==='th'?'Switch to English':'เปลี่ยนเป็นภาษาไทย';
 }
 function makeBtn(){
-  if(EMBED||document.getElementById('apexLangBtn'))return;
+  if(EMBED||window.APEX_I18N_NO_BTN||document.getElementById('apexLangBtn'))return;
   ensureBtnStyle();
   var b=document.createElement('button');
   b.id='apexLangBtn';
@@ -228,6 +228,7 @@ function setLang(l,announce){
     revert();
   }
   updateBtn();
+  try{window.dispatchEvent(new CustomEvent('apexlang',{detail:{lang:l}}));}catch(e){}
   if(announce){
     var ifr=document.querySelectorAll('iframe');
     for(var i=0;i<ifr.length;i++){

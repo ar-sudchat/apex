@@ -319,6 +319,7 @@ html.embed .content{padding-top:14px}
         <select class="sel" id="bookSel" style="width:300px"></select>
         <span class="meta" id="bookMeta"></span>
         <div class="right">
+          <button class="btn btn-s" onclick="openCostBookReport()">พิมพ์รายงาน</button>
           <button class="btn btn-s">แก้ไข</button>
           <button class="btn btn-s btn-d">ลบ</button>
         </div>
@@ -362,7 +363,7 @@ html.embed .content{padding-top:14px}
             <th class="c" style="width:76px">คำนวณ</th>
             <th class="c" style="width:104px">ดูต้นทุน</th>
           </tr></thead><tbody id="tbItems"></tbody></table></div>
-        <div class="pager"><span id="pgItems"></span><span>ต่อหน้า: 50</span></div>
+        <div class="pager"><span id="pgItems"></span><span>· Total = DM + DL + OH + ค่าของเสีย (Waste) − เศษขาย ดูที่มาได้ใน Cost Card</span><span>ต่อหน้า: 50</span></div>
       </div>
 
       <!-- เปรียบเทียบ -->
@@ -473,7 +474,7 @@ const RM=[
  {c:'RM-CU-FOIL1',   n:'COPPER FOIL 1 Oz (34.3 um) LF/HF',  u:'KG',  grp:'CU',  dim:'DM',      p:401.38, rec:82, rsl:198.00, sup:'FURUKAWA ELECTRIC'},
  {c:'RM-CU-FOIL05',  n:'COPPER FOIL 0.5 Oz HTE',            u:'KG',  grp:'CU',  dim:'DM',      p:438.60, rec:82, rsl:198.00, sup:'MITSUI MINING'},
  {c:'RM-CU-ANODE',   n:'COPPER ANODE Micrograin Ø50',       u:'KG',  grp:'CU',  dim:'DM',      p:359.25, rec:88, rsl:296.00, sup:'NIKKO METALS'},
- {c:'RM-AU-SALT',    n:'GOLD SALT KAu(CN)2',                u:'KG',  grp:'AU',  dim:'DM',      p:64220.00,rec:94,rsl:58900.00,sup:'TANAKA KIKINZOKU'},
+ {c:'RM-AU-SALT',    n:'GOLD PLATING SOLUTION 2% Au',                u:'KG',  grp:'AU',  dim:'DM',      p:64220.00,rec:94,rsl:58900.00,sup:'TANAKA KIKINZOKU'},
  {c:'RM-AG-SALT',    n:'SILVER SALT AgNO3 (Immersion)',     u:'KG',  grp:'AU',  dim:'DM',      p:28400.00,rec:90,rsl:24800.00,sup:'METALOR TECHNOLOGIES'},
  {c:'RM-SN-SOL',     n:'TIN PLATING SOLUTION',              u:'KG',  grp:'NM',  dim:'DM',      p:980.00, rec:40, rsl:290.00, sup:'ATOTECH'},
  {c:'RM-NM-SM-GRN',  n:'SOLDER MASK Green HF/LF (2K)',      u:'KG',  grp:'NM',  dim:'DM',      p:1850.00,rec:0,  rsl:0,      sup:'TAIYO INK MFG.'},
@@ -589,6 +590,7 @@ PRODS.forEach(p=>{ p.bpcs=p.pnl*p.pcs; p.area=areaOf(p.c);
    ══════════════════════════════════════════════════════════════ */
 function calc(p, bk, override){
   if(p.bom.length===0) return {ok:false, why:'nobom', miss:[]};
+  if(p.rt.length===0) return {ok:false, why:'noroute', miss:[]};
   const miss=p.bom.filter(l=>rmPrice(l.c,bk)===null).map(l=>l.c);
   if(miss.length) return {ok:false, why:'noprice', miss};
   const dims={}, lines=[];
@@ -727,6 +729,7 @@ document.querySelectorAll('#p-items thead th.s').forEach(th=>{
 function calcOne(c){const p=PRODS.find(x=>x.c===c); const r=cost(p,BK);
   if(r.ok) toast(`คำนวณ ${c} สำเร็จ — Total: ${nf(r.tot)} ฿`,'ok');
   else if(r.why==='noprice') toast(`${c} คำนวณไม่ได้ — ไม่พบราคา ${r.miss.join(', ')} ในช่วงเวลาของเล่มนี้`,'warn');
+  else if(r.why==='noroute') toast(`${c} คำนวณไม่ได้ — ยังไม่มี Routing ที่ใช้งาน`,'warn');
   else toast(`${c} คำนวณไม่ได้ — ไม่มี BOM ที่ตั้งเป็น default`,'warn');}
 function calcAll(){
   const ps=PRODS.filter(p=>p.t==='FG'||p.t==='SFG');
@@ -783,6 +786,16 @@ let WIOV={};
 function wiRender(){
   const p=PRODS.find(x=>x.c===document.getElementById('wiItem').value);
   const base=calc(p,BK), sim=calc(p,BK,WIOV);
+  if(!base.ok){
+    const why=base.why==='noprice'
+      ? 'ไม่พบราคา '+base.miss.join(', ')+' ในช่วงเวลาของเล่มนี้'
+      : (base.why==='noroute' ? 'ยังไม่มี Routing ที่ใช้งาน' : 'ไม่มี BOM ที่ตั้งเป็น default');
+    ['wi0','wi1','wi2','wi3','wi4','wi5'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('wiD').className='wc wc-a';
+    document.getElementById('tbWI').innerHTML=
+      `<tr><td colspan="9" style="text-align:center;padding:26px;color:var(--mut)">จำลองไม่ได้ — ${why}</td></tr>`;
+    return;
+  }
   document.getElementById('wi0').innerHTML=nf(base.tot)+'<span class="u">฿</span>';
   document.getElementById('wi1').innerHTML=nf(sim.tot)+'<span class="u">฿</span>';
   const d=sim.tot-base.tot, pc=d/base.tot*100;
@@ -798,13 +811,13 @@ function wiRender(){
 
   document.getElementById('tbWI').innerHTML=base.lines.map((l,i)=>{
     const cur=WIOV[l.c]!=null?WIOV[l.c]:l.rate;
-    const pc2=(cur-l.rate)/l.rate*100, imp=l.q*(cur-l.rate);
+    const pc2=(cur-l.rate)/l.rate*100, imp=l.q*(cur-l.rate)*(1+p.waste/100);
     return `<tr>
       <td class="c seq">${i+1}</td>
       <td><span class="code" style="font-size:12.5px">${l.c}</span></td>
       <td>${l.n}${l.resin?' <span class="chip c-warn">resin · weighted</span>':''}</td>
       <td style="color:var(--mut)">${l.u}</td>
-      <td class="r mono" style="color:var(--mut)">${nf(l.q,l.q<0.001?6:4)}</td>
+      <td class="r mono" style="color:var(--mut)">${nf(l.q,l.q<0.01?6:4)}</td>
       <td class="r mono" style="color:var(--mut)">${nf(l.rate)}</td>
       <td class="r"><input class="qin" type="number" step="0.01" value="${cur.toFixed(2)}"
            onchange="wiSet('${l.c}',this.value)" /></td>
@@ -901,7 +914,7 @@ function openCard(code){
         ${rows2.map((l,i)=>`<tr><td class="c seq">${i+1}</td>
           <td class="mono" style="font-size:12px;color:var(--mut)">${l.c}</td>
           <td style="font-weight:600">${l.n}</td>
-          <td class="r mono">${nf(l.q,l.q<0.001?6:4)}</td><td class="r mono">${nf(l.rate)}</td>
+          <td class="r mono">${nf(l.q,l.q<0.01?6:4)}</td><td class="r mono">${nf(l.rate)}</td>
           <td class="r mono" style="font-weight:600">${nf(l.amt)}</td>
           <td><span class="chip c-rm">${l.sup}</span>
             <div style="font-size:10.5px;color:var(--mut)">${bk.s} → ${bk.e}</div></td></tr>`).join('')}
@@ -971,7 +984,7 @@ function openCard(code){
           <th class="r" style="width:95px">OH (฿)</th></tr></thead><tbody>
           ${r.ops.map((o,i)=>`<tr><td class="c seq">${i+1}</td>
             <td class="mono" style="color:var(--mut)">${(i+1)*10}</td>
-            <td style="font-weight:600">${o.nm}</td><td class="mono" style="font-size:12px">${o.mc}</td>
+            <td style="font-weight:600">${o.nm}${o.man>1?` <span style="color:var(--mut);font-weight:400;font-size:11px">× ${o.man} คน</span>`:''}</td><td class="mono" style="font-size:12px">${o.mc}</td>
             <td class="r mono">${nf(o.min)}</td><td class="r mono" style="color:var(--mut)">${nf(o.dlr)}</td>
             <td class="r mono" style="color:var(--mut)">${nf(o.ohr)}</td>
             <td class="r mono dl">${nf(o.dl)}</td><td class="r mono oh">${nf(o.oh)}</td></tr>`).join('')}
@@ -990,7 +1003,7 @@ function openCard(code){
     <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
       คำนวณจาก BOM ${p.bom.length} บรรทัด · Routing ${p.rt.length} ขั้นตอน · ราคา ณ ${bk.s}</span>
       <span><button class="btn" style="border-color:#f0d9c2;color:var(--orange)" onclick="openSheet('${p.c}')">${IC_SHEET.replace('<svg','<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"')} Cost Sheet Report</button>
-      <button class="btn">Excel</button><button class="btn">PDF</button>
+      <button class="btn">Excel</button><button class="btn" onclick="openCostCardPdf('${p.c}')">PDF</button>
       <button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
   </div></div>`;
 }
@@ -1084,7 +1097,7 @@ function drawSheet(){
         <td>${leafCode(1,o.mc)}</td>
         <td class="csdesc">${o.nm}</td>
         ${dmC('','','','','')}
-        ${dlC(csN(o.lhr,4), csN(o.dlr), csN(o.dl),'thb-lb')}
+        ${dlC(csN(o.lhr,4), csN(o.dlr)+(o.man>1?` <span class="lfc">× ${o.man} คน</span>`:''), csN(o.dl),'thb-lb')}
         ${mcC(`<span class="mono">${o.mc}</span> <span class="lfc">${MCN[o.o]||''}</span>`,
               csN(o.mhr,4), csN(o.ohr), csN(o.oh),'thb-mc')}</tr>`;
     });
@@ -1268,8 +1281,101 @@ renderAll();
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานเล่มต้นทุนมาตรฐาน ─── */
+function openCostBookReport(){
+  const F=ApexReport.fmt, bk=BOOKS.find(b=>b.c===BK);
+  const list=PRODS.map(p=>({p,r:cost(p,BK)}));
+  const ok=list.filter(x=>x.r.ok);
+  const rows=ok.map((x,i)=>[i+1,x.p.c,x.p.n,x.p.t,x.p.cust,x.p.plant,
+    F(x.r.dm,2),F(x.r.dl,2),F(x.r.oh,2),F(x.r.tot,2)]);
+  ApexReport.open({
+    docNo:BK,
+    title:'รายงานต้นทุนมาตรฐาน',
+    titleEn:'Standard Cost Book Report — DM · DL · OH',
+    meta:[['เล่มต้นทุน',BK],['ชื่อเล่ม',bk.n],['ช่วงที่ใช้',bk.s+' – '+bk.e],['สถานะ',bk.st]],
+    meta2:[['สกุลเงิน','THB'],['จำนวนสินค้า',ok.length+' รายการ (FG '+ok.filter(x=>x.p.t==='FG').length+' · SFG '+ok.filter(x=>x.p.t==='SFG').length+')'],
+           ['คำนวณไม่ได้',(list.length-ok.length)+' รายการ'],['วันที่พิมพ์','03-08-2026']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสสินค้า'},{t:'ชื่อสินค้า'},{t:'ประเภท',a:'c'},{t:'ลูกค้า'},{t:'โรงงาน',a:'c'},
+          {t:'DM (฿)',a:'r'},{t:'DL (฿)',a:'r'},{t:'OH (฿)',a:'r'},{t:'Total (฿)',a:'r'}],
+    rows,
+    totals:[['DM รวม',F(ok.reduce((a,x)=>a+x.r.dm,0),2)+' ฿'],
+            ['DL รวม',F(ok.reduce((a,x)=>a+x.r.dl,0),2)+' ฿'],
+            ['OH รวม',F(ok.reduce((a,x)=>a+x.r.oh,0),2)+' ฿'],
+            ['ต้นทุนมาตรฐานรวม',F(ok.reduce((a,x)=>a+x.r.tot,0),2)+' ฿','b']],
+    note:'ต้นทุนต่อบอร์ด คำนวณจาก BOM + Routing จริง ณ ราคาดัชนีของเล่ม '+BK+' · WASTE / RESELL รวมอยู่ใน Total แล้ว · รายละเอียดรายบรรทัดดูจาก Cost Sheet Report ของแต่ละรายการ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายบัญชีต้นทุน','Cost Accounting'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+
+/* ─── PDF จาก Cost Card — ต้นทุนรายสินค้า ─── */
+function openCostCardPdf(code){
+  const F=ApexReport.fmt, p=PRODS.find(x=>x.c===code), r=cost(p,BK), bk=BOOKS.find(b=>b.c===BK);
+  const lines=[...r.lines].sort((a,b)=>b.amt-a.amt).slice(0,18);
+  const rows=lines.map((l,i)=>[i+1,l.c,l.n,l.u,F(l.q,4),F(l.rate,2),F(l.amt,2),l.resin?'DM-RESIN':l.dim]);
+  ApexReport.open({
+    docNo:'CC-'+p.c,
+    title:'ใบต้นทุนมาตรฐานรายสินค้า (Cost Card)',
+    titleEn:'Standard Cost Card — '+p.n,
+    meta:[['รหัสสินค้า',p.c],['ชื่อสินค้า',p.n],['ลูกค้า',p.cust],['โรงงาน · Layer',p.plant+' · '+p.L+'L · '+p.fin]],
+    meta2:[['เล่มต้นทุน',BK+' ('+bk.s+')'],['BOM',p.bom.length+' บรรทัด'],['Routing',p.rt.length+' ขั้นตอน'],['วันที่พิมพ์','03-08-2026']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสวัตถุดิบ'},{t:'ชื่อรายการ'},{t:'หน่วย',a:'c'},
+          {t:'จำนวน/บอร์ด',a:'r'},{t:'ราคา',a:'r'},{t:'จำนวนเงิน',a:'r'},{t:'มิติ',a:'c'}],
+    rows,
+    totals:[['DM — วัตถุดิบทางตรง',F(r.dm,2)+' ฿'],
+            ['DL — ค่าแรงทางตรง',F(r.dl,2)+' ฿'],
+            ['OH — โสหุ้ยการผลิต',F(r.oh,2)+' ฿'],
+            ['WASTE / RESELL (สุทธิ)',F(r.waste+r.resell,2)+' ฿'],
+            ['ต้นทุนมาตรฐานต่อบอร์ด',F(r.tot,2)+' ฿','b']],
+    note:'แสดง '+lines.length+' รายการวัตถุดิบมูลค่าสูงสุดจาก BOM ทั้งหมด '+r.lines.length+' บรรทัด · ค่าแรงและโสหุ้ยคิดต่อ 1 บอร์ด · หารด้วย '+p.bpcs+' ชิ้น/บอร์ด เพื่อได้ต่อชิ้น',
+    signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายบัญชีต้นทุน','Cost Accounting'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
+"คำนวณไม่ได้ — ยังไม่มี Routing ที่ใช้งาน":"cannot be calculated — no active Routing",
+"ยังไม่มี Routing ที่ใช้งาน":"no active Routing",
+"จำลองไม่ได้ —":"Cannot simulate —",
+"ไม่พบราคา":"no price for",
+"ไม่มี BOM ที่ตั้งเป็น default":"no BOM set as default",
+"· Total = DM + DL + OH + ค่าของเสีย (Waste) − เศษขาย ดูที่มาได้ใน Cost Card":"· Total = DM + DL + OH + Waste − Scrap Resale — see the Cost Card for the breakdown",
+"× 2 คน":"× 2 persons",
+"คน":"persons",
+"รายงานต้นทุนมาตรฐาน":"Standard Cost Book Report",
+"เล่มต้นทุน":"Cost Book",
+"ชื่อเล่ม":"Book Name",
+"ช่วงที่ใช้":"Effective Period",
+"สกุลเงิน":"Currency",
+"จำนวนสินค้า":"Item Count",
+"คำนวณไม่ได้":"Not Calculable",
+"วันที่พิมพ์":"Print Date",
+"รหัสสินค้า":"Product Code",
+"โรงงาน":"Plant",
+"DM (฿)":"DM (THB)",
+"Total (฿)":"Total (THB)",
+"DM รวม":"Total DM",
+"DL รวม":"Total DL",
+"OH รวม":"Total OH",
+"ต้นทุนมาตรฐานรวม":"Total Standard Cost",
+"ต้นทุนต่อบอร์ด คำนวณจาก BOM + Routing จริง ณ ราคาดัชนีของเล่ม":"Per-board costs are calculated from actual BOM + Routing at the price index of book",
+"· WASTE / RESELL รวมอยู่ใน Total แล้ว · รายละเอียดรายบรรทัดดูจาก Cost Sheet Report ของแต่ละรายการ":"· WASTE / RESELL already included in Total · see each item's Cost Sheet Report for line details",
+"ฝ่ายบัญชีต้นทุน":"Cost Accounting",
+"ใบต้นทุนมาตรฐานรายสินค้า (Cost Card)":"Standard Cost Card by Item",
+"รหัสวัตถุดิบ":"Material Code",
+"ชื่อรายการ":"Item Name",
+"จำนวน/บอร์ด":"Qty/board",
+"ราคา":"Price",
+"จำนวนเงิน":"Amount",
+"DM — วัตถุดิบทางตรง":"DM — Direct Materials",
+"DL — ค่าแรงทางตรง":"DL — Direct Labor",
+"OH — โสหุ้ยการผลิต":"OH — Manufacturing Overhead",
+"ต้นทุนมาตรฐานต่อบอร์ด":"Standard Cost per Board",
+"แสดง":"Showing",
+"รายการวัตถุดิบมูลค่าสูงสุดจาก BOM ทั้งหมด":"highest-value material lines out of all",
+"บรรทัด · ค่าแรงและโสหุ้ยคิดต่อ 1 บอร์ด · หารด้วย":"BOM lines · labor & overhead per 1 board · divide by",
+"บรรทัด":"lines",
 "ต้นทุนมาตรฐาน · ตรวจสอบที่มาที่ไปของ DM / DL / OH":"Standard Costs · Trace the Origins of DM / DL / OH",
 "+ สร้างเล่มใหม่":"+ New Cost Book",
 "แก้ไข":"Edit",

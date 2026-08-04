@@ -416,7 +416,7 @@ html.embed .content{padding-top:14px}
     </div>
   </header>
 
-  <div class="topstrip">Tuesday, July 28, 2026 (apex production)</div>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
 
   <div class="content">
     <div class="card">
@@ -429,6 +429,7 @@ html.embed .content{padding-top:14px}
         <div class="actions">
           <button class="btn btn-run"><i>✓</i> RUN MRP</button>
           <button class="btn btn-clear" onclick="clearAll()"><i>↺</i> ล้างตัวกรอง</button>
+          <button class="btn btn-run" onclick="openMrpAdvReport()"><i>⎙</i> พิมพ์รายงาน</button>
         </div>
       </div>
 
@@ -526,7 +527,7 @@ html.embed .content{padding-top:14px}
           <code>sup:taiyo</code> ผู้ขาย ·
           <code>grp:ccl</code> Sub Group ·
           <code>whs:เคมี</code> คลัง ·
-          <code>lot:PP-2605</code> เลขล็อต ·
+          <code>lot:PP-2650</code> เลขล็อต ·
           <code>unit:kg</code> หน่วย ·
           <code>lt&gt;45</code> Lead Time ·
           <code>safety&gt;1000</code> ·
@@ -592,7 +593,7 @@ html.embed .content{padding-top:14px}
 
 <script>
 /* ══════════ ข้อมูลจำลอง ══════════ */
-const ORIGIN=new Date(2026,6,28), HORIZON=190;
+const ORIGIN=new Date(2026,7,3), HORIZON=190;
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const addDays=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
@@ -624,7 +625,7 @@ const GROUPS=[
   base:['ALUMINUM SHEET MVC-1240','ALUMINUM ENTRY 0.15mm','ALUMINUM PANEL 0.20mm','AL BACKUP BOARD']},
  {g:'Non-market mat',pfx:'RM-NM',unit:'KG',lt:[25,45],daily:[4,90],batch:true,shelf:180,n:78,
   sup:['TAIYO INK MFG.','ASAHI KASEI','ATOTECH','DUPONT'],
-  base:['SOLDER MASK Green HF/LF','SOLDER MASK Black','DRY FILM E9415DI','LEGEND INK White','MICRO ETCHANT','DESMEAR CHEMICAL','GOLD SALT KAu(CN)2','TIN PLATING SOLUTION']},
+  base:['SOLDER MASK Green HF/LF','SOLDER MASK Black','DRY FILM E9415DI','LEGEND INK White','MICRO ETCHANT','DESMEAR CHEMICAL','GOLD PLATING SOLUTION 2% Au','TIN PLATING SOLUTION']},
  {g:'Packaging mat',pfx:'PKG',unit:'SET',lt:[7,16],daily:[150,900],batch:false,shelf:null,n:52,
   sup:['THAI CONTAINERS GROUP','SCG PACKAGING'],
   base:['CARTON BOX A4 Double Wall','VACUUM BAG PE 0.08mm','DESICCANT 50g','PALLET WOOD 1.1x1.1','STRETCH FILM 500mm']},
@@ -810,7 +811,7 @@ function expHtml(it){
   if(!it.batch) return `<span class="exp-none">— ไม่ควบคุม Batch —</span>`;
   if(!it.expiries.length) return `<div class="exp-cell"><b>${it.shelf} วัน</b><span>Shelf Life</span></div>`;
   const e=it.expiries[0], d=addDays(ORIGIN,e.d);
-  const col=e.d<=14?'#b32b2b':(e.d<=45?'#8a6a00':'#1a7a42');
+  const col=e.d<=14?'#b32b2b':(e.d<=30?'#8a6a00':'#1a7a42');
   return `<div class="exp-cell"><b>${fmtShort(d)} ${yy(d)}</b>
     <span>${e.lot} · ${ni(e.qty)}</span><span style="color:${col};font-weight:700">อีก ${e.d} วัน</span></div>`;
 }
@@ -1178,7 +1179,7 @@ function openItem(code){
       ${it.expiries.length?`<div style="margin-top:14px"><b style="font-size:13px;color:#8a6a00">ล็อตที่มีวันหมดอายุ</b>
         <table class="dtb" style="margin-top:6px"><thead><tr><th>Lot No.</th><th>วันหมดอายุ</th><th>เหลืออีก</th><th class="num">จำนวน</th></tr></thead>
         <tbody>${it.expiries.map(e=>`<tr><td><b>${e.lot}</b></td><td>${fmtFull(addDays(ORIGIN,e.d))}</td>
-          <td style="color:${e.d<=14?'#d93838':(e.d<=45?'#a06a00':'#1a7a42')};font-weight:600">${e.d} วัน</td>
+          <td style="color:${e.d<=14?'#d93838':(e.d<=30?'#a06a00':'#1a7a42')};font-weight:600">${e.d} วัน</td>
           <td class="num">${ni(e.qty)} ${it.unit}</td></tr>`).join('')}</tbody></table></div>`:''}
       <div class="hint">ช่วง <b>${it.lt} วันแรก</b> คือ Firm Zone — MRP วางแผนสั่งซื้อไม่ได้แล้วเพราะสั่งไปก็ไม่ทัน
         ของที่ขาดในช่วงนี้ต้องแก้ด้วยการเร่ง PO เดิม หรือใช้วัสดุทดแทน</div>
@@ -1293,6 +1294,42 @@ renderHead(); renderBody(true);
 <script>
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานสรุปผล MRP — รายการผิดปกติ (Exception Report) ─── */
+function openMrpAdvReport(){
+  const F2=ApexReport.fmt, MAX=40;
+  const stName=it=>{const s=STATS.find(s=>s.f(it));return s?s.t:'ปกติ';};
+  const exc=ITEMS.filter(it=>STATS.slice(0,4).some(s=>s.f(it)))
+    .sort((a,b)=>a.min60-b.min60);
+  const shown=exc.slice(0,MAX);
+  const rows=shown.map((it,i)=>[i+1,it.code,it.name,it.grp,it.unit,
+    F2(it.safety),F2(it.opening),F2(it.min60),
+    it.shortDay>=0?'วันที่ +'+it.shortDay:'—',stName(it)]);
+  const cnt=k=>ITEMS.filter(STATS.find(s=>s.k===k).f).length;
+  ApexReport.open({
+    docNo:'MRP-260803-EXC',
+    title:'รายงานสรุปผล MRP — รายการผิดปกติ',
+    titleEn:'MRP Exception Report — Raw Material',
+    meta:[['เลขที่รายงาน','MRP-260803-EXC'],['รอบ MRP','03-08-2026 06:00'],
+          ['ขอบเขต','RM ทั้งหมด · 6 Sub Group'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['SKU ทั้งหมด',F2(ITEMS.length)+' รายการ'],['รายการผิดปกติ',F2(exc.length)+' รายการ'],
+           ['ช่วงพิจารณา','60 วันข้างหน้า'],['ผู้รันแผน','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสวัตถุดิบ'},{t:'ชื่อวัตถุดิบ'},{t:'กลุ่ม'},{t:'หน่วย',a:'c'},
+          {t:'Safety',a:'r'},{t:'ยอดยกมา',a:'r'},{t:'ต่ำสุด 60 วัน',a:'r'},{t:'วันที่ขาด',a:'c'},{t:'สถานะ'}],
+    rows,
+    totals:[['ขาด / ติดลบ',F2(cnt('short'))+' รายการ'],
+            ['ต่ำกว่า Safety',F2(cnt('below'))+' รายการ'],
+            ['ต้องออก PR ใน 7 วัน',F2(cnt('pr'))+' รายการ'],
+            ['ใกล้หมดอายุ ≤30 วัน',F2(cnt('exp'))+' รายการ'],
+            ['รวมรายการผิดปกติ',F2(exc.length)+' / '+F2(ITEMS.length)+' SKU','b']],
+    note:exc.length>MAX
+      ?'แสดง '+MAX+' รายการที่เสี่ยงสูงสุด (เรียงตามยอดต่ำสุดในรอบ 60 วัน) จากทั้งหมด '+F2(exc.length)+' รายการผิดปกติ · รายการเต็มดูจากหน้าจอ MRP Workbench'
+      :'เรียงตามยอดคงเหลือต่ำสุดในรอบ 60 วัน · รายละเอียด Planned Order ดูจากหน้าจอ MRP Workbench',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติแผน','Approved by']]
+  });
+}
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Artit Sudchat",
@@ -1437,7 +1474,28 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "ที่เลือกไว้":"selected",
 "เอาออกแล้ว":"removed",
 "ยืนยันสร้าง PR":"Confirm — Create",
-"ใบ (":"PR(s) ("
+"ใบ (":"PR(s) (",
+"รายงานสรุปผล MRP — รายการผิดปกติ":"MRP Summary Report — Exception Items",
+"เลขที่รายงาน":"Report No.",
+"รอบ MRP":"MRP Run",
+"ขอบเขต":"Scope",
+"RM ทั้งหมด · 6 Sub Group":"All RM · 6 Sub Groups",
+"วันที่พิมพ์":"Print Date",
+"SKU ทั้งหมด":"Total SKUs",
+"รายการผิดปกติ":"Exception Items",
+"ช่วงพิจารณา":"Review Horizon",
+"60 วันข้างหน้า":"Next 60 Days",
+"ผู้รันแผน":"Plan Run By",
+"รหัสวัตถุดิบ":"Material Code",
+"ชื่อวัตถุดิบ":"Material Name",
+"กลุ่ม":"Group",
+"ต่ำสุด 60 วัน":"60-Day Min",
+"วันที่ขาด":"Shortage Date",
+"รวมรายการผิดปกติ":"Total Exceptions",
+"รายการที่เสี่ยงสูงสุด (เรียงตามยอดต่ำสุดในรอบ 60 วัน) จากทั้งหมด":"highest-risk items (sorted by 60-day minimum balance) out of",
+"รายการผิดปกติ · รายการเต็มดูจากหน้าจอ MRP Workbench":"exception items · see the full list on the MRP Workbench screen",
+"เรียงตามยอดคงเหลือต่ำสุดในรอบ 60 วัน · รายละเอียด Planned Order ดูจากหน้าจอ MRP Workbench":"Sorted by lowest 60-day balance · See Planned Order details on the MRP Workbench screen",
+"ผู้อนุมัติแผน":"Plan Approver"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>

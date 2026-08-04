@@ -219,7 +219,7 @@ html.embed .content{padding-top:14px}
     </div>
   </header>
 
-  <div class="topstrip">Tuesday, July 28, 2026 (apex production)</div>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
 
   <div class="content">
 
@@ -228,10 +228,11 @@ html.embed .content{padding-top:14px}
       <div class="page-head">
         <div>
           <div class="page-title">ประวัติการรันแผน (Plan Run History)</div>
-          <div class="page-sub">MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูและเปรียบเทียบได้</div>
+          <div class="page-sub">MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูรายละเอียด และเทียบรอบล่าสุดกับรอบก่อนหน้า</div>
         </div>
         <div class="actions">
           <button class="btn" onclick="alert('ส่งออกประวัติเป็น Excel')">ส่งออก</button>
+          <button class="btn btn-p" onclick="openHistoryReport()">พิมพ์รายงาน</button>
         </div>
       </div>
 
@@ -261,14 +262,14 @@ html.embed .content{padding-top:14px}
 /* ══════════════════════════════════════════════════════════
    ข้อมูลจำลอง — 14 รอบการรันย้อนหลัง
    ══════════════════════════════════════════════════════════ */
-const TODAY=new Date(2026,6,28);
+const TODAY=new Date(2026,7,3);
 const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const MONE=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const addDays=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
 const pad=n=>String(n).padStart(2,'0');
 const nf=n=>Number(n).toLocaleString('th-TH');
 const fmtDT=(d,h,m)=>`${pad(d.getDate())} ${MON[d.getMonth()]} ${d.getFullYear()} · ${pad(h)}:${pad(m)}`;
-const fmtD =d=>`${d.getDate()} ${MONE[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
+const fmtD =d=>`${d.getDate()} ${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
 const ni=n=>Math.round(n).toLocaleString('en-US');
 function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
 function rng(seed){let s=hash(String(seed));return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
@@ -280,7 +281,7 @@ const GRP=[
  {g:'PP mat',p:'RM-PP',u:'ROLL',n:14,base:['PREPREG FR-4 7628','PREPREG FR-4 2116','PREPREG 1080','PREPREG HIGH TG 3313']},
  {g:'Copper mat',p:'RM-CU',u:'KG',n:12,base:['COPPER FOIL 1 Oz LF/HF','COPPER FOIL 0.5 Oz HTE','COPPER ANODE Micrograin']},
  {g:'AL mat',p:'RM-AL',u:'SHT',n:8,base:['ALUMINUM SHEET MVC-1240','ALUMINUM ENTRY 0.15mm']},
- {g:'Non-market mat',p:'RM-NM',u:'KG',n:12,base:['SOLDER MASK Green HF/LF','DRY FILM E9415DI','GOLD SALT KAu(CN)2','MICRO ETCHANT']},
+ {g:'Non-market mat',p:'RM-NM',u:'KG',n:12,base:['SOLDER MASK Green HF/LF','DRY FILM E9415DI','GOLD PLATING SOLUTION 2% Au','MICRO ETCHANT']},
  {g:'Packaging mat',p:'PKG',u:'SET',n:8,base:['CARTON BOX A4 Double Wall','VACUUM BAG PE 0.08mm','STRETCH FILM 500mm']},
 ];
 const ITEMS=[];
@@ -292,8 +293,6 @@ GRP.forEach(G=>{for(let i=0;i<G.n;i++){const r=rng(G.p+i);
 /* สร้างสถานะของแต่ละรายการในแต่ละรอบ — เดินแบบต่อเนื่อง ไม่สุ่มใหม่ทั้งหมด */
 const NRUN=14;
 const USERS=['อาทิตย์ สุดชาติ','วราภรณ์ ทองดี','ชัยวัฒน์ พงศ์ไพศาล','ระบบ (ตั้งเวลาอัตโนมัติ)'];
-const SCOPES=['RM ทั้งหมด · 28 ก.ค. – 31 ธ.ค.','RM ทั้งหมด · 21 ก.ค. – 31 ธ.ค.',
-              'CCL + PP · 28 ก.ค. – 30 พ.ย.','RM ทั้งหมด + Packaging · 28 ก.ค. – 31 ธ.ค.'];
 const CAUSES=[{k:'fc',t:'Forecast เปลี่ยน',c:'cz-fc',col:'#4f9de6'},
               {k:'st',t:'สต๊อกไม่ตรง',c:'cz-st',col:'#e0a90c'},
               {k:'bom',t:'BOM แก้ไข',c:'cz-bom',col:'#7a4fd3'},
@@ -320,15 +319,25 @@ for(let k=0;k<NRUN;k++){
   const back=k*3+(k>4?k-4:0);
   const d=addDays(TODAY,-back);
   const idx=NRUN-1-k;                                    // index ใน it.runs
-  const shortN=ITEMS.filter(i=>i.runs[idx].short).length;
-  const planN =ITEMS.filter(i=>i.runs[idx].qty>0).length;
+  // รอบที่ k%4===2 จำกัดขอบเขตเฉพาะกลุ่ม CCL + PP
+  const scoped=k%4===2;
+  const inScope=i=>!scoped||i.grp==='CCL mat'||i.grp==='PP mat';
+  const shortN=ITEMS.filter(i=>inScope(i)&&i.runs[idx].short).length;
+  const planN =ITEMS.filter(i=>inScope(i)&&i.runs[idx].risk>0.22).length;
+  const id=`MRP-26${pad(d.getMonth()+1)}${pad(d.getDate())}-${String(Math.floor(r()*900)+100)}`;
+  const h=6+Math.floor(r()*11), m=Math.floor(r()*60);
+  // เรียก r() ทิ้งหนึ่งครั้งแทนช่อง type เดิม เพื่อคงลำดับการสุ่ม
+  r();
+  const ds=`${d.getDate()} ${MON[d.getMonth()]}`;
   RUNS.push({
-    id:`MRP-26${pad(d.getMonth()+1)}${pad(d.getDate())}-${String(Math.floor(r()*900)+100)}`,
-    idx, date:d, h:6+Math.floor(r()*11), m:Math.floor(r()*60),
-    type: r()<0.22?'MPS':'MRP',
-    user: k===0?USERS[0]:rpick(USERS,r),
-    scope: k%4===2?SCOPES[2]:SCOPES[k%2],
-    shortN, planN,
+    id, idx, date:d,
+    h:k===0?6:h, m:k===0?0:m,
+    type:'MRP',
+    user: k===0?'ระบบ (ตั้งเวลาอัตโนมัติ)':rpick(USERS,r),
+    scope: scoped?`CCL + PP · ${ds}–30 พ.ย.`
+          :k%4===3?`RM ทั้งหมด + Packaging · ${ds}–31 ธ.ค.`
+          :`RM ทั้งหมด · ${ds}–31 ธ.ค.`,
+    scoped, shortN, planN,
     status: k===0?'draft':(k<4?'conf':'rel'),
   });
 }
@@ -346,7 +355,7 @@ function renderRuns(){
       <td>${r.type}</td>
       <td>${r.user}</td>
       <td style="color:#5a6b7d">${r.scope}</td>
-      <td class="r" style="color:${r.shortN>18?'var(--red)':'var(--ink)'};font-weight:600">${r.shortN}</td>
+      <td class="r" style="color:${r.shortN>21?'var(--red)':'var(--ink)'};font-weight:600">${r.shortN}</td>
       <td class="r">${r.planN}</td>
       <td class="c"><span class="st ${sc}">${st}</span></td>
       <td class="c"><span class="lk" onclick="openSnap(${i})">ดู snapshot</span></td>
@@ -368,8 +377,8 @@ function renderKPI(){
       <div class="s">เทียบรอบก่อนหน้า</div></div>
     <div class="kpi k-green"><div class="n">${stab.toFixed(0)}%</div><div class="t">Plan Stability</div>
       <div class="s">ยิ่งสูง แผนยิ่งนิ่ง เชื่อถือได้</div></div>
-    <div class="kpi right k-purple"><div class="n">${ITEMS.length}</div><div class="t">รายการวัตถุดิบในขอบเขต</div>
-      <div class="s">6 Sub Group</div></div>`;
+    <div class="kpi right k-purple"><div class="n">${ITEMS.length}</div><div class="t">วัตถุดิบกลุ่มหลักที่ติดตามผล</div>
+      <div class="s">จากทั้งหมด 402 รายการ · 6 Sub Group</div></div>`;
 }
 
 /* ── snapshot ของแต่ละรอบ ── */
@@ -377,7 +386,7 @@ function closeDlg(){document.getElementById('dlgRoot').innerHTML='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
 function openSnap(i){
   const r=RUNS[i], g=rng('snap'+r.id);
-  const short=ITEMS.filter(x=>x.runs[r.idx].short);
+  const short=ITEMS.filter(x=>x.runs[r.idx].short&&(!r.scoped||x.grp==='CCL mat'||x.grp==='PP mat'));
   const SRC=[
     ['พยากรณ์การขาย (Forecast)', 'FC-2026-'+pad(r.date.getMonth()+1), Math.round(18+g()*10)+' รายการ', 'ฝ่ายขาย'],
     ['คำสั่งซื้อจากลูกค้า (SO)',  'SO ที่ยังไม่ปิด',              Math.round(24+g()*16)+' ใบ',    'ฝ่ายขาย'],
@@ -413,7 +422,7 @@ function openSnap(i){
           <td><b style="color:var(--blue)">${it.code}</b></td><td>${it.name}</td>
           <td style="color:#5a6b7d">${it.grp}</td>
           <td class="r"><b>${nf(q.qty)}</b> ${it.unit}</td>
-          <td class="c">${fmtD(addDays(TODAY,q.day))}</td></tr>`;}).join('')}</tbody>
+          <td class="c">${fmtD(addDays(r.date,q.day))}</td></tr>`;}).join('')}</tbody>
       </table>
       ${short.length>12?`<div style="font-size:12px;color:var(--mut);margin-top:8px">
         แสดง 12 จาก ${short.length} รายการ — ดูทั้งหมดได้ในไฟล์ส่งออก</div>`:''}
@@ -431,10 +440,39 @@ renderRuns(); renderKPI();
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานประวัติการรันแผน ─── */
+function openHistoryReport(){
+  const F=ApexReport.fmt;
+  const rows=RUNS.map((r,i)=>[i+1,r.id,fmtDT(r.date,r.h,r.m),r.type,r.user,r.scope,
+    F(r.shortN),F(r.planN),ST[r.status][1]]);
+  const d2=d=>pad(d.getDate())+'-'+pad(d.getMonth()+1)+'-'+d.getFullYear();
+  ApexReport.open({
+    docNo:'RUNLOG-260803',
+    title:'รายงานประวัติการรันแผน',
+    titleEn:'Plan Run History Report (MPS · MRP)',
+    meta:[['เลขที่รายงาน','RUNLOG-260803'],['ช่วงข้อมูล',d2(RUNS[RUNS.length-1].date)+' – '+d2(RUNS[0].date)],
+          ['จำนวนรอบรัน',RUNS.length+' รอบ'],['วันที่พิมพ์','03-08-2026']],
+    meta2:[['MRP',RUNS.filter(r=>r.type==='MRP').length+' รอบ'],
+           ['MPS',RUNS.filter(r=>r.type==='MPS').length+' รอบ'],
+           ['สถานะ Released',RUNS.filter(r=>r.status==='rel').length+' รอบ'],
+           ['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'Run ID'},{t:'วันเวลา'},{t:'ประเภท',a:'c'},{t:'ผู้รัน'},
+          {t:'ขอบเขต'},{t:'ขาด',a:'r'},{t:'Planned Order',a:'r'},{t:'สถานะ',a:'c'}],
+    rows,
+    totals:[['รายการขาดรวมทุกรอบ',F(RUNS.reduce((a,r)=>a+r.shortN,0))+' รายการ'],
+            ['Planned Order รวม',F(RUNS.reduce((a,r)=>a+r.planN,0))+' รายการ'],
+            ['จำนวนรอบรันทั้งหมด',RUNS.length+' รอบ','b']],
+    note:'ทุกรอบรันเก็บ snapshot ของข้อมูลนำเข้า (Sales Order · Forecast · Stock · BOM · พารามิเตอร์) — เปิดดูได้จากปุ่ม “ดู snapshot” ในหน้าจอ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "ประวัติการรันแผน (Plan Run History) — APEX Circuit":"Plan Run History — APEX Circuit",
 "ประวัติการรันแผน (Plan Run History)":"Plan Run History",
-"MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูและเปรียบเทียบได้":"MPS · MRP — every run stores an input-data snapshot for look-back and comparison",
+"MPS · MRP — เก็บ snapshot ของข้อมูลนำเข้าทุกรอบ เพื่อย้อนดูรายละเอียด และเทียบรอบล่าสุดกับรอบก่อนหน้า":"MPS · MRP — every run stores an input-data snapshot to review details and compare the latest run with the previous one",
 "ส่งออกประวัติเป็น Excel":"Export history to Excel",
 "ส่งออก":"Export",
 "รอบการรันล่าสุด":"Recent Runs",
@@ -451,10 +489,6 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
 "ม.ค.":"Jan","ก.พ.":"Feb","มี.ค.":"Mar","เม.ย.":"Apr","พ.ค.":"May","มิ.ย.":"Jun",
 "ก.ค.":"Jul","ส.ค.":"Aug","ก.ย.":"Sep","ต.ค.":"Oct","พ.ย.":"Nov","ธ.ค.":"Dec",
-"RM ทั้งหมด · 28 ก.ค. – 31 ธ.ค.":"All RM · 28 Jul – 31 Dec",
-"RM ทั้งหมด · 21 ก.ค. – 31 ธ.ค.":"All RM · 21 Jul – 31 Dec",
-"CCL + PP · 28 ก.ค. – 30 พ.ย.":"CCL + PP · 28 Jul – 30 Nov",
-"RM ทั้งหมด + Packaging · 28 ก.ค. – 31 ธ.ค.":"All RM + Packaging · 28 Jul – 31 Dec",
 "RM ทั้งหมด":"All RM",
 "Forecast เปลี่ยน":"Forecast Changed",
 "สต๊อกไม่ตรง":"Stock Discrepancy",
@@ -468,7 +502,8 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "Planned Order ที่เปลี่ยน":"Planned Orders Changed",
 "เทียบรอบก่อนหน้า":"vs previous run",
 "ยิ่งสูง แผนยิ่งนิ่ง เชื่อถือได้":"Higher = steadier, more reliable plan",
-"รายการวัตถุดิบในขอบเขต":"Materials in Scope",
+"วัตถุดิบกลุ่มหลักที่ติดตามผล":"Key material groups tracked",
+"จากทั้งหมด 402 รายการ · 6 Sub Group":"of 402 items in total · 6 Sub Groups",
 "พยากรณ์การขาย (Forecast)":"Sales Forecast",
 "คำสั่งซื้อจากลูกค้า (SO)":"Customer Sales Orders (SO)",
 "SO ที่ยังไม่ปิด":"Open SOs",
@@ -509,7 +544,22 @@ if(window.self!==window.top)document.documentElement.classList.add('embed');
 "สูตร":"BOMs",
 "ใบ":"docs",
 "ยิ่งสูงยิ่งเสี่ยงขาด":"higher = higher shortage risk",
-"index ใน it.runs":"index in it.runs"
+"index ใน it.runs":"index in it.runs",
+"รายงานประวัติการรันแผน":"Plan Run History Report",
+"เลขที่รายงาน":"Report No.",
+"ช่วงข้อมูล":"Data Range",
+"จำนวนรอบรัน":"Run Count",
+"วันที่พิมพ์":"Print Date",
+"ผู้พิมพ์":"Printed by",
+"ขาด":"Short",
+"รอบ":"runs",
+"14 รอบ":"14 runs",
+"10 รอบ":"10 runs",
+"0 รอบ":"0 runs",
+"รายการขาดรวมทุกรอบ":"Total shortage items (all runs)",
+"Planned Order รวม":"Total Planned Orders",
+"จำนวนรอบรันทั้งหมด":"Total run count",
+"ทุกรอบรันเก็บ snapshot ของข้อมูลนำเข้า (Sales Order · Forecast · Stock · BOM · พารามิเตอร์) — เปิดดูได้จากปุ่ม “ดู snapshot” ในหน้าจอ":"Every run stores a snapshot of its input data (Sales Order · Forecast · Stock · BOM · Parameters) — open it from the “View snapshot” button on screen"
 };</script>
 <script src="apex-i18n.js"></script>
 </body>
