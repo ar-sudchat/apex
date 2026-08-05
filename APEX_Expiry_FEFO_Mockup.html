@@ -204,7 +204,7 @@ html.embed .content{padding-top:14px}
     </div>
   </header>
 
-  <div class="topstrip">Tuesday, July 28, 2026 (apex production)</div>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
 <style>
 /* ── ส่วนเฉพาะหน้า FEFO (ใช้โทเคนสีจากธีมหลัก) ── */
 .content{padding:20px 24px 30px}
@@ -267,12 +267,13 @@ html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
     <div class="page-head">
       <div>
         <div class="page-title">บริหารวัตถุดิบใกล้หมดอายุ (FEFO)</div>
-        <div class="page-sub">ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน · ข้อมูล ณ 28 ก.ค. 26</div>
+        <div class="page-sub">ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน · ข้อมูล ณ 3 ส.ค. 26</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <span style="font-size:12px;color:var(--mut)">เตือนล่วงหน้า</span>
         <select class="alertsel" id="alertSel"><option>7 วัน</option><option>14 วัน</option><option selected>30 วัน</option><option>60 วัน</option></select>
         <button class="hbtn" onclick="toast('ส่งออก fefo-lots.xlsx เรียบร้อย (เดโม)')">ส่งออก Excel</button>
+        <button class="hbtn" onclick="openFefoReport()">พิมพ์รายงาน</button>
         <button class="hbtn pri" onclick="toast('ส่งรายการให้ผู้วางแผนแล้ว (เดโม)')">ส่งให้ผู้วางแผน</button>
       </div>
     </div>
@@ -306,7 +307,7 @@ html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
 
 <script>
 /* ── ข้อมูลจำลอง: ล็อตของ item ที่ควบคุม Batch ── */
-const TODAY=new Date(2026,6,28);
+const TODAY=new Date(2026,7,3);
 const fmt=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
 const addD=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
 const nf=n=>n.toLocaleString('en-US');
@@ -429,5 +430,136 @@ render();
 <script>
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานวัตถุดิบใกล้หมดอายุ (FEFO) ─── */
+function openFefoReport(){
+  const F=ApexReport.fmt, ad=alertDays();
+  classify(ad);
+  const l=LOTS.slice().sort((a,b)=>a.expIn-b.expIn);
+  const c=st=>LOTS.filter(x=>x.st===st).length;
+  const v=st=>Math.round(LOTS.filter(x=>x.st===st).reduce((a,x)=>a+x.qty*x.price,0));
+  const vt=Math.round(LOTS.reduce((a,x)=>a+x.qty*x.price,0));
+  const rows=l.map((x,i)=>[i+1,x.code,x.name,x.lot,fmt(addD(TODAY,x.expIn)),x.expIn,
+    F(x.qty,Number.isInteger(x.qty)?0:1)+' '+x.unit,F(Math.round(x.qty*x.price)),ST[x.st][0],
+    x.mo?x.mo+' — '+(x.st==='fefo'?'ข้ามล็อตเก่ากว่า':x.st==='miss'?'หมดอายุก่อนวันใช้':'ตามคิว')
+        :(x.st==='ok'?'ยังไม่ถูกจอง':RECO[x.st][0])]);
+  ApexReport.open({
+    docNo:'FEFO-260803',
+    title:'รายงานวัตถุดิบใกล้หมดอายุ (FEFO)',
+    titleEn:'Expiry Management (FEFO) Report',
+    meta:[['เลขที่รายงาน','FEFO-260803'],['วันที่พิมพ์','03-08-2026'],
+          ['เกณฑ์เตือนล่วงหน้า',ad+' วัน'],['จำนวนล็อต',LOTS.length+' ล็อต · เฉพาะ item ควบคุม Batch']],
+    meta2:[['หมดอายุแล้ว',c('expd')+' ล็อต'],['จะหมดอายุก่อนแผนใช้',c('miss')+' ล็อต'],
+           ['ใกล้หมดอายุ / ผิดคิว FEFO',c('near')+' / '+c('fefo')+' ล็อต'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'30px'},{t:'รหัส'},{t:'ชื่อวัตถุดิบ'},{t:'Lot No.'},{t:'วันหมดอายุ',a:'c'},
+          {t:'อายุคงเหลือ (วัน)',a:'r'},{t:'จำนวน',a:'r'},{t:'มูลค่า (฿)',a:'r'},{t:'สถานะ'},{t:'การจัดการ / คิว FEFO'}],
+    rows,
+    totals:[['หมดอายุแล้ว ('+c('expd')+' ล็อต)',F(v('expd'))+' ฿'],
+            ['จะหมดอายุก่อนแผนใช้ ('+c('miss')+' ล็อต)',F(v('miss'))+' ฿'],
+            ['ใกล้หมดอายุ ('+c('near')+' ล็อต)',F(v('near'))+' ฿'],
+            ['ผิดคิว FEFO ('+c('fefo')+' ล็อต)',F(v('fefo'))+' ฿'],
+            ['ปกติ ('+c('ok')+' ล็อต)',F(v('ok'))+' ฿'],
+            ['มูลค่ารวมทุกล็อต ('+LOTS.length+' ล็อต)',F(vt)+' ฿','b']],
+    note:'กติกา FEFO: จ่ายล็อตที่หมดอายุเร็วก่อนเสมอ · ล็อตที่หมดอายุก่อนวันแผนใช้ถูกตัดออกจากยอดที่ใช้ได้ · การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · เรียงตามวันหมดอายุ (เร็ว → ช้า) · เกณฑ์เตือนล่วงหน้า '+ad+' วัน ตามที่เลือกบนหน้าจอ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"บริหารวัตถุดิบใกล้หมดอายุ (FEFO) — APEX Circuit":"Expiry Management (FEFO) — APEX Circuit",
+"อาทิตย์ สุดชาติ":"Arthit Sudchat",
+"บริหารวัตถุดิบใกล้หมดอายุ (FEFO)":"Expiry Management (FEFO)",
+"ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน · ข้อมูล ณ 3 ส.ค. 26":"Track expiry dates per lot for batch-controlled items · issue by FEFO — first expired, first out · data as of Aug 3, 26",
+"เตือนล่วงหน้า":"Warn ahead",
+"7 วัน":"7 Days",
+"14 วัน":"14 Days",
+"30 วัน":"30 Days",
+"60 วัน":"60 Days",
+"ส่งออก fefo-lots.xlsx เรียบร้อย (เดโม)":"Exported fefo-lots.xlsx (demo)",
+"ส่งออก Excel":"Export Excel",
+"ส่งรายการให้ผู้วางแผนแล้ว (เดโม)":"List sent to the planner (demo)",
+"ส่งให้ผู้วางแผน":"Send to Planner",
+"ค้นหารหัส / ชื่อ / เลข Lot":"Search code / name / lot no.",
+"ทุกกลุ่ม":"All Groups",
+"ทุกคลัง":"All Warehouses",
+"WH-01 คลังกลาง":"WH-01 Central Warehouse",
+"WH-02 คลังเคมี":"WH-02 Chemical Warehouse",
+"WH-03 คลังห้องเย็น":"WH-03 Cold Storage",
+"ทุกสถานะ":"All Statuses",
+"หมดอายุแล้ว":"Expired",
+"จะหมดอายุก่อนแผนใช้":"Expires Before Planned Use",
+"ผิดคิว FEFO":"FEFO Violation",
+"ใกล้หมดอายุ":"Near Expiry",
+"ปกติ":"Normal",
+"คลัง":"Warehouse",
+"รับเข้า":"Received",
+"หมดอายุ":"Expiry",
+"เหลือ (วัน)":"Left (Days)",
+"คงเหลือ":"On-Hand",
+"มูลค่า (฿)":"Value (THB)",
+"จองให้ใบสั่งผลิต":"Reserved for WO",
+"แผนใช้":"Planned Use",
+"กติกา FEFO:":"FEFO rules:",
+"ล็อตที่หมดอายุก่อนวันที่แผนจะใช้ ถูกตัดออกจากยอดที่ใช้ได้และแสดงเป็น":"Lots expiring before their planned-use date are excluded from usable stock and shown as",
+"การจ่ายของยึดล็อตหมดอายุเร็วก่อนเสมอ การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · item ที่ไม่ควบคุม Batch ไม่อยู่ในหน้าจอนี้":"Issuing always takes the earliest-expiring lot first; skipping the queue requires an approved exception with a recorded reason · non-batch-controlled items are not shown on this screen",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"แยกกลุ่ม รอตัดจำหน่าย":"Segregate, pending write-off",
+"เร่งใช้ก่อน / เสนอสลับแผน":"Use urgently / propose plan swap",
+"สลับคิวไปใช้ล็อตเก่าก่อน":"Switch queue to the older lot first",
+"จัดคิวผลิตให้ใช้ล็อตนี้ก่อน":"Schedule production to use this lot first",
+"ใกล้หมดอายุ ≤ 30 วัน":"Near Expiry ≤ 30 Days",
+"ล็อต · เร่งจัดคิวใช้":"lots · expedite usage queue",
+"ล็อต · ตัดจากยอดใช้ได้แล้ว":"lots · already cut from usable stock",
+"ล็อตใหม่ถูกจองก่อนล็อตเก่า":"Newer lot reserved before older lot",
+"ล็อต · แยกกลุ่ม รอตัดจำหน่าย":"lots · segregate, pending write-off",
+"ล็อต":"lots",
+"ยังไม่ถูกจอง":"Not Reserved",
+"แสดง":"Showing",
+"จาก":"of",
+"ล็อต · เฉพาะ item ควบคุม Batch":"lots · batch-controlled items only",
+"เลยมา":"overdue by",
+"(เลยมา":"(overdue by",
+"อีก":"in",
+"(อีก":"(in",
+"วัน)":"days)",
+"มูลค่า":"Value",
+"การจองและแผนการใช้":"Reservation & Usage Plan",
+"ใบสั่งผลิต":"Work Order",
+"วันที่แผนจะใช้":"Planned Use Date",
+"จำนวนที่จอง":"Reserved Qty",
+"คิว FEFO":"FEFO Queue",
+"ข้ามล็อตเก่ากว่า":"Skips an older lot",
+"หมดอายุก่อนวันใช้":"Expires before use date",
+"ตามคิว":"In queue",
+"ยังไม่มีใบสั่งผลิตจองล็อตนี้":"No work order has reserved this lot yet",
+"คำแนะนำของระบบ:":"System recommendation:",
+"ขออนุมัติข้อยกเว้น FEFO — ต้องระบุเหตุผล":"Request FEFO exception approval — reason required",
+"เช่น ล็อตเก่าติดรอผล QA · ลูกค้ากำหนดสเปกล็อตผลิตใหม่":"e.g. older lot held for QA results · customer requires a freshly produced lot",
+"บันทึกคำขอข้อยกเว้น FEFO พร้อมเหตุผลแล้ว รอผู้มีสิทธิ์อนุมัติ (เดโม)":"FEFO exception request saved with reason, awaiting approver (demo)",
+"ส่งคำขอ":"Submit Request",
+"ขอข้อยกเว้น FEFO":"Request FEFO Exception",
+"ส่งคำขอเร่งใช้ล็อตนี้ให้ผู้วางแผนแล้ว (เดโม)":"Expedite-use request for this lot sent to the planner (demo)",
+"เสนอเร่งใช้ก่อน":"Propose Expedited Use",
+"รายงานวัตถุดิบใกล้หมดอายุ (FEFO)":"Expiry Management (FEFO) Report",
+"เลขที่รายงาน":"Report No.",
+"วันที่พิมพ์":"Print Date",
+"เกณฑ์เตือนล่วงหน้า":"Advance Warning Threshold",
+"จำนวนล็อต":"Lot Count",
+"ใกล้หมดอายุ / ผิดคิว FEFO":"Near Expiry / FEFO Violation",
+"ผู้พิมพ์":"Printed by",
+"รหัส":"Code",
+"ชื่อวัตถุดิบ":"Material Name",
+"วันหมดอายุ":"Expiry Date",
+"อายุคงเหลือ (วัน)":"Days Left",
+"การจัดการ / คิว FEFO":"Action / FEFO Queue",
+"มูลค่ารวมทุกล็อต":"Total Value, All Lots",
+"กติกา FEFO: จ่ายล็อตที่หมดอายุเร็วก่อนเสมอ · ล็อตที่หมดอายุก่อนวันแผนใช้ถูกตัดออกจากยอดที่ใช้ได้ · การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · เรียงตามวันหมดอายุ (เร็ว → ช้า) · เกณฑ์เตือนล่วงหน้า":"FEFO rules: always issue the earliest-expiring lot first · lots expiring before their planned-use date are excluded from usable stock · skipping the queue requires an approved exception with a recorded reason · sorted by expiry date (earliest → latest) · advance warning threshold",
+"วัน ตามที่เลือกบนหน้าจอ":"days as selected on screen",
+"ตามที่เลือกบนหน้าจอ":"as selected on screen",
+"วัน":"days",
+"฿":"THB"
+};</script>
+<script src="apex-i18n.js"></script>
 </body>
 </html>

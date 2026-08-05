@@ -269,7 +269,7 @@ html.embed .content{padding-top:14px}
       <div class="page-head">
         <div>
           <div class="page-title">Price Shock Simulator</div>
-          <div class="page-sub">จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ตัวเลขต่อ 1 บอร์ด · หน่วยขายเป็นชิ้น</div>
+          <div class="page-sub">จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ต้นทุนและราคาขายต่อบอร์ด</div>
         </div>
       </div>
 
@@ -393,7 +393,7 @@ const DRV=['วัตถุดิบทั้งหมด (RM_ALL)','RM ตา�
 const PCTONLY=[3,5];                       /* driver ที่รองรับเฉพาะ % */
 
 /* ── ต้นทุนตั้งต้นรายสินค้า — บาทต่อ 1 BOARD (ตรงกับ Standard Cost Book เล่ม STD2026-Q3)
-       โครงหน่วย 1 BRD : pnl PNL : pcs PCS · หน่วยขายเป็นชิ้น · qty = บอร์ด/เดือน ── */
+       โครงหน่วย 1 BRD : pnl PNL : pcs PCS · ต้นทุน/ราคาขายต่อบอร์ด · qty = บอร์ด/เดือน ── */
 const I=(c,n,cust,pnl,pcs,qty,gp,dm,osc,dl,oh,waste,resell)=>
   ({c,n,cust,pnl,pcs,bpcs:pnl*pcs,qty,gp,
     dm:{'CCL mat':dm[0],'PP mat':dm[1],'Copper mat':dm[2],'Precious metal':dm[3],
@@ -418,13 +418,24 @@ const ITEMS=[
    [330.50,140.20,134.10,4.40,58.10,4.98,7.55], 0, 202.94, 306.52, 49.00, 8.50),
  I('R806N-115K','PCB MURATA 4L Silver','MURATA',24,2, 1750,.284,
    [262.30, 91.80, 88.90,4.40,79.80,4.98,7.55], 0, 202.98, 303.98, 38.85, 6.74),
- I('T118M-204R','PCB KYOCERA 6L Gold ENIG','KYOCERA',18,3,  760,.246,
-   [392.40,166.20,159.30,7.19,66.40,4.98,7.55], 5.40, 264.28, 391.22, 95.43, 15.60),
 ];
 const dmSum = m=>GRP.reduce((a,g)=>a+(m[g]||0),0);
 const baseCost = it => dmSum(it.dm)+it.osc+it.dl+it.oh[OHD[0]]+it.oh[OHD[1]]+it.waste-it.resell;
-ITEMS.forEach(it=>{ it.base=baseCost(it); it.price=Math.round(it.base/(1-it.gp)*20)/20;
-  it.pricePcs=it.price/it.bpcs; });
+ITEMS.forEach(it=>{ it.base=baseCost(it); it.price=Math.round(it.base/(1-it.gp)*20)/20; });
+
+/* ── ฐานต้นทุน/ราคา ต่อ 1 บอร์ด อ้างอิง Standard Cost Book STD2026-Q3 — แก้ที่ SCB แล้วต้อง regen ตารางนี้ ── */
+const SCB_TOT={'A048T-168BJ':1343.79,'A188D-023A':1476.32,'B491V-072D':2077.16,'D617P-140S':872.66,
+               'F903C-055H':506.50,'K129B-036A':1864.61,'M205L-088Q':1229.37,'R806N-115K':1077.88,'G120A-017A':1058.85};
+const SCB_PRICE={'A048T-168BJ':1481.54,'A188D-023A':1359.65,'B491V-072D':2704.65,'D617P-140S':1239.60,
+                 'F903C-055H':736.20,'K129B-036A':1147.15,'M205L-088Q':1686.40,'R806N-115K':1505.40,'G120A-017A':1364.50};
+ITEMS.forEach(it=>{
+  const k=SCB_TOT[it.c]/it.base;   /* คูณทุกองค์ประกอบด้วย k เดียวกัน — โครงสร้างสัดส่วนคงเดิม */
+  GRP.forEach(g=>{ it.dm[g]*=k; });
+  it.osc*=k; it.dl*=k; it.oh[OHD[0]]*=k; it.oh[OHD[1]]*=k; it.waste*=k; it.resell*=k;
+  it.base=baseCost(it);
+  it.price=SCB_PRICE[it.c];
+  it.gp=(it.price-it.base)/it.price;
+});
 
 /* ── ใช้ชุด shock กับสินค้า 1 ตัว ── */
 function apply(it,SH){
@@ -639,7 +650,7 @@ function openItem(code){
   document.getElementById('dlgRoot').innerHTML=`
   <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
     <div class="dlg-hd"><h3>ผลกระทบรายสินค้า — ${it.c}
-      <small>${it.n} · ลูกค้า ${it.cust} · 1 BRD : ${it.pnl} PNL : ${it.pcs} PCS (${it.bpcs} ชิ้น/บอร์ด) · ขาย ${nf(it.qty,0)} บอร์ด/เดือน · ราคาขาย ${nf(it.price)} ฿/บอร์ด = ${nf(it.pricePcs)} ฿/ชิ้น</small></h3>
+      <small>${it.n} · ลูกค้า ${it.cust} · 1 BRD : ${it.pnl} PNL : ${it.pcs} PCS (${it.bpcs} ชิ้น/บอร์ด) · ขาย ${nf(it.qty,0)} บอร์ด/เดือน · ราคาขาย ${nf(it.price)} ฿/บอร์ด</small></h3>
       <button class="dlg-x" onclick="closeDlg()">×</button></div>
     <div class="dlg-bd">
       <div class="mcards">
@@ -829,7 +840,9 @@ function openShockReport(){
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
-"จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ตัวเลขต่อ 1 บอร์ด · หน่วยขายเป็นชิ้น":"Price what-if across the standard cost book · figures per 1 board · selling unit: pcs",
+"จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ต้นทุนและราคาขายต่อบอร์ด":"Price what-if across the standard cost book · cost and selling price per board",
+"ต้นทุน/ราคาขายต่อบอร์ด":"Cost/selling price per board",
+"ต่อบอร์ด":"per board",
 "STD2026-Q3 · ต้นทุนมาตรฐาน ไตรมาส 3/2569":"STD2026-Q3 · Standard Cost Q3/2026",
 "STD2026-Q2 · ต้นทุนมาตรฐาน ไตรมาส 2/2569":"STD2026-Q2 · Standard Cost Q2/2026",
 "⚠ book นี้เริ่มใช้ 01-07-2026 (34 วันแล้ว) — ราคาตลาด 4 กลุ่มขยับจาก book แล้ว ตัวเลขอาจไม่สะท้อนราคาปัจจุบัน":"⚠ This book took effect 01-07-2026 (34 days ago) — market prices in 4 groups have drifted from the book; figures may not reflect current prices",
@@ -924,7 +937,6 @@ function openShockReport(){
 "· ขาย":"· Sells",
 "บอร์ด/เดือน":"boards/month",
 "· ราคาขาย":"· Selling price",
-"฿/ชิ้น":"THB/pc",
 "OSC จ้างผลิตภายนอก":"OSC Outsourced Processing",
 "DL ค่าแรงทางตรง":"DL Direct Labor",
 "WASTE ของเสีย":"WASTE Scrap",
