@@ -231,17 +231,35 @@ function setLang(l,announce){
   try{window.dispatchEvent(new CustomEvent('apexlang',{detail:{lang:l}}));}catch(e){}
   if(announce){
     var ifr=document.querySelectorAll('iframe');
-    for(var i=0;i<ifr.length;i++){
-      try{ifr[i].contentWindow.postMessage({apexLang:l},'*');}catch(e){}
-    }
+    for(var i=0;i<ifr.length;i++)announceTo(ifr[i],l);
   }
+}
+
+/* ส่งภาษาให้ iframe แล้วรอ ack — ถ้าไม่ตอบ (เช่นเบราว์เซอร์ cache ไฟล์เก่าที่ยังไม่มี engine)
+   ให้ reload iframe หนึ่งครั้ง โหลดใหม่แล้วจะอ่านภาษาจาก localStorage เอง */
+function announceTo(f,l){
+  var src=f.getAttribute('src')||'';
+  if(!src||src==='about:blank')return;
+  var acked=false;
+  var onAck=function(e){
+    if(e.data&&e.data.apexLangAck)acked=true;
+  };
+  window.addEventListener('message',onAck);
+  try{f.contentWindow.postMessage({apexLang:l},'*');}catch(e){}
+  setTimeout(function(){
+    window.removeEventListener('message',onAck);
+    if(!acked){try{f.contentWindow.location.reload();}catch(e){}}
+  },900);
 }
 
 /* ─── sync ภาษาแม่↔ลูก (index shell ↔ iframe) ─── */
 window.addEventListener('message',function(e){
   var d=e.data||{};
-  if(d.apexLang&&d.apexLang!==lang)setLang(d.apexLang,true);
-  else if(d.apexI18nQuery&&e.source){
+  if(d.apexLang){
+    if(d.apexLang!==lang)setLang(d.apexLang,true);
+    var srcW=e.source||(EMBED?window.parent:null);
+    if(srcW&&srcW!==window){try{srcW.postMessage({apexLangAck:lang},'*');}catch(err){}}
+  }else if(d.apexI18nQuery&&e.source){
     try{e.source.postMessage({apexLang:lang},'*');}catch(err){}
   }
 });
