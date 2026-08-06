@@ -429,6 +429,7 @@ html.embed .content{padding-top:14px}
         <div class="actions">
           <button class="btn btn-run"><i>✓</i> RUN MRP</button>
           <button class="btn btn-clear" onclick="clearAll()"><i>↺</i> ล้างตัวกรอง</button>
+          <button class="btn" onclick="apexOpen('APEX_Plan_History.html')" title="ดูประวัติทุกรอบที่รันแผนและเทียบกับรอบก่อนหน้า">ประวัติการรันแผน</button>
           <button class="btn btn-run" onclick="openMrpAdvReport()"><i>⎙</i> พิมพ์รายงาน</button>
         </div>
       </div>
@@ -1295,6 +1296,10 @@ renderHead(); renderBody(true);
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script>
+/* เปิดหน้าจอย่อยผ่าน shell หลัก (ฟังก์ชันนี้เป็นส่วนหนึ่งของหน้าจอนี้ ไม่ใช่เมนูแยก) */
+function apexOpen(f){ if(window.self!==window.top){ parent.postMessage({apexOpen:f},"*"); } else { location.href=f; } }
+</script>
 <script src="apex-report.js"></script>
 <script>
 /* ─── รายงานสรุปผล MRP — รายการผิดปกติ (Exception Report) ─── */
@@ -1332,6 +1337,8 @@ function openMrpAdvReport(){
 }
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"ดูประวัติทุกรอบที่รันแผนและเทียบกับรอบก่อนหน้า": "View every plan run and compare with the previous one",
+"ประวัติการรันแผน": "Plan Run History",
 "อาทิตย์ สุดชาติ":"Artit Sudchat",
 "รายการวัตถุดิบ · 6 Sub Group":"material items · 6 Sub Groups",
 "ระบุเลขที่ Work Order / คำค้น":"Enter Work Order No. / keyword",

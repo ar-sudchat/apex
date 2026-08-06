@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>บริหารสต๊อกที่มีความเสี่ยง — APEX Circuit</title>
+<link rel="icon" type="image/png" href="apex-logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838; --purple:#7a4fd3; --orange:#c25f1e;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4; --p-amber:#fdfaef; --p-purple:#f8f4fd;
+  --th:#5b9fe0; --line:#edf2f8; --line-d:#d7e2ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* CHROME */
+#app{min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--hdr);display:flex;align-items:stretch;height:76px;flex:none;position:sticky;top:0;z-index:100}
+.logo-tab{background:#fff;border-radius:0 0 26px 0;width:212px;display:flex;align-items:center;justify-content:center;flex:none}
+.logo-tab svg{height:46px}
+.apexlogo{height:44px;width:auto;display:block}
+
+nav{display:flex;align-items:center;gap:4px;padding:0 10px;flex:1;min-width:0;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+.mi{display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;font-size:12.5px;
+    padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:.94;cursor:pointer;transition:.2s;text-decoration:none}
+.mi:hover{background:rgba(255,255,255,.12)}
+.mi svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mi.active{background:rgba(255,255,255,.22);opacity:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#fff;padding-right:24px;flex:none}
+.user svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.user b{font-size:14.5px;font-weight:600;display:block;line-height:1.3}
+.user span{font-size:12px;opacity:.85}
+.topstrip{background:var(--strip);color:#2b567c;font-size:12.5px;text-align:right;padding:5px 24px;flex:none}
+.content{flex:1;padding:16px 20px 64px}
+footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padding:14px;flex:none}
+
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:18px 22px;margin-bottom:14px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:16px}
+.page-title{font-size:22px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:12.5px;color:var(--mut);margin-top:3px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:20px;
+     border:1.5px solid var(--line-d);background:#fff;font-family:inherit;font-size:13px;
+     font-weight:500;color:var(--ink);cursor:pointer;transition:.15s}
+.btn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.1)}
+.btn-p{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.sel{padding:7px 30px 7px 11px;border:1px solid var(--line-d);border-radius:6px;background:#fff;
+     font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;outline:none;appearance:none;
+     background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237d8ea0' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+     background-repeat:no-repeat;background-position:right 10px center;background-size:10px}
+
+/* ── ตัวเลขพาดหัว ── */
+.hero{display:flex;align-items:stretch;gap:26px;flex-wrap:wrap}
+.hero-main{flex:0 0 300px}
+.hero-main .lbl{font-size:13px;color:var(--mut)}
+.hero-main .big{font-size:52px;font-weight:700;color:var(--red);line-height:1.05;letter-spacing:-1.5px;margin:2px 0}
+.hero-main .sub{font-size:12.5px;color:var(--mut);line-height:1.6}
+.hero-main .sub b{color:var(--ink)}
+.hero-cards{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:11px;min-width:520px}
+.hc{border:1.5px solid var(--line-d);border-radius:9px;padding:13px 15px;cursor:pointer;background:#fff;
+    transition:.15s;text-align:left;font-family:inherit;position:relative;overflow:hidden}
+.hc:hover{border-color:#9dbdd9;transform:translateY(-1px);box-shadow:0 3px 10px rgba(31,80,140,.1)}
+.hc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.hc.on{border-color:var(--hdr);background:#f4f9fe;box-shadow:inset 0 0 0 1px var(--hdr)}
+.hc .v{font-size:24px;font-weight:700;line-height:1.1}
+.hc .t{font-size:12.5px;font-weight:600;color:var(--ink);margin-top:4px}
+.hc .d{font-size:11px;color:var(--mut);margin-top:3px;line-height:1.5}
+.hc-dead::before{background:var(--red)}    .hc-dead .v{color:var(--red)}
+.hc-exc::before{background:var(--amber)}   .hc-exc .v{color:#a06a00}
+.hc-exp::before{background:var(--orange)}  .hc-exp .v{color:var(--orange)}
+
+/* ── กราฟแท่ง ── */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart{border:1px solid var(--line-d);border-radius:8px;padding:15px 17px}
+.chart h4{font-size:13px;font-weight:700;color:#3a5773;margin-bottom:3px}
+.chart .cs{font-size:11.5px;color:var(--mut);margin-bottom:13px}
+.brow{display:flex;align-items:center;gap:11px;margin-bottom:9px;font-size:12.5px}
+.brow .nm{width:132px;flex:none;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brow .track{flex:1;background:#f2f6fa;border-radius:4px;height:22px;position:relative;overflow:hidden}
+.brow .fill{display:block;height:100%;border-radius:4px;transition:width .5s ease}
+.brow .val{width:96px;flex:none;text-align:right;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.brow .pct{width:44px;flex:none;text-align:right;color:var(--mut);font-size:11.5px}
+.brow:hover .nm{color:var(--blue)}
+
+/* ── ตัวกรอง ── */
+.fbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.flabel{font-size:12.5px;color:var(--mut);font-weight:600}
+.search{position:relative;flex:0 0 290px}
+.search input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--line-d);border-radius:20px;
+  font-family:inherit;font-size:13px;outline:none;background:#fff}
+.search input:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.18)}
+.search .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mut);display:flex}
+.cnt{margin-left:auto;font-size:12.5px;color:var(--mut)}
+.cnt b{color:var(--blue)}
+
+/* ── ตาราง ── */
+.tblwrap{border:1px solid var(--line-d);border-radius:6px;overflow:auto;max-height:520px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+thead th small{display:block;font-weight:400;font-size:10px;opacity:.8;margin-top:2px}
+thead th{background:var(--th);color:#fff;font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap;
+         position:sticky;top:0;z-index:5;border-right:1px solid rgba(255,255,255,.18);cursor:pointer;user-select:none}
+thead th:last-child{border-right:none}
+thead th.r{text-align:right} thead th.c{text-align:center}
+.sm{font-size:9px;margin-left:3px;opacity:.9}
+tbody td{padding:10px 12px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+tbody td:last-child{border-right:none}
+tbody tr:hover td{background:#f7fbff;cursor:pointer}
+td.r{text-align:right} td.c{text-align:center}
+.code{font-weight:700;color:var(--blue)}
+.seq{color:#a8b6c4;font-size:12px;font-variant-numeric:tabular-nums}
+.sub{display:block;color:var(--mut);font-size:11px;margin-top:1px}
+.money{font-weight:700;font-variant-numeric:tabular-nums}
+.m-hi{color:var(--red)}
+.tag{display:inline-block;padding:2px 9px;border-radius:11px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.t-dead{background:#fdf4f4;color:#b32b2b}
+.t-exc{background:#fdfaef;color:#8a6a00}
+.t-exp{background:#fbeadd;color:#b3561e}
+.act{display:inline-block;padding:2px 9px;border-radius:11px;font-size:10.5px;font-weight:700;
+     background:#f1f8fe;color:#1f6fc4;white-space:nowrap}
+.act-w{background:#f4fbf7;color:#1a7a42}
+.act-r{background:#fdf4f4;color:#b32b2b}
+.mos{font-weight:700}
+.mos-inf{color:var(--red)}
+.empty{text-align:center;padding:36px;color:var(--mut)}
+.note{background:#f5f9fd;border-left:3px solid var(--hdr);border-radius:0 6px 6px 0;padding:11px 15px;
+      font-size:12.5px;color:#4a6b86;line-height:1.7;margin-top:14px}
+.note b{color:var(--blue)}
+
+/* dialog */
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.4);z-index:200;display:flex;
+      align-items:flex-start;justify-content:center;padding:56px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:8px;box-shadow:0 14px 44px rgba(15,40,80,.3);
+     width:56%;min-width:620px;max-width:880px;overflow:hidden}
+.dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
+.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:transparent;border:none;color:#fff;font-size:21px;cursor:pointer;padding:1px 7px;border-radius:4px;font-family:inherit}
+.dlg-x:hover{background:rgba(255,255,255,.24)}
+.dlg-bd{padding:16px 18px;max-height:66vh;overflow:auto}
+.dlg-ft{padding:10px 18px;border-top:1px solid var(--line);background:#fbfdff;display:flex;justify-content:space-between;align-items:center}
+.kv4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:15px}
+.kv4 div{background:#f5f9fd;border-radius:7px;padding:10px 12px;font-size:11.5px;color:var(--mut)}
+.kv4 b{display:block;font-size:15px;color:var(--ink);margin-top:2px;font-weight:700}
+.fcbar{display:flex;gap:8px;align-items:flex-end;height:110px;padding:10px 0 0;border-bottom:1px solid var(--line-d)}
+.fcb{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;justify-content:flex-end;height:100%}
+.fcb .bx{width:100%;border-radius:4px 4px 0 0;background:#7fb3e0;min-height:2px}
+.fcb .zero{background:repeating-linear-gradient(45deg,#f2f6fa,#f2f6fa 5px,#e6eef6 5px,#e6eef6 10px);
+           height:6px;width:100%;border-radius:3px}
+.fclab{display:flex;gap:8px;margin-top:7px}
+.fclab div{flex:1;text-align:center;font-size:11.5px;color:var(--mut)}
+.fclab b{display:block;color:var(--ink);font-size:12.5px}
+@media(max-width:1150px){.charts{grid-template-columns:1fr}.hero-cards{min-width:0}}
+
+/* ══ เก็บรายละเอียดความสวยงามทั้งโปรแกรม ══ */
+::selection{background:#cfe6fa;color:#1a3a5c}
+:focus-visible{outline:2px solid #7FB3E0;outline-offset:2px;border-radius:6px}
+button,select,input,textarea{font-family:inherit}
+button{-webkit-tap-highlight-color:transparent}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#bcd0e2;background-clip:content-box}
+/* ปุ่มและช่องกรอกให้สูงเท่ากันและมุมนุ่มขึ้น */
+.btn{border-radius:20px;transition:border-color .15s,box-shadow .15s,background .15s,color .15s}
+.btn:active{transform:translateY(.5px)}
+.sel,.inp{border-radius:8px;border-color:#dfe7f0;transition:border-color .15s,box-shadow .15s}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.chip{letter-spacing:.1px}
+/* ตัวเลขทุกที่ใช้ความกว้างเท่ากัน อ่านเป็นคอลัมน์ได้ */
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed #app{min-height:100vh}
+html.embed .content{padding-top:14px}
+
+/* ── แท็บสลับมุมมอง (ชุดเดียวกับ .dlg-tabs/.dt ในหน้าอื่น) ── */
+.vtabs{display:flex;gap:2px;margin:0 -22px;padding:0 22px;background:#fbfdff;
+       border-top:1px solid var(--line-d);border-radius:0 0 8px 8px;flex-wrap:wrap}
+.vtab{background:transparent;border:none;font-family:inherit;cursor:pointer;padding:11px 18px;
+      font-size:13.5px;color:var(--mut);border-bottom:2.5px solid transparent;display:flex;align-items:center;gap:8px}
+.vtab:hover{background:#f2f8fe;color:#4a6b86}
+.vtab.on{color:var(--blue);font-weight:600;background:#fff;border-bottom-color:var(--hdr)}
+.vtab svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.vtab .bg{background:#eef2f6;color:#5a6b7d;border-radius:9px;padding:0 7px;font-size:10.5px;font-weight:700}
+.vtab.on .bg{background:#e8f2fc;color:var(--blue)}
+.vhead{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:10px;flex-wrap:wrap}
+.vhead .vt{font-size:15.5px;font-weight:700;color:#3a5773}
+.vhead .vs{font-size:12px;color:var(--mut);margin-top:3px;line-height:1.6}
+
+/* ══ มุมมอง 1: FEFO (คลาสเฉพาะของหน้าเดิม — ที่ชนกับ design system ถูก scope ด้วย .v-fefo) ══ */
+.hbtn{border:1.5px solid #d5e2ef;background:#fff;border-radius:18px;padding:6px 14px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--blue);cursor:pointer}
+.hbtn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.alertsel{border:1.5px solid #d5e2ef;border-radius:18px;padding:5px 10px;font-family:inherit;font-size:12.5px;color:#2b567c;background:#fbfdff}
+.sumrow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 4px}
+.sc{border:1px solid #e3ecf5;border-left:4px solid var(--blue);border-radius:8px;padding:10px 14px;cursor:pointer;transition:.15s}
+.sc:hover{background:#f7fbff}.sc.on{outline:2px solid var(--blue);outline-offset:-1px;background:#f2f8fd}
+.sc .v{font-size:20px;font-weight:700}.sc .t{font-size:12.5px;font-weight:600;color:#3a5773;margin-top:1px}
+.sc .d{font-size:11px;color:var(--mut);margin-top:2px}
+.sc.c-amb{border-left-color:var(--amber)}.sc.c-red{border-left-color:var(--red)}
+.sc.c-org{border-left-color:var(--orange)}.sc.c-gry{border-left-color:#8aa3b8}
+.v-fefo .fbar{display:flex;gap:10px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.v-fefo .fbar input,.v-fefo .fbar select{border:1.5px solid #dfe7f0;border-radius:8px;padding:7px 11px;font-family:inherit;font-size:12.5px;background:#fbfdff;outline:none}
+.v-fefo .fbar input{width:220px}
+table.ft{width:100%;border-collapse:collapse;font-size:12.5px}
+.ft th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid #dfe7f0;white-space:nowrap}
+.ft td{padding:8px 10px;border-bottom:1px solid #eef3f8;white-space:nowrap}
+.ft tr.clk{cursor:pointer}.ft tr.clk:hover td{background:#f7fbff}
+.ft .r{text-align:right}.ft .c{text-align:center}
+.ft small{display:block;color:var(--mut);font-size:10.5px}
+.bdg{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
+.b-ok{background:#e9f8f0;color:#1a7a42}.b-amb{background:#fdf3dc;color:#8a6a00}
+.b-red{background:#fdeceb;color:#b32b2b}.b-org{background:#fdeadd;color:#b25012}
+.b-gry{background:#eef2f7;color:#5b7590}
+.dleft{font-weight:700}
+.reco{font-size:12px;font-weight:600}
+.reco.a{color:var(--blue)}.reco.w{color:#a06a00}.reco.r{color:#c62828}
+.v-fefo .note{margin-top:12px;padding:10px 14px;border-left:3px solid var(--blue);background:#f4f9fe;font-size:12px;color:#3a5773;border-radius:0 6px 6px 0;line-height:1.7}
+/* กล่องโต้ตอบฝั่ง FEFO — scope ด้วย .v-fefo บน .mask เพราะใช้ #dlgRoot ร่วมกับมุมมองเงินจม */
+.v-fefo .dlg{border-radius:10px;width:760px;min-width:0;max-width:94%}
+.v-fefo .dlg-hd{background:#2b6cb8}
+.v-fefo .dlg-bd{padding:15px 18px;max-height:62vh}
+.v-fefo .dlg-ft{justify-content:flex-end;gap:8px}
+.v-fefo .kv4{margin-bottom:14px}
+.v-fefo .kv4>div{background:#f7fafd;padding:8px 12px}
+.v-fefo .kv4 b{font-size:14px;color:#1a3a5c}
+.dtb{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}
+.dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:7px 10px;border-bottom:1px solid #dfe7f0}
+.dtb td{padding:7px 10px;border-bottom:1px solid #eef3f8}
+.exf{margin-top:12px;background:#fdf9ef;border:1px solid #e3cf8f;border-radius:8px;padding:11px 14px;display:none}
+.exf textarea{width:100%;box-sizing:border-box;border:1.5px solid #dfd0a2;border-radius:7px;padding:8px;font-family:inherit;font-size:12.5px;min-height:56px}
+.toastw{position:fixed;right:18px;bottom:78px;z-index:400}
+.tst{background:#1a7a42;color:#fff;border-radius:8px;padding:10px 16px;font-size:12.5px;margin-top:8px;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+@media(max-width:1100px){.sumrow{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="logo-tab"><img class="apexlogo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAABRMElEQVR42u19d5xdVbX/d+29zzm3Tu9pk95DSEKowkRAmiIqiQoqggWelfcs+GwzEStPfYiioiJFEJzQTIDQwkyAhABppPc6yfSZO3Nnbjnn7L1+f5w7EGKQ93s1ifebz/ncySn7tHXWXnut714LyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888vgfAjPTO2yXjcySmcX/wrUIZlbvdE3/iKAjH9JJdWNE5u3ua2jb//S9H32ePN4GjY0sT7Z76u/nsrcTrMZGlinms/tdPrtzkOf8T11DfX2Tampi5fr76jV3LWUeHMb/S1r3RIECgAULSDPzOAAOAP7vPEH2Hdc4x9wLcHO/9hF/H6MJ54h1jg0CCYZt0il/cjLNbRnO9JJLZNs2u3CJYbPrpUsY4UtZAtIgk2XOMGCObO6/2uvmepetRMRZ3l0NFJ6bSLWdURyNPtzYyJKZJQBDRPyPLIDEzPTa2oMf3rLWuS/Zr6RnNLQOnokkAkkCCQCkAWgYdmFYA0yQAIQQUCSgpAARwRgD3/dhwBAgQBIEGCQ0AAMhNYgIDIYxGr4xkCQghQDAIGIIwYAAGBqGNRg+BAyEpGBfUGA75F6z1gytCZoIhgkwAqlU1tjKFrZlB+czBr5hMBF8rZHO6gFAgFhSJByKMgsQCwgEyskYA2MYTIAUAj4A1xBAEpYdwkAyAyksCCGO6nYBYfdA2R4KCyqap08pXSvD/Ofxk6xoHGgHcG1Lb/ufR5RUbQCA1avZmj0b5khhzNmKCoA+2btxYubQ2vX72j939dqCtsMRY4U4J3GAlBJSCQhJEEKDiGHZBNtSAAMEgpIClmLYFkFKA6EAIQChJEgQHMdByLFgKYBJQyhASYKSEkQEEgKWVJAysAKEZEjFkBZghwClACE0BPkQFkEJBSUEiBmGgw9F+4FwGRbQBjBagn1F2mNoH+xrIJNxYTSBQWAi8g3gZT1ozfCyPrMhsCF4rod0xoXnaWifkfUMfM8g6xmktUGWJboSg+js7gVIgqQ6otMgEFlQtgsBg2EVI6mmohiOneBx4wu8c84tsyeOL98241T1qgW9HJB/JqLMkQOjfzStSMwcWvXa9l1fv35XTdthG05MkW05ABGkEJBKQkgAbGC0RiRiI+TYsG2FSDgMRYBlayjLQFgawmYoQZCWCtpQEtFIBETBC1ICsKWCZVkQEiAiFBaEYFsSWqYhVCoQfEkIRyyEHAWQARFDKoKQKtA6DHBOAI0OtDYzYJhhDMH3GJ7L0Jkw3CyQzRhoQ2+oqd6ePgwm02AmaA34voHWgJvNIuu5SKVdpFKDcF0Lg/0OfANktEaGLbR2GHT19ME3BhBHjelYAWwBRoF90vANgLQU6AXjME49pRwXXzodc04vR7RQrDv93MjyQoHtwL67iUZnAkHsGQUU/xDo+A1R5UvMLIlIn6w2ICllFfb2JHR7u+DQgIJlOyACpFBQUkJZCkoq2JYCZ7PwpA9lCwxYadgWwbIAy2KQrcHCBcMFSQOSDMsSULaEFAJkFGxSsKQFJQjheBiWEuju0VDKgFUCpFJQQsCxrEArilz3TAJKSkgnp2IBsGEQAE9rGF8DxsAYA20Y2tfwfILxCuFlA83m+wzBADPBeAa+p6H94HjPNeR6Glkvi6znw/UC7ZgeJHR1M4wBMkbD0xEe7HPgDSRyZp54GxMw9ytssriKJUqgqIQ2vN5u1r2+yRSGImLyKfLUuosqT627YBgmjK/94qDPt0Uk7gLubjf+J9q1kv5RDZ6UGlC9vmnfA1vWha7s7PShHBsi1x0SABIiZ0MxwAZSMAQxCAbMPiQBJBhCCkAIGGFgENh7JDiw47QGMwBWUJAQIrAfpUUQbGDYg6YsAA0IAxIGSgT7EVFgSxJBCAKkABPhSI+aMQbsa4icWcBM0D7D1wzNDE8z2GewIYCD9hQpEBO0IWjNyKSz8A1giOB6PjQIStlBt8waWhOYJRwrBkEO0ikXRgNHd5YMgMEgKXG4rRWvb3gde7dEMNhfikHd50tYSiIOgOGi3QgkTXVZCc09c4x87wfH4JSZRdvGT8IthWG6KxhJs0ADsPAktQUp569Cf8a/mYSIZj0fvh/0VQYGbI7cmYOBBIDALDeQAoAR0DmF6hsBBuAPvRgDABIw9hv/F7k3ZeBDmFwbBLAwgTUOQCDQOgKA4OBAP7fNDF15ThMKAxjtQwgBO2e/Gh1cv4GBEXhjcDG0P4yAEBakEBAwQiqUGoB8rToMEJa2iSEn+xpgASFJQ4PRIXIXoT3AHCUWhiBE8B2YQc/HwcMHKzrb6MPLl7WIwaSNNWtacWi/7yfTLEJwRDTkIJMZRBYpUxRnPu2MUfLS903H7LMiu0+Zaf8krOj3ANDErNAMzJtH/knpiP5HR3d/92csy7IMsjdq7W/QrvMCKSejPc2GfKuoINTfn+hsryob9ex/IhIyor0XRb5n/nXHDu+jWzYOYvWqvXipaSsfPNhnQmKYCFk15Osskv6AceDx3HOj8trrT8O0mQW/P2UKfkFEm0/iSAgTM+SaNf+/ArnmiL9n/x/fyppjXMeadzhmNmbPhn/kqDPDh563UHCKQLwM4KLcqLSPmc/QGrMOHcbX+5IgDZDrA8wAQYOhTVGxLaIxrC0uwash4HofaJHwf2yRteQIYRzWlcIPuzoxM9GenfHEX/fg4QfWoWVvRAvEhUUVBISQ4U7Dcr9+/4Ix1sWXjex+3/uqv0ohuEUOPdDYyGL+fPDJ4KL5h9GAuegDDbk5hv5/+HCymMiuqKkJbQEAj/mD2sP0Q4eg2GRv2LCuy2zY2N/rhGniYCqFLVvaMNBTCc9luH4W2vgA+SBixOIWKqvDmDVnIsBpjBpVgJkzIxAKL5WW4da4AzEAdMeJnmcGATy9qw9f3rkr+cnly/aKh+7bgN1bwiarK4QlakCcQJYP67HjlLzqmpH47D9NRVkp3kVELw35C090l80/ZBfMzOJI7cHMlQBmb9+V/E6yJ3zGhnUD2LqtH8uXb8eOXW2QKoqBTJpd7WtbxQRSFfDgguEB8HOLAeABSLMFm5VlBEGjtroap8waJd51/hicfq4FoQZXTZ4S/bEDbCSiPbnzj+xM4mt7dqQ/+/TSXfYdt7/sdbZNUkooskjA072cxk7vkvMn46b6szJnvyv6YNeA+8svXWdvbWw8sTUh/QMIGxERu9xxroVie2Cge2M8XtW+vzU5dWRVrCzl4tJtWwbP3Lix/V0rX9qIVU39pr2lAr1ply0qIA0FIxiamAwESabcQCp45wKAAkNQMPIAEbTRYDAU2YBhEIW1Rj9HCtswa25cXHL5LDF2XLzroouiOwEs3tPduhguML66Wh7s8b6/f493+R0/bceSxWv8TDosFRWQkFlk/D2YPNXBN779flx4WVGqLD4wmijecfQHlRfA4wiN3CgX0ALtcvvnJIp/6rv7TzNmXMr18an2Dv9bSx7bieeeOIRVK3bpVLYIDkZKgSikTINlDzzjsqsl+wwEziQNAT8X9CNWkJAIwogaGgYsHJRBIIosAIYQStqA8aG5Fz56YDDgT51Sri69YjjmXTS244xzCrrCAv/uEP2hqakpVFdXd+prm3Drqyv75v504TPc3upAkEMEDc+k2IPr39xwsXXdDSX3VFUu+tSiBfMxv/HEjKDQiabJ/jPH1jOLhUQmme49PxQqUnt2Zx5svG9nwQP3rdYHdoVEFqUIq7iUHAdYwRiXU2g1FpKmtFJbZVUWystLUFFViGhUYFRtBQqLHBTGQhDE0NrAy7poPXwIA6kM9u8KY+fOBLq6E2htTXgZZiERo4goIGVFiCHhZpMsVcpU11jygvcV6qs/W3t4zLiKz1dFVNPuls7qmuGxKhvhsff8edvtf77ntcgLzxitUCWVKAazhTQf0N/46lnymk+Xf3ziZLrvyitZNp6AQkhDLxf4z4yC/yuj1f/o6HkNgNmYM4c8ZhZr1uBvqGNLlkAvXHjsLqixkWWO7TPqUAceee2l7Kxf3fokVq9qh+dVwKFxYIoiY7qYkDIaPWZYlbROP2cM5pwxDNGijFc9Qm2YOb3SYkKHEOgsK8CcFOMJC3jFaEghwdqF0b5/SjSiPtRyEMb1IFo7U7GBQb/6uWfWYsNrnWg9aHCgJa0lamSIKqCkhO9rzmIb1U7uwAfmz8blV07ddNr0ItM20PnjYfGKB5j5/Je2dD72qx9uiD324Aat9DgpaBh89MDnbu9fb7rAuuaG0nvGjqZPzp/fKBsb559QQnjCaECiwOXxn9GazFy+ep158Ym/7px4609f9lKDJarQKiNj4vB1Bhl06mikT551ziiccV4Fps0swNRpFUvHjcTDA8AlMWDdINraYlR953/0WoMIDZcBuDxhcGXrAW/qS817hm9c3yGee/wgDu4Oax9hOFQhFTlImxbOYgu//wNTxA1fPjM966yCDCzz50wmUxwJRX5ycC9++sCdr174u39/xc2kKm1LhOGZMAR5/je+VaeuvCZ8z5SJ4pNamyEWzQkhhMTMlEwmy5ji/ywtxNIuwBw8Q2GCsd1b7kQMRSqAIZ/8kduzWWAwx++wg8gZjAAYBqAsSPlgeCAhIExgPZlc2ESAYDiIqAQRBgGlJPlGsO1gGqTuJJh2AQcmCxgXuqwM0gfujMVo/ZAxzszU0ABauJBMayfPe+aZ1ofv/PWagi3r02JgME6WLIUxMWiOsS0303veG0Xde4bxxCnxR8+pK28OAduI6FkAqK+H+MpX+kt2d3f7p46u7auvD9plZtHc/NZAcGcneMGCY5MGckyXs7vT7k2b1nde/MJTg+LZp/bhtVd7fBsVUgsmpkHAuKakUuLbPzhXvG9+6ZOhePqHpRRZwcyzdx/EY7+8ZePwe37/inbdWmlRMTyThiXgfeffKqwL3k+/nzluwmfvuGO1df31c7wTRAD3hjZt4Z1PPJQe3pewACtglAgGYDgQriP0JOcWccRqpkBiGQZCCIQiYQgSsEhASgEWGhAeiDKQyke0MARlESQLEBixaBS2UiAOwoKAgDYCqVQGqVQWrm+QHEhCGwbYQiZpY6DXQWZQY+xEYNyM9A3vfe/kO5qaWNXVvfn1M3Ph97+3f8sD966r2bk7YyRGCiljyOhWOKLXP23ucPWBD4/VF1xW/dep4/ELInrhiDslZkii/3zoa8i0IcIbUeOVKxvDZ545//QDLZi47tX+ebt2Jj78xztewb69ETBCiMhKDOoBiPAO/+vfOl3N/8TYe6aNsj7JDDAfCK9dM+K3d9y+/hN33vWyDtEwKSkO3yiW8ef8737/Pf7Hrj67rrqMXq2vZ7FwIXGuFzhuR8gKqEVX10bnrts3+T2dhSxtQ0OiRURv9idD0kfBektISCkhFEEowLIMlK2hHAEnZMO2LFhCwQ7ZCIUkImEJO8SIRATsqI9w2ELIBqQFVJaHEI04cGwB2wrO19/nI9nvor/PoLu3H/0DfdTTAe7rLEBH6yA6WjTadaeuKe4X9/zl/H9SCnfMm0e6qYklc2f4YFvZH+sXbrnk97dusfsSFsesakHCQtY/zJWVvf4/fXm2den7a5OTp9iXRnKOXaBeMDeIRQAvINJE8P9rZgNxzkmYG5GzPIsoDaA5t9zR3cevTZtZcuNf7modtuix13Qya8tCNYwS6YRq+PZzftvhw9ds2e+WDR9h3UpEz5HANU8/l0ZHV/vVjy1Z7UdokrLEKOpPTpR/uG2Pmn3q3KeZ+WIAry1cCB5yuh+vQqhyNotvWeGA6WFpAAJMAJE4xogFECJHDFUSQgqQVFBOBlaoH8oSEIogFSCVhu0YOI6A7QBOSCAUZlgOIxRmOI6GUoxQxEc4JuFYCo7jACyQ8TJwfReWl4GTzcDy02w7EdiyAJbMwlJZWLqQFBUIpWJVuUvlurp9asf+2m0P/Xlfza23LIWbqoQQBppakcn269PrCuQ3F37IqjvXXhwCbiGiFY2NLIdCW0QL/8de1AIindOK1NwMMW9egyktpJ8x8x3jx49/se6isTNv+vqf0NW1FwWRSgxkJqjf/XqnTqf4sq98910XM3MdEb10yXvC1zzdlJ7nU2bE04vbjRAjRYxOEYd27/NvvaWpqKKi7qFpk5wRfdxXqpAeT0SrjlchVACyETv+q6uumfmDvbtTsEMKhkSOi0VvUYDEgV0oclIbULUAUgqkGKCKgGolFKTMQoR64CgN2xYQwgMRYFkSIceCbStAMJgZ4YiBZRlIqcGchfYNomGG7xn42sBxwigtE0hXxpAeFUM6ZaG31yCdKkR1dRiWrR/zfQKzERu34k9PPZas+eE3X/UIY5USIE19EHbSfO6GS+XVnx3ePX6qfVuY6HtDttn/JtkzpxU5FzrB6tWrLSIa6Of+Cy8ojH/2j2NO/8odv24qWvZoF4VFDWUxWd5zd7vbP7DM+vYP6n6cYv5GhOilueeEPn5tqm7RmjWNpX2H+thRirQplsue3K7/PGN94a6DPF6i7QMRFP2IueO9AJ5ibpREC44rYisBQHt7e2z/ntCPjO/EXG0AKEJu8CDMWwfK8g0SMAMqmJshJAKhBQJKPgCCB9hpWARIRZA01IMPEaMoGOAww8tmoTUHTGghYLQPrXVOu1pQRICQ8LWC70pkM4A2hi3Jwme1/5Szu7ocyM69h8u3P/Voy5offnuV6UuUEsglZoPqcmOu/qexYsHHJz00cRx+bBOtyQ0Kjosw1pE+ziynf9zWFbrpK599iZ9YstHYNFa6Ooq02WI+ff0UceO3T+Pa4fZlMaKl+3p5x1/u7Bjzs5tfQGagQGpdCEF9ZtqspPjnb5y+e/6Vw89I6+52BfMVW1XcytykiOadVHSu4wK92f0NyWzihZ/evqJv9PC7vDCeMjHxCofpUS6PPuT9+tYB7krwBT7vvz7pHaxbzWzlBPD4cbTXs2hqYjV/fqNk5vEvvpL965dvfI0L7D+4RXIZx+UqVrjP/+K/rOV9fext6esr7XL5gX6P+eJLl7CNuzlG67hYbWSL7vE/euXLZud2/vde3lp7PL87NfQFNjdD7tix5n/ELzj7v4upteZoAthsrMjsFMXOqIbf3rnujLvv2FjQ0lKmbTGMmH1UlRTor908VS24OtpbWoANfZ7Vl87S/jlx8o63LAW0kEzj1EZqbJxvurL75Jy5xV7YmfNkXyddunjRbjbGI0eMlb//5S5/zLix6qPXFXxhR9vBz88cMWLTp66f8+V9O18p273ThTAFpHi0eP7pdv7IVbjx8gmTfsXMtGgRxNu5iPL4T3ZbuUnew1ev5U0X1K1kiXtNoVjPUdrAcdXo//iHWzjDfGWauRY4/tNiDH0UfdxSmnAPzGVmZ82Wwe5rb7ifge/65dFVrNBkZkx92TQu7u8aZP7xS52d8UMD/Gz99zv9gsjzfow2cZxeZMLD7ic/skevW5d+iAhoamKVl5r/RqxezRYAtCb4pzffnGDgXjcml3IBrWIbj3k/+V4PH2jlh48SWHEi5WfJTWCfvm53e9dFl93PRZGHdXloHYfEY/z+9zdxt8fcw3xLN/NF2w8zz5613A/T8xwTz7CNJ7my4AFz3937DTPPGrr/4+0eT9gUEXPmkNfv8jmvvpz+1H13N/sWRZQQHpK8Q394QY36wILi+sKyxPbOTP+kIXsvcLMc/yGqI4WFiDbOHFMx76s3XdJWWt2PhLvfEDt44ZmD5rc/3eb7Lj5N8MaVlOOH775khB+KDACGIchCez+8ta9qtBzAVUTEixYhrwX/O7qo9btaKwZ4oOqVzYnVn7x2Iws85Efl82zjPn3KhGX6qadSu5j3fyuRPbCImYtONM13JDYx2wCQZv7cnX9McjzyiGuJp7iQXuAp4//gv7K9n/uZn+ni/u8eTjBPHPWUa2MJx+WLTHhOTx3TbJYudbdmmaczs6ivP760oDgBhVDEooCN6AdXv9I26+EHd2pJIyQbG7FYxtz0veliyqnh36ZB+wpt/XEiSuTcLSckdX0q4DUyyxDwx3PPj3V+/GPTFZusARXgwL5iLLpznxkcQET77pbqQnz7qmvGWRZcFhyBQEzs2T/I27YlJ/UNYDIRmbo65BMj/VeEr76eBTNP3LA/uf/cugc0YZmJii0ssNj7xMdeMWu3HVrM/KbBfTLk5BvKXsbMpy9+PMEThjd7EazgCFbwxBGPea+s9ZiZpwHAqlcyTe+asVLHabm26UW26Snz7nlP6i17/deYuSz3/Oh4fLkUBOBZcOAnC2Zxv83CzGL1arZWrx7yqTEd0YZcvZqtnL9taNYvvfn71qWpiVUgNMc8z1tyGDKzSDBfePdDB9ixbvVC9AqHaBUPK1vkP/RoQjPzTAB4cscO578q7P9bvsKczXfMBJZDtuDQR7V7D//6+wu7OYJn/AJax3HxqH/T17ea/e38u1w7td/+6g62cTtH7afYxhM8rPJPvOzFDDPzxCPbPC664CH7KOiiKBcPJW/o/2+3EJGZM4e8OXPIC0JZxEe0oefMIW9O0E6O0TUUgvrbtubNIz9gnRzzPG90nfv2wSYis29vx3nPPbGTfb8KDIksJ/TF75tEYyZZDxEFtKxLJ0x4S863+vr6oSyl6p1cEkNxUwpit+qoRRyxnzqG0Kr/wEJH7k9ETET+scyE4PkRiMj3vO5LxoxGw9wzi+488/QpUrPSRJXyrw9t18k+fKYr7X4MQMfo8WZ1zQgfvu4xTITBpIN1q7cbAH3Hm/YbetDMzE5O801m5puYeSQz27n19hFLKPd7Zm6/mzzmD+TWhZnZ9pkXDG1j5jlv084b67LMn3SZP3uM7RYzFyYSiRJmpoKa9g8w878d2hG+9rUXekmzI8JCIhZp1VdfN01MmBR5OqdpxVuFr0ktXLjQ5F6yP5RdoL6+/piagIhM14F1w9hrO3/omCMW09TEqr6exZFUrdz/zTH2P9bCR+7PvKHY9/2P793bFBrSvMxM9fUsBrItp372js9YnNk7SYjIHwf8/dPnniUWXfS+Yeyi24AUDh7I0DOPHzSk7XcRUWrGabUbTjtjunG1ryMyikxKm44WLdIuziMibm5uPm40oEqmk+8+3DJw+b2/33dV62Hjw/aLqqorwocPtn+LPU6DACMYgiSIAF+75BmPoyFZOqy6XEol0Z9Koi+R7AjYoJqLy+IVhYUxWALoaO/wM67pYWYympkhYHLeAAUCfEZhaVEFQ6C9tfdmGICNQCqZNTNOjeHyD9Wu9X31CyJ65o7Vqx/64KjKYSuf9Wt27Ta+TVGVMV36yitH2zUjvCVRWHc3HcXhy2kzn5lHALgi0MLotm35wMKFC/8mVe/Bg3BGjMBYAB8EUMDMkwPTATon2E8T0U4AGPC7P3NYdt97P8Z7CwMi7HgAFx+x77HgAvgTEaVzdtu8rEbEkRhdW1vnE9EDQEDdWriQdEMDz77js796BLD+LIDfxWXtMmaO1U7I7pswQdTu3pkwzJJeXdklzqkbMREAps1w1px55tTrHl7UAsEWBBzesSGJXTtRz8zPLloUaMLjYWCmwiF7ZGdnz4d/c+vm8kP7CUZ6SGV8L+7YcalUPLDaCIICmhUJQFoCMD5gdnu2I2GHhAqHwxVEBCEYnu4wUgptK4FQyLKYqUJrH55nYEygoAwDpBlGGyQH9mvXN5BCVfieRjqTRk9PEh//5FhMmGKtnTVn9DOJRNfcwsLSPa+s1Rcsb97KQJGQCLEV7sXFF787M3GU1dDntv5wfMb8G4DuoQdMRGbp0i0ffGbprh/VVI+akEkpaJ3EM0+1fG2wt+vK9145Y099fb1oaGgAAA4XpKZu3JR4YjAZrshmFaJOBCR8GPbhhAkHDrS2LFvWW3/WeUUmJA8tX7/I5YULyNxx946xK15MPB9y7OGuRyB5JJc8sD4C0q5GNCa+uG5d9w0vr+x+uCBSWtnfD7h+EhXV1vX7W9xCn62VY4k2PPb47suWPdPxK2FsR1nWN61QP5Y+vW0WEb1v90HW77m4ln6x4wW2yKYNaw+b1kMzpjDzCGWJX//xrtbPjR5ZOfXggYyxUIq2w/3YsG77lulTJ/Zv3txMCxbMOy68AspWzt3Ll2/5mZ8u9JKDQCSkKG4pIYzwyRcMKUAIaFnGAEwGxgcsSWRbQlhCQmqpTVbCsoVUSiIUksKxpAjSQZIPEmyMLwRc4WkGQ8BoA+358DwPklnaguBmtWEtdDLRiT4Nz806NmxhMbNIprqHA5nODesTFZ3tTGGMZJdT5rRpRTIStn4LtH680C69sdC2/xUAmpshAfjJJC94/rl9f/mXL/4Wfd1VnpBlYHRTaVX3qXfd/9U1zPx5AA/sBOwJRNlt23jsn+5aWfKHO57JROR0xTrCoDRAHgwDTlgMP+2McXf29pyGaTOH/duCBcO/zswTN29zm770qb9Wr3u5M+uEC4TmTJDXkIPEnABAAsimPbruc6dMu+6zZzb//EePq2efOeAWRkaLlJsww0Z58rbffbxh9lxc0tLKP3/8sYNfavjX+0n61YY5baKFvbTwlivf2+fx5ax016TpkWh5caSqs9fH9j1dZu/uvrLWZMlXfa/99ieXlS6ZMrly6u4DbTqM4aKjvQ2HD+0tASYWNDc39x83GlD7HFqxctOuyaeE52r0wAoLSJK51GwBI5qFgLQCAirAgRaUBCUElApo9wYG6XRGW5YKElpKASkhSoqKFZHAYDKJvr5BbTsMZgFlNLRvYOWSS/pMcIyWsVhcFJQzCntcq6ZWIhQSMjeQeaSjjy/pajNT9h9K+g5VKXCXP/vMsVw1zFmUQXYKm46/hsVwAEBdXcC360/ikqceP6D3tVTpMCbYBgUAKtCza0P2tVd7i6adUlC+1IE442DQZQoLNZ5frHoHiziDKsUI5XrU4N79AZf3L+nxly59nL5df+HX9rfwWS6wSruisL1NeSlUOX6mGtpYwTFvkKI9CMHMWtD2TdahEbX2U9NmTr3u8cd7RdIrUT5H8frWTd6GDZnKc89x/BWbEVv18oDsSlR4EaqyBrmN3/+uaaK6auTPmdKO66f2TJgWHpw6M171QlOCbSoTr69rxbmHQ++vntj30+mzi+tqatOQ6BWKhsmOLs+UV06bB+Cjy5cvvB1okLkb+78VQCLKrN90oP4LXxvzL22t/b5hXxEkGCbIOAoAQsB2JCxbIEjNx5TL0gwBEINZ2Kq6urp4WiYbsPgtCQwMpJHoyjxHYA5Fhk2pqCgclkkzJBGYg/km2gQCbYcF+vqT6OlJP+t6xkQcJtuRz1UMq3hg0ya2p06Fv20nirduSjkZJs+mPlhyN867aAqNneiODtPo3wD4zVtNOpZPPjk4ev2rvgzRXAAhACEQjQSzJVa+1MsTp1X2LZgX1k1NwZy7dBauQRREo0GIBhOoYEMzGNBQIkyKKq207+GWm5dn55713rNrhmHN3paezaVFNadt4TbjkBCKLGgQNPuGAuVHgSFpuKS0RFgxtMz/2EQsXbyH1m/shaOKIc0ode+9TXzhFVc8uO/QnrLnnt3KITFCGRgIVuYDV50ip5+DaJGKLGpLux+ccZo1tmZMN4VekGDtYOvGhHEHIwSMK1GRzszw8QNcEEpJL9MLD8V8aE+R6erFmONpFKwAYOa0kU8BeOo/4K86C8DZAJ4jonVHbXMAnIFAZnM+v3CKKPJabnsVgIkA5SbVDXkDjvQKxONAvIaIfne0I3bqVHBrB2p7+9IANGU4w9VVZRSPxweEEAcbGxvlzPnz1QSibPDNCGZm/d1vbxx34EA/mBWx7EFGawiuhKAI7dw9QPtbuqb1M5/32J9eXw0ARoI0BUTZIMGGBQ2G7QwQawsZ34JEN6SIos/NyIce3q4nzp4IK+LbWeOBQfA4CcdJweMuRAss4Xk+tEcQQsJLe255bVF1Z2+ycNTo+Ccv++D0e17b8IyWxpbCRGjr5lY8+9TAlDWv9aK1VSNmW0i6LXrOqWXW6In2s6UOnttxuGtK1tVPl4Qsf/yYESWxSCKeTAJ7du42icQplUCssMapmHfXA5vdkrIOq6MlzS7S3Nk7IPuTsYk5E4WOGwEM3BF1As1vs1dd8NPQ0PwqUPcq0Iz6+iYFAFOn1vHmzc1EwYtffiwvfm57G4C2d7qg+vomVV/fpJqbgc9/vo7nz4cZoszf/8iBG/buOwDAEi48PmXmbGkptb88bi0L3C+B8O3YscOZMGFCtj/tf+qH3z1Y3D0otFSeYLsTYUvBT0dhdEht2tDmK6f2K0CmasSIU1Yc4YcBEAhM1vTztJkF9InPzuke7CPzyJ8Plb++cTMTDyODKPbuHpRdXRC2NaTjGEak4VI/f+gTU2jKzMrXHWewoqwwWg0ZImXghOK9B43k38Yc2t7Y2H/D6BEFp+9vSWhHjJLsCfz45qdNehAkRQWl/RSUneRzL5rk1Y7Bo0T00OrVbM2ZQ1sA3P3LX+1aUVCgz+pM9vthZNXObYdS8+rG/0s/95dvez0yOGpkR9HhliQkJNLpDHyDzHGnAQN3xN+ZjLP8P0wUOFZVIj3kJ2to+Ptf3aJFwIIFb7pQli9/M5TGzMU//eXr3NrSx5JqoDmJ4lKB2jGRzjfnAYPr6+vFhAkTsn2cOqu7Tf/htVUHOOsrRC0iYQ9g6qzR2L0lg+42gqcj5oXnN5izz5v27Lx5o/xjhcoZCYybbvgz/1TqFgCPJ3qzn9yyVSihFSAK0dXlorcnlSIlPEiZE1wF10uZ08+eLL/widDNKeBKAq7MAN8pBuxulKwif9/YQd5T1LI7fttHrjnjgR98/xFX0SgpdRG6WtMCOgQ2Njx08tTxBersecUYVob7co5wf2gi1YoV6XA03gKNAXLTQnd3cMHhLjOptiKzsrg4rkMhkSUYW0DA8zx4/vGVjOC/zSGZc3noo5eh7QsXBpGFv7e8DWNXAkBK4yPsFY1M9Id8JSxB6DPDR/dnR1RgIRHxUJC9oaHBdjnxUAHC4aVPbt22Y3svHJRi0Mtg0qSxuOT9k0wo1g4FgxBiatu6PtHdJj7NzFEAMGZodjzDsIEkhzpbB+n17cnqZ15Lfmbd6r0WmQJSIoaIraRwBlFW7bxfheRYz3MhoYg4DMsqk3/45Qv4wk3bH/riP6/+yOdvfFVd//Gm71zz6Ve+fu9v1y3yOHYLYGHCWDw96+zIupphZSpjEkYbgvFDMMYBQcKCMpdcfArmnFXxWwDZRYtARMSbNwfzWQrjqr20bBAKLoQ/0vR3VqL1oPoRUN49aiTeqyzuFxAkILmnpxfd3f047jTg8RaTPpZ7QBvo1KAHAw9hFdXFRcNVd1dqDRE1A/Wiri4Y0Q2is1gYoTIaV217PVHT3jlIYRlFRndiZO0wvOvc4eKh+yI4jAwclNCOzf1Ys/LQqWfOGP6G8L8x4Z41BJVg2+sebrzmeT58cJAGe0bBFiXQxsVgZhsVlDmIFsiJvb0OhCQosolIgk0BNq/vwutr9rIQEkRhAnTE+Gxi4VOEzhYt79UHZg3ItDX71JJHLrnk7FPv+sN2zWxyE/8ZBtrUVFbK8RMqdw+P2V8mIncoFDh1anCZiR7rZ6OHD7v4ZaTYgKA9AZ0G5/bdWFhsRQI9QEFtleOMlH/cUXOIiO+4Y7V1xx2rrRzrWQCA8SAyaQ+AhK8NlCVQWl5KRx7HzBRtKG+PyLIrWvfjkkRraQE4ZlgxAAujx5Rh2hQ0jxk1mg0YTIxMqlTv2xGhPh/vampqUgTQULSUABArJDrj2PBKnLoPD4POREHGhkAGhcUJ/e6Lq3R5AWAyWWQ9D1lOw2MXvi8AXQOB6QQzjlhXAqYKStSasFXFxNCWjHw5QvZ9RYW4OeQIVrCGiLMY+he2wrqyqiCdBT4HAEcnZwrFQMUlRXBgw4Mrdm7bjngRrshNp7WmTJ6gLTvMPks2HjN7Quc14N8hAQAIEVHq6G0DA0j7XpCf3/V9+L4LS1p/00YDGsDM8cWLU2u3b3MvBULsmyzikRJs2dSL7ze0zzrckqSwLIAxINcUou2wihzaj+/NmzfvzLU72YLIDeIhIBVDEWB0DEHXnIVnNDJo9T5w4UTroounQgLPhqzQ+SaX0MY3PhwZRlZbMAgD6AXQAzBBQ5L2q1laFUlC2HeU7Nq2V4988aXX4QIIUQGG8qFIKLGrZY+3bk3ZtPPfO7yqvb09dvDgWwvrSQcgK9CaEkSZbAaWg3k5AfRJ9Uor1Ea2zzIcdshS2YK8AL4N++RQx74Z2VTJE0sfTd2eznSb8eOrRVGZXDWilp4nwpmpVBa5WAxIEMJh+y3trFkDtXDhQu8r/9rweVfwZa9s2e7Zdo2ldRbsEZ59fD+WLUWBkgqCBDRrCBTLtasP8I7d0TNcdm/a22E+n0wmISCUEARmA4gkZKgH7EUNdJEoLe3G/I+ebp1/afFr1QXWkjDw81Tf4LZoKDQMyBqGEEJlMXGch6phaaTTSUQiETjKwWB/ShZXdPnx0ISlA57KdiXRte4Vd/b2rR2+wDjFrAGZBbEAkQQ4bC1e9Kr7oY+Uf2n0hMihOZX0y9XM1p5FgYtWhQBhaRhoMCyQILAxA0N2xDkXu+kxU8YoY4Q/YWKtKirAEzlHPecFMIdclimTSZV/5Te3vlTzclPyB/AIVyw4FR/46JjbADwvCCN8TwcEHuQK2LwNW6+vF+Hnl+0x0BlABkkIWBsoUoARMMYHcRJSEMgUYs/ufrNuTac474KR78uk8btwLHqzAWuQUK5ux6jRWbz3gxO4MF4ovIGImT5jUt95FxTfW1KMxohNK5lZ6axPggQBgolseLoDH/nUafjYp4f3pjLJCLTwIo6dSg+mBpQVaghrfXrY6vrTirXWA/f8YRWyblSEqQgaPTDcCSACi4tgoxS7du2w7r97g/zXhtOiTU17Q7OBbLI86IqVBEyuDBoBgPRAxKx9FgAGz541dRJm4UhTpetI70ReAI+Al4nG9u70edWGwYyDkRx/Zp81/lQeBICsh1WhcOhSgIyCFMSMwUGXjxq8eMxc9PIKfX3zs4cEyUKSQgGa4ZksNDIguDBwtQKLiFIkKIyMLhavvpiijuswVlpwPDdIOp4xWTA8TJ9eqW/+8UzpeniIfNxYGoEholYgSK0BQIeEyhVPNAADnvZMQVFcFBeqh0sLi8+ygbYw8GKmNDw7BDzb7rv/XIxR529el5jy+isZhDCGFIXhow+jxzsYSGokD2dhUSUGvWrz2nKWezbjo3V1tb9pbn4z4ZGvgawbvEpFAswuQCYadMjEALqP5kUezQLKC+DQw0SCQlGfohS3JCpYqbRltA9mppZOtDmOA8CCJYVM9PToESNmzmTmC4jouTVrGiwEaeoHt25yCw7u9mBbcRjfANrHlAmjTaxAQPtJlJZH5P49u7B3915YshIKRWjdn8WhloxfOzakHTsKIAyGBBBiRxQBHnocO/vdAid0KBA8tmbPhs4JvSBhwegcA4azUFZUPLPkEAb75ae7O/chZNlTIuHIuxNdfRg7xX76quvGv5LK4PdLH+ngdGY4bFFIGdOHklLghs9fgu1b2nDPb/ZBYhjCGCXWr23Fyhc7p5w6p1zPm0d+U31AhtVZkPYiACwQDIfCEr7Pr+ZCkXRsgmveBnxroCVHHCgriv2CpPt+n1koEPYfbEckXvkpIeib7Sk2peUxAAQFgud7nB4YcICSOADMng1/+/Z1w9q7Om/auKklDcNhgRDSvsSUiYRf3jNeFJcC8TCgYV5c8mB0+I8beHTfIHMISWpp2Ystm52qcZPnfK63uw+AkjaF4bE2sSJfJvqwY1RFaGt9PauGhkDw3uonktDsAvDBCAgXzz21G88s3aG1m87V9yQjocSHP14+4+rrJvzx0UcO7t+4ce8oiYlM5BJoK8ZO03zF/GKz4oV+8cSjLdTXFoMUtZTxHPNic6uYfW749iy3jGrr2fV5buAtzz8PP9PvQFEULneb4SPHyMF++4EhRtDxXtrruHLDFFSpnQaEoKw0iUOHB3xQRUXK8KeiISTC8QyAQQRV4BTcwcBDM/SwJ0yoSvT1FJx1YI9for1iLXWchEiaGafFePR4XDVxHGbXDsOZE2vluWMnFDZNmVrJGSS1UnH0Jx1sWJVS8FCudRpEmiQZSPJASMGyEM9plGPOLWYYMCVBlAFRDNorgOeWQLvlUopakrJWKDlSWXK0cAerjUnLWzesHhjV1p6FEiBjuhCLduPyK6bQiErIuWePoNlnlrBP+6EoA0UF4uWXDtDhg/gEo+Jx09+ym4g4VmA+d6ilBy5rYviQSkNZwTXG48d/CubjahCS6jffGTu2Foxd2kdGpVzBXR2S2zsweVRF/x3xomSirMAvyCRT7CKCHVt7cbhjeDpn//nMXPL6q92TXnnxoJ/lQja6hUPWPjNz7nA7zVjvEG0dOufsubHqs86VtPyVVt/zK+DBwtqVPdi1WbOl0sTciqwOgTHo6yxxshe31RQTNzYee0JPvFD5JPo08yAzFwwFcIac6EMMDXaR4ZBdRS83ae+FpT0izVn2eQ+y6DBzJ1SIuXPG7WTgGyMqxQOXXTw3svTRh7wevZ0k4kj2HNKPPPgyps648KyJY+r+3WU+5+ABvPfggVbtQYuwIq6trTLjRuO8XuaXion2rV7N1pIlzVxXV/dfeUPv1Ie9w7F1f9NOZ2cdL1hA+njpghkAIhGxtLyy8NO2I0U2m4WPEHZuHaBZc4t6UdE3e9bcmqLqYXu9HVsHLEKYDrb0YseujZ8dVjnjmSETJ5lKRidMLkDVQAie6UbFyBBmzYm61aXgpiZWw4ZB3n9/g1dTiZ/NmCPPqzs9FvHSBINahApb4bnA1Kk1mD7RwOFh0Caspk4aj5jEPgCYP//Y9yBD6bLxE4rl4TaFSCTQmsQChoKBOHHgWQzZEYydJNDampKGkzhndhEICgOJUbj8vdUYPjz0qxDR4jTzZXXzRjx55fvrwtu2MOJRFz5FVTKzA7GiCz+wcU972fQxlUWd3ewkunt9gWIIB6qqCr3FxVjc67oFCU4UFxH1BqHQvAZ8Z3uAdeXEibUiEt9k0m4G4Cj2bB1ApidiA91PZVJlnTUjCkq3be1lAYsOH+rlnq7yucxcRIQ+AInqWnH52e8upFQaSKdtnjJ7Mp0yo/ZAAdG2IU3Z2NgoiWjZU0+t/9CXbprzrk2reRUJJbtTfaawoBfjx4Vw8cUjUFM5CYMDbTxtWphqSrEhd5nHMuIZYuCD/3zTed/89BdQbJihSBOZINMsg1kqImhOr3qh4wfnXVBUV15uXTBp0jlm7eo9/97elu3N9EfpzPNKeHytbMolzWw+0Manf+y6U8c0PXHIxAq7KYsilI0swuHWA/jTHY8lbrvtS6ufb1rVkvJTNQYVfmlJgdXZ3Xk7UfWSlesODBs9pvjH63d0Otm0KNEZ20DnElUfbUDQ3/4pJKBkwNnM+B5Y+0ERcxm4vwxrsPFhWMC2Q5A5nxgbQAflogOicS5qZdsEaWlADOji4rD0svjr+Nryu44XATSNjSxDFh7RHn90WE3JeR3dKR0RJXLXpnbuTZR+eAAzHxoxAqnRYwvKgS5jkxSbth30E92zRwC4CIzGRYvgL1gwasnRjX/x+jfDdQCwYMECnXN+/w0P8uc/f+dQ4duseya3vDO+icXHWv3TX/+Nc34jgI1vcx345/rP/duOre01fYNZJngYP7YCkVjhBuZN9p6W4lKpYx958qHNBcuf34VIqBrwCcYM0YnNEV/PW78lgoGQgJQMZQFCGUjJkFJASIDIgIhh21ZQ1JsJvg7izGxyNZRZQmsD3/dgjAkEFgbMLqIFSSz48Nx3j68t//NxIYDBNMVGuWDBgs7XXvRay0sLIDhpwo5j7dy30/T2jp0YQ1jIQtw1Y/bwBtAOwxQVnqnC5nWM3XUoxBji8iamxkaWm29vpuaczVFXV4eGhjpztPuBiEx9fb3YsmUqTekopyELpaEBaG4Olrq6N02Yhoa6v1t7I9BaDQw0/J0IQwPV19eJLVM7edGC+QZooPnzG2hKR3C9DXVAXe48uXIToqEBorm5GcGlNKPi81P5c+Xzad488rdu6Dtt2wYhLBSbDHowYeoIvuKKkREicnt7uT+bwu92vU43rnne8eNxWzGnA5oD0VsUOYGC6RdCYig7s5AEKRmOTVAWYDsqt45gSYJQhIKCGEKhCDxPw/M0UoNZpDJZGBOU3vA1QXuA57lwXR8CcWRScS6oGKRLLw33H1dd8NSp8zUz0+GdWFJZVvIRQS3SNx5cLyNWvPSqmfe+91wlIth8yqllmbKiAtXTa8PCMNH8bA8++omam5j5biJyj253+fKFb2v/HMshO2/ekccO/fHONtSbkYW/uyMfdU5etOjN/ectf+vhuY/G5C4hOKCZRW7C/Mzf/L67ZMdmMooKKMIJnHn2CKquhpvxDl3hqAMbur2RsJSvBo1y7QGHmQZyM/MAkHlD8wkiCKkAxZBCBMnpGSAWcFkjZIcgWEIYA6WC6ghKSmQzBtlMCqwBzzfwNUCwwb4P39XwfIb2g0ls7CsIC2AeZN8bgK9T8rgSwM2bwQsWEDPzsqoRnmEMCs93odkye/ZkRWtr9qppY53ZThitp84ZN3LZc52mQMXE3j0d3qHD6THTELsWwB25TAMnbR7k5mYIZsaBFpy+f4coTw5KP0JaTpjiyeGjvQFAvaw1T/dU6DIVxjNnno8bJ08bFwGXgVEbCNaQMBODh1YIgAOuBwQH5G5BBEEMBYIgAguGkAJCBEWFmDV8wwhIGAwWBCNzWVU0YIwBGxOQOHwNSIO0l0C0sAijasPiuBLAhgagoYEJQNnMOTERD/vw0xo+QrRtYwZ796ai08Y6PGosllz9qXFfWvrsOg0aCdfNyj/f9wImzrjwJma+82QWvkBDB/e3+FHvn559YidsWCLFbeasumpZPYz+SET7gGDEDgAeJy9SCNX1JT3NHBbHGkIZBAnph36FOaKHNoDyASGGJqgdcZB4qzfZ5BLbD60a8tIKAQgfcI1BlqtMeWlYaA/PEdHxMz3gCOo9Pfdc387Tpj/BESzWEXqSY9ZD3u2/TfHBPv4VM9e8sMp/ZOKYx3QIT+pisYKriv7o/vXxfpNl/kwu+5N1MmTFOhr1zKK+vl5kmWcs/FZHd0loqS5Vy0xp/C6v8cFuw8wXMTPt2MFOEzep4zEj6nHphhliQbcl2yo12s6rqqn67pSpFfe9vnE7h+Vw9HkZPP1kC8ZMHF88Yh4dXvps720XXTLtA7+5fYfPiIu+RA2ee3ovjZ44wlm4sMQsXAhzMmq/hbmB1IWXf+ixFSt6S7KZsM7iMF902mg1bUbJBgAv5mrkvcEZbGxslPPnzxdr1gRVR//vEVxHLo5ujhftFwTWuf0xj1uYmUt+tHArR/FHLhYvs8CzunrYEvOrO3peTjG/a19H5rJHFydNWcEDbpSWcZReMhNqH9OPLOnb35Hh8SneOSLBXHwyCd9Q2rz+fv7Zd7+1QsfoQa+IXuOQvNf7/R1dpjvBHx4ajZ9I93W8qGjDzKShv08mthnAnOmnDls9ZepwZEzGhKlAtB7a6+/Z035Gyz7cVFsRemLmnNjOyz5UbmV4i7bIo/37BJ55tH9kqgsvCIyYUQh4J0IX9B8UPxpKm/fyC+kbFv/ZEYprpeEBTJ1UoS++opTgDCZOxDs7Ll7QkCq2qWZ1alDMI6Jnps2IL7/k8jlskPQBA0EV4qEHXzEvv9gbSTP/pbAM95x/ydTe6kpJGe5mm+Li8cfWea+tSFWlUs6NRDSwKFeO9kQWRGamxsZgksDBg3zpX+7fltl78DDblgDJNv3Ra05xpML1JaHoy7lMqiel+fG/1s0MPXRmnnXvvb08ovxxI/G8CdFLDPxO3/gvm7m9n9uZmXa08C9u+vp2Bu71yuVmjmOZnjlhsb/okbYdzDxpKLXtyYCBrH/tk0sMl8ce8Ivk01yKl/X7zl/JzS+mGpmDkhUn48Dr/8rWIWYOv/RKcs/ZZz/JwF+1Q6s5JJ7hsuLfe08u7/fTzA8zN8ply3nVBWev5iiW+4XiNQ7hT97HPvIyr33dfwQA2hOJsS53zT3RXlDuGdDW/ftrmHlk48N7/zRn5sOehWVuqfWqqY4u0b//dWuKmUediLbf8WYDvqU7XrMGiojSY6Y7d71/wWhEQq52OQWDGHp6Y+rO29bB9fDBPv/yO2eegZVXfXpUR0VZFzzuZBIRteQvHd7jDw5+YP16/khFYWKUlwnyRgOQJ4IQDhW63nzwYPGoYZXXrd6YfOHX/77mY6+vt0SBHGllvIy59ovDxbxLyj5GRPubmprU8TLH46TA6lyXkmD+912trGfNfiRLeISJlrPAQ1xV+Vu+8972DDNzG/fM2LKF7/zWV1r8QvwxG5V/YQuL9bDCR8x3/3XzoY4OnhW4I04cDTHkFWDmsRs38Z5PfHwZK9zmlzkrWeEJc87ZzbxtJ/cw84jGRpa5ikp0Ii7H5QtozHUn7Sn37H5m/s4P13Jh/EEj0MSKHmZb3s5nn7XYf30r684M/5KZL9yxg/myC5/gQnm/CYnn2cYTPK66kf90d5I7OvhHANCX6RjPzEXHqdkhjhK+MVu38f4bPrWTQ/IBvyy8imP0gpkw/onsE02pvu5sdsmO/2IlgOMBx2XpplxlcUFEK3o03/2+y6fMf/axPvvVVzOK4RBRFVau3C9++4vt+M4tExd0cGZJ1ajQ41d/as7U7VtXjN7XApAswd7WXlP/rUaj7I9+o6WN02Enkezo6FjMzH0IIqDHRQGbIS/AUOJzZh6zebf//G9v2zDyjjs36ZCYJOFb8PiQ9+3vftA+82zcJ2Rrsqh81JQtW7gtUgbwYMAtGBxqNPdHNApEIgBSwNBs/8HBYIehXyB67AuLHtXYURuiiAJRIBoByo9sKRqc90i8sW0Q6AAgqVvGIiZy3NYOIyKzaRPbJZKube/h1Td+te5X1378j57rTrBgagCUY9GibTxibKH5zJeqKrpN4osf/XBF70Dm7N5b6rfy3v29EIJEyyFLNHzzCf2lr52z8LL3Va0uqxlMENFuApj/7zWfWrRoEV8x/91zPM/1b/kB1jHzjDWb8Ndf/WzdqAfv3u9HxWQlKAFWm/wf/2S+fdZ5+GvY6ljf2hr6wB9uX/PioV0VdixWSGR1Q9oupBJQiqGUhqMYobBAJOQEvD4ysCwLliUQZD80gDAw6AYzgTWgPQPP83O5vAmaGZ5r4HoG2hj4BmAtQVAQLAAmuBlGNqvBTCATFBmXyoI2DK19sGGADRwVRmoghYKyLnzoqlGdM2ZGXzsRDHIFAHv2o/GHN6+94s47N/phMccy7CHLG8z0GXHxmS+cuv2Ln6mdvAiLxOWYf8niJWbJt77QrPceSAkSBSRMPwoiPWb+R+Z6X795klNcZX5UKOU3D3Z1DR9eWnr4/zokNOAf+owt/XldXSN/vnO7WfWLW/bIJxZvMSRqBAyzh7X65z+9SH34mtpnKssw30P3pNWv2g813PTqiOeauyARQUmJRijEKCktRiQiUVwUQWlJBI4F2EqhqIxRVqlhWQrxaAS2I2DZEpo1sq6LdNaF5/pIpz3092WgPQX4DlxXIj3oI5Xy4GoNzzNwswbal2ANsBZID3pIp4LknMYgEFhf51Ko+GBmCGNgqxgGk2mUVrXia985p/Wjn5gw4kRw0DIR+cNH4buf/fwMOmWaJbXZx4p8WFQoNm7oNvf+7sC4J5/Frnlm/vcOoffAuReKv3znJ3PlmFFRGJMFRATJVKG464/rnS9cuwzPPtZ3DTO/HIuHbhrStP9Tzuoj6hofWeBGNDWxOpxIzG4d7JoblTXPdfWPxAP37132+U89I5Ys3m0cOU4II+BEtuHbDWeoyz5Su6iyDFcQUb9NZa+6KZ1MJPo8g2zWg/EGBzKetBxPSstzs9oTQnqA8Bw75JWUlHnRSMyzHceLhCOeY1teJGR7xYUxr6gwboqL4lxaUsThaJitkOJ4LMaxaJTtkMPhcIjdrOe7ruuxgSGAJVFO9xEzGxYQWgnlEQktlGBpK3bCIY5EwhwOhzgcDrNth3zLcjzbCrtS2l5hUZwAhE4ox2Vbwv32oj91fOvmm161UqkSYchQBh4M+zj7rGI0/NsM75yzogN96D1PZotrX1hqHvz+t5vsdZu3U0gUSGIHzA5Gjozx5788k869qOQPM6fiViLaPGSDNTT8903eHsp5c/T3VF8PWriQjMvuGRrWFU3LWz/UtLRn3KONr6Blv4EQldB+RIedPvpq/ZTU575W9Xqxiq1IeL2tRVb5bQCwfOXmtkceOFS+diUQDhfAtzpQXB5GcVERlGKEbMBSGsVFUZQWFcGwDyYPsUgUJcVRsMmABaMvmUA6nYYGMDiYDYilWYLn+nCzHjxXIx4pgGFCTyKBwYwL4xPYC+Z8aC1QEClGOBzDQCqDvuQAgjIcBK01PN8Ha4OieBTRSBEGB9IorezA++aP2H/Re0b9/oQRwKYmVvPmkX+gle9+9MHENd/52nN+VpcpRVFo9CNjdpl57x6Ln//iAp48DR8KEf2VmUf8+eHDa+79w8vlzU8d9B05UTFXImv6mXFYn3/xOPXui6j9Q1dP+faY8uhqIlqfExJRX5+j5wOiDtD/v4OVIYYPc0+hMXa9xmDclr++HlhomFn2pvGRbZtw2eZNqY/+4pYl2LktoW0VE4JC5MPjkbWKvvGd83HBJcV3lZQd7jImprUY+FkcNb0kSB/uaPthMhmp7Oo0rLUgbbIQloCU9hsOXmINSwrInMFrgICfl7OyPc/lSFReFI1ZwzIZA7KcgKyaq64mAEhF6OtJPao1eiNx54pw1CpxswwiAaM1Io5CX6+3Npvm9U5MnVpYaJ2aynKQJAkAG4OQDfT0ZJ5lHweZYSoqjci4PYsnjit88YSKDGwGrKmAv3cfHvzpD/fN/83vl/kxGqcgsvCRQFYnzbzzZot/unFyx4eucEYRUaalj5/fs83DQ/dvn/eb2571BU6ViorJcC/SSOiCUL+86LLJmPeeqlTdu0c8OHkcfnV0Avaj/YhvNzUTABYBmLJ5s1y0qNN88ztTP6Ao+kMhUj0ANhCVf6arj288uA9feP659rGPP7YNr67s9kOqXIINpdwe1vD8d50zWt3w5cmrrrwy9gsAj/amui4qjpQtzY2Q/1vrezBzKYASBEx9epsB4c7cvtUAYkfsO/R7gIiyuUT1I49qi4Mmgjb+pu0TLUxHRNzRweO7erD+B/UvhBr/socFRYVCBIYUXJPBWadW4ROfH7v56k+Vfa9vwO+qiqnM2i345NYdLZ/52Xc3Yfd2oYVlCTdLBFPJGZPSceuges9lwzFtemGmdkzZ63POKH69ogblZQW4G8DzRDTw/3+92esAu7ajF7ta9rifXPPq4bKXV24asWOrU7R+TdZzIUVUlkupgP7sXj2m1hI3fPFiOv3M0LYzz8TUo7vvI4WPmdWaNWtozZp3vo7Zx6ABrlkTrJ8zZ473TsfX17OoqVkjr7/+7fe9447V1t/bDoDuuGO1GrqePXv2mPnz55sTLnidmzOrk8wX7t2CxQu/tslZ/OQaVjRCECIQ1ArfEE+dVkrf+P7pOKPOvnN4IX4HZEp8hD62Zr17weJHOysfuP95tOzzNPQwCstSITjFWdNnLKnkiOFlmD7LwqwzbMw6sxChWHJZJFb8E0GWEILN+DGlx3SiHjjch2wG2LM1K7WOaOEkbxlI9s/cvNbgleUJHNqfRneXwUBWGklhwZzlFFLGQq957wdHWVd/YmZ23nui98fCA099dMHSRxob54MEaTYs/qd8lrloBP2H/JTMouHtB4r8Dm0d8/pPSPbEkD2YSPKF2zZhyS0/WOEseXynKXAmCc9PwjdAhvuNExrwv/CV8+13X1D96FnnyAv6/f5bbYq8PtCjzlu98vBnXnpuV+jZx7uxvcXXAiwiIk7EFvusDVECwh6AHU7zqFEFqnb0KIwcOQyWbVA1rBBCMEqKg6AKcZCIY9/+A/A1o7sDOLB/EAf3DWD/gT6TGYgzQ5GPJGzhkWds0mBTVtAnZpwWx9XXzsXp7yp/qGYkGuJEm9Pp1tpQqOrgP0J894Sl7+RqZXhdCb5w11Y8/qufrbIeeGittjBJKYrDkIJnXHhYb+aeM1xce/1s793nV7UPr0ZRIrP3yprQ6EMH9+Orr65IzH55Rfe0pmU7sWn7gO+CRAiWEGRDCAVmwDPa+HANwJDQAFxImBzxjt8w+oeSRBJs+IiAUCgZsVy23H4wuoyLA7q0MIwrrzzbOuOcssGJU2N/PvO0yGMAniUir4lZzTvJJ1adFAJ4pBAmEnzhocN48p67X1F/+l2Ll0hEpUAVkYiQEfuRNntMcQnEu+um4otfmYVpMyP3lIbpk0Pt7NzDv2k9lLlu/66Q/fjjLWhqeg19/QnO+n0A4hzCOFikgtKLQgK5QLqhN0VQgmCMYQPDPjwY+AjDhodBrZFAeaklTjt9tJx3/mRMnmFhwtTQtjHVuJaIVh3ttjm2+yYvgMd1dzzounMzWevrK5v1h779jUbs2mrBmAoIYQDKAMbA5awZMSyBCy4anb3kktNfn3FK+GdjxmMDEe1g5sosMGfbDnytu9uct35DC15/fR1a9xG2ryuEgILvG2SyHnyX4LqGda7eXSCEZOKhiJSCEA4LxGM+4kVZzJozHONnRDF9ThmKisyG2lGhn5dGkQXoL0Tg3KQh4G3Svp2sGGLCnBQM2sZGlkNFbg528sc3vNb7vQfu2V667InWcN9AiXBEsWAOUlT5pgVZ7MeUqWV41/mjcfF7x2L4qNLVFSPNimjocNaHyhKqLkqlUJlOJ01vD9CyS+n+3qyzdcs+amsd7A87oYqQI8tc18D3fRih4TgWHGF3E5AtKIrw2WfXUlmZOqQ1/lAxEhQtxkCZTfcb86ZN3sgQ89+k0A+5eXRDA6ihAUPVLE9KoRz62Ogk+poIg52ViHozgJpnOg7jCxs34LbvfeclrF7d5huUUJiqpSANQ/0Y1K3ayB5RXV1CF18yG+e+pxynnh1FSak5VGCLhijw+CAGEQUJIFIA4ACQjHqIf2bAeB+3BI9PZdABIRBTilxh1hVBfBjAgFLBw9V5iujboqenp7C4uPgkE0D0FRq49wz0u9cWFKxM9A/M/+K69cl/eeXF9hGLG/di/fpB+IgyYJEQDgRZcHUGBhlTGGdTPTzEU0+1rSmnWJg8qSI1a26lkJbcPbJULJLAo4EQoioDnE/AIQdYkRt/GLzJWZJHaC0CYB3hkD2WRiMAnPZwAwPpiIV7AFQAuM4DHreATUec42SABSANdH8NKF140kxiOdpJO5Sig5mjiQSuX7kyO+elF9Z95Pmn22jr1rTuzyoAVTJKpWAwNPvwoaHRasJygIYND9GYcWFUVMVcpazWOXPGxJ2QUMZo1/f9lLC0JZUOSwUQaSgFKcHEbFhIAVsKkHbBOgtmCVAIJARIAhBBXQ9hESwZJLEoLSmNEwED/X1JkLHLy4uctrZW1sYMECSICcZoaI+hzVuDFmwYJlcpRPsadATRzBiTKz4uQFJAShnQphAGdEEg/czBQgZsOMdTIxhtgoAcB8mKDAd5Xt6wfAVy35QfpF4zGsw+DPiNYjvBTgrCEIhtFmSxHUknJ05Wn5t5WsHck2oW1dFhqqMTFTHznI2b/IdWrhgY9eKLe7B8+Xp0tIQNY7hRiAlLFggmDVf3wOVuZiQRhaBYxMkdb0DCQCpASg0hDWxHQSmCsgVsRRCSIKSGE5YIOwLhkIK0MpDCIOTYsMMCVgiwQwKRmEAoLBAOheFYId+2JRXEHMkwyGRcT/vG8j2G52mQkdAa8H0D7ROMZvi+j4zrIuu6QZIgDrYbDUAzDDOMDpZ0NotUOhUIEmloPwaTrskJXzB2N2yCwjwmp651wPEDC/haQ2sd0Kty+f/eKAvNAsycywMYtIMc+SegeQsQBAQLZLL9qBjRhS987fSWq64+fYQ6mQTw6FHkUOy0uRmyuRmGiFYz8ymjxxd98j2XzpqzeUvp/HWrB5y1r7li07o2HDywy2RBrGBzCCwsFAhJCn5aMDNB5yrcSxKwLQXbtsEmBI8AWDZUKAQVUiBosG/gS4LPEkoloOw0orEootEQpCI4IYFoxILjKBQWARU1lpIKCNsOExG0T5abAafSHtysBnwJzzMIBJLhez4yng876yHjetAGQZo0D9BaQbs+fM+AScCDAYV8hCwTCCiAbFYg68dgDMCGoI0GaRNkunqjor0HgMAESGkgyUAJAzZHpNKCAFjBcE5gtc7VS8EbTnogyLjFBlDoZEWGLFlkMXP8pBLAvyOUPhDMNSGivvb2pjtHj5hw/8gRo1adfxEKXnk1MWrv9pJzM4Nm8pbNGu0HHRzY14J9uw4Y7RnOuj5l4TNDQMCGZIeMG2LmoKCNAcP3s/D9DJSrQJYP2zNwtISGQNb3YVsK8AXcLCMWdSAphAxL+GkLggbgFLRBCYWsDEMIGQhaViKTJfguAKNyyR4JvsvwfYLrE7RWIC2RzbgBk9kX0JrBvoTWBN9l8rIMVzN8Zhgf7LOA72t4phdGC4AljGEwDDxoaKPJaAP2cyYrA5oZMAbaMLMRoCCjZa57VjAG0EYzGwNj3mrmDkWK2BgMZDs4OpghMnEHgHfSC+CRmJ9LATKAgWj7wCDi4XbPksTzTq+8gZljAK7uS+OijWuNbjkcG1MQnzJrz84u7N89gPb2LgwkMyCEYLRAyAnDth0IIYKXQwRBgLQVhAKUo6EchmMxyJKwSEAQQ1AW0QgjEgk0CpGA5Xhws1mwZAhpwfg+fG2gfYb2KaBHKQOlCMIxsExAm7cNg6QCSCLm+vB9Dd8jsFYglgATMmkPftbAz30oBIAUBcJoDIKPaCiCA7jEyLhZQBuQZxC4r3L2HwApFYgJnq9zkxoCAWUmKKUCzXmEABLeTNBujAs2cQwbVop4PLMFQ1XG/tEx5Mw+yp60AMzsGkyfn+oOP2uAT0TD7oTkAPXu2un9bNQo69KiIpyVSEAbhkQuta20BKRtAAoMe8AAUkCYQAP4XrCOBEPmBhJsBDQbKEiE7DB8DWgfMNrA0zqwy8iFlICyGBAGvusFNhspSClBSkKAYHRQFsISAjCU3bu3/yfZrHSFA2GynqkeHp0yrMa6KpGCYcOCc4LFzFCKYIgyew/0/iTrGc/ygKD4FEAEchk8ZVLlDSREdPPrXT8jAjFbDACObVvjJsRvEpJDnmsg3jLlnDlkE/X0eE87lnhPOIwltbWp+xoafjX4DymAR8xHpVw3bXLrRHNzsO54rzCUD8X9YwipAIBFi4J15eXN1NwMTN3SyZg/H+XlzYTmXB7zuqEj6/DOhV3+HuqOse4/315nZycfbYiUlze/7XtvBjD1b455E5s3lxPqjr3P5vJyqvu711LH5ZubqXNqHc+f/48VeswjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOPPPLII4888sgjjzzyyCOP4xn/D9+VfnFGx20DAAAAAElFTkSuQmCC" alt="APEX Circuit" /></div>
+    <nav>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5"/><circle cx="18.5" cy="6" r="2.5"/></svg>Administrator</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
+    </nav>
+    <div class="user">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div><b>อาทิตย์ สุดชาติ</b><span>Material Planner</span></div>
+    </div>
+  </header>
+
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
+
+  <div class="content">
+
+    <div class="card" style="padding-bottom:0">
+      <div class="page-head">
+        <div>
+          <div class="page-title">บริหารสต๊อกที่มีความเสี่ยง</div>
+          <div class="page-sub">วัตถุดิบที่ใกล้หมดอายุ และของที่ไม่มีแผนใช้ — ดูจากฐานข้อมูลสต๊อกชุดเดียวกัน · ข้อมูล ณ 3 ส.ค. 26</div>
+        </div>
+      </div>
+      <div class="vtabs">
+        <button class="vtab on" id="vtFe" onclick="showView('fefo')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.4l3.2 1.9"/></svg>
+          วันหมดอายุ (FEFO)<span class="bg" id="vtFeN">17</span></button>
+        <button class="vtab" id="vtId" onclick="showView('idle')">
+          <svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>
+          เงินจมในคลัง<span class="bg" id="vtIdN">40</span></button>
+      </div>
+    </div>
+
+    <!-- ═══════════ มุมมอง 1: วันหมดอายุ (FEFO) ═══════════ -->
+    <section id="viewFefo" class="v-fefo">
+      <div class="card">
+        <div class="vhead">
+          <div>
+            <div class="vt">ล็อตวัตถุดิบที่ใกล้หมดอายุ</div>
+            <div class="vs">ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;color:var(--mut)">เตือนล่วงหน้า</span>
+            <select class="alertsel" id="fe_alertSel"><option>7 วัน</option><option>14 วัน</option><option selected>30 วัน</option><option>60 วัน</option></select>
+            <button class="hbtn" onclick="feToast('ส่งออก fefo-lots.xlsx เรียบร้อย (เดโม)')">ส่งออก Excel</button>
+            <button class="hbtn" onclick="openFefoReport()">พิมพ์รายงาน</button>
+            <button class="hbtn pri" onclick="feToast('ส่งรายการให้ผู้วางแผนแล้ว (เดโม)')">ส่งให้ผู้วางแผน</button>
+          </div>
+        </div>
+
+        <div class="sumrow" id="fe_sumrow"></div>
+
+        <div class="fbar">
+          <input id="fe_q" placeholder="ค้นหารหัส / ชื่อ / เลข Lot" />
+          <select id="fe_fGrp"><option value="">ทุกกลุ่ม</option><option>CCL mat</option><option>PP mat</option><option>Non-market mat</option><option>Precious metal</option></select>
+          <select id="fe_fWhs"><option value="">ทุกคลัง</option><option>WH-01 คลังกลาง</option><option>WH-02 คลังเคมี</option><option>WH-03 คลังห้องเย็น</option></select>
+          <select id="fe_fSt"><option value="">ทุกสถานะ</option><option value="expd">หมดอายุแล้ว</option><option value="miss">จะหมดอายุก่อนแผนใช้</option><option value="fefo">ผิดคิว FEFO</option><option value="near">ใกล้หมดอายุ</option><option value="ok">ปกติ</option></select>
+          <span class="cnt" id="fe_cnt"></span>
+        </div>
+
+        <table class="ft">
+          <thead><tr>
+            <th class="c">#</th><th>Item Code</th><th>Item Name</th><th>Lot No.</th><th>คลัง</th><th>รับเข้า</th><th>หมดอายุ</th>
+            <th class="c">เหลือ (วัน)</th><th class="r">คงเหลือ</th><th class="r">มูลค่า (฿)</th><th class="r">จองให้ใบสั่งผลิต</th><th>แผนใช้</th><th class="c">สถานะ</th>
+          </tr></thead>
+          <tbody id="fe_tb"></tbody>
+        </table>
+
+        <div class="note"><b>กติกา FEFO:</b> ล็อตที่หมดอายุก่อนวันที่แผนจะใช้ ถูกตัดออกจากยอดที่ใช้ได้และแสดงเป็น "จะหมดอายุก่อนแผนใช้" ·
+          การจ่ายของยึดล็อตหมดอายุเร็วก่อนเสมอ การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · item ที่ไม่ควบคุม Batch ไม่อยู่ในหน้าจอนี้</div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════ มุมมอง 2: เงินจมในคลัง ═══════════ -->
+    <section id="viewIdle" class="v-idle" style="display:none">
+      <div class="card">
+        <div class="vhead">
+          <div>
+            <div class="vt">วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง</div>
+            <div class="vs">จาก Sale Forecast + MPS ล่วงหน้า <b id="hz">4</b> เดือน · <span id="asof"></span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span class="flabel">ช่วงที่ดู</span>
+            <select class="sel" id="hzSel">
+              <option value="3">ล่วงหน้า 3 เดือน</option>
+              <option value="4" selected>ล่วงหน้า 4 เดือน</option>
+            </select>
+            <button class="btn">ส่งออก Excel</button>
+            <button class="btn" onclick="openIdleReport()">พิมพ์รายงาน</button>
+            <button class="btn btn-p">ส่งให้จัดซื้อ</button>
+          </div>
+        </div>
+
+        <div class="hero">
+          <div class="hero-main">
+            <div class="lbl">มูลค่าวัตถุดิบที่ไม่มีใครจอง</div>
+            <div class="big" id="heroBig">—</div>
+            <div class="sub" id="heroSub">—</div>
+          </div>
+          <div class="hero-cards" id="cards"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="charts">
+          <div class="chart">
+            <h4>มูลค่าแยกตามกลุ่มวัตถุดิบ</h4>
+            <div id="chGrp"></div>
+          </div>
+          <div class="chart">
+            <h4>มูลค่าแยกตามระยะเวลาที่ไม่ได้เบิกใช้</h4>
+            <div id="chAge"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="fbar">
+          <div class="search">
+            <span class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+            <input id="q" placeholder="ค้นหารหัส / ชื่อ" />
+          </div>
+          <select class="sel" id="fGrp"><option value="">ทุกกลุ่ม</option></select>
+          <select class="sel" id="fSup"><option value="">ทุกผู้ขาย</option></select>
+          <select class="sel" id="fWhs"><option value="">ทุกคลัง</option></select>
+          <select class="sel" id="fAge">
+            <option value="">ไม่จำกัดเวลาที่ค้าง</option>
+            <option value="0">ค้างไม่เกิน 3 เดือน</option>
+            <option value="1">ค้าง 3 – 6 เดือน</option>
+            <option value="2+">ค้างเกิน 6 เดือน</option>
+            <option value="3">ค้างเกิน 12 เดือน</option>
+          </select>
+          <select class="sel" id="fMin">
+            <option value="0">ไม่จำกัดมูลค่า</option>
+            <option value="100000">มูลค่า ≥ ฿100,000</option>
+            <option value="500000">มูลค่า ≥ ฿500,000</option>
+            <option value="1000000">มูลค่า ≥ ฿1 ล้าน</option>
+            <option value="3000000">มูลค่า ≥ ฿3 ล้าน</option>
+          </select>
+          <button class="btn" onclick="idClearF()">ล้าง</button>
+          <span class="cnt" id="cnt"></span>
+        </div>
+        <div class="tblwrap">
+          <table>
+            <thead><tr>
+              <th class="c" style="width:52px">#</th>
+              <th data-s="code" style="width:150px">Item Code<span class="sm"></span></th>
+              <th data-s="name" style="width:230px">Item Name<span class="sm"></span></th>
+              <th data-s="grp" style="width:135px">กลุ่ม<span class="sm"></span></th>
+              <th data-s="whs" style="width:135px">คลัง<span class="sm"></span></th>
+              <th class="r" data-s="stock" style="width:130px">คงเหลือ<span class="sm"></span></th>
+              <th class="r" data-s="use" style="width:158px">ถูกจองไว้แล้ว<small>ใบสั่งผลิต + Forecast <span id="hzT">4</span> ด.</small><span class="sm"></span></th>
+              <th class="r" data-s="idle" style="width:142px">ไม่มีใครจอง<span class="sm"></span></th>
+              <th class="r" data-s="val" style="width:145px">มูลค่าเงินจม<span class="sm"></span></th>
+              <th class="c" data-s="last" style="width:130px">เบิกครั้งล่าสุด<span class="sm"></span></th>
+              <th class="c" data-s="cat" style="width:130px">ประเภท<span class="sm"></span></th>
+              <th style="width:150px">แนะนำให้ทำ</th>
+            </tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div class="note" id="note"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
+</div>
+<div id="dlgRoot"></div>
+<div class="toastw" id="fe_toastw"></div>
+
+<script>
+/* ── ส่วนกลางของหน้า: กล่องโต้ตอบร่วม (dlgRoot เดียว) + สลับมุมมอง ── */
+function closeDlg(){document.getElementById('dlgRoot').innerHTML='';}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDlg();});
+function showView(v){
+  var fe=(v!=='idle');
+  document.getElementById('viewFefo').style.display=fe?'':'none';
+  document.getElementById('viewIdle').style.display=fe?'none':'';
+  document.getElementById('vtFe').classList.toggle('on',fe);
+  document.getElementById('vtId').classList.toggle('on',!fe);
+  closeDlg();
+}
+</script>
+
+<script>
+/* ═══ มุมมอง 1: วันหมดอายุ (FEFO) — ห่อ IIFE กันตัวแปรชนกับมุมมองเงินจม ═══ */
+(function(){
+/* ── ข้อมูลจำลอง: ล็อตของ item ที่ควบคุม Batch ── */
+const TODAY=new Date(2026,7,3);
+const fmt=d=>`${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getFullYear()).slice(-2)}`;
+const addD=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
+const nf=n=>n.toLocaleString('en-US');
+const L=(code,name,grp,unit,whs,lot,recvAgo,expIn,qty,price,mo,useIn)=>({code,name,grp,unit,whs,lot,recvAgo,expIn,qty,price,mo,useIn});
+const LOTS=[
+ L('RM-PP-7628','PREPREG FR-4 S1000HB 7628','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2605-C',81,9,18,6800,'MO-26080142',14),
+ L('RM-PP-7628','PREPREG FR-4 S1000HB 7628','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2606-A',52,38,11,6800,'MO-26080177',22),
+ L('RM-PP-2116','PREPREG FR-4 S1000HB 2116','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2606-B',47,43,9,7200,null,null),
+ L('RM-DF-E9415','DRY FILM E9415DI 1.5 MIL','Non-market mat','ROLL','WH-02 คลังเคมี','DF-2512-A',236,-6,9,9400,null,null),
+ L('RM-DF-E9415','DRY FILM E9415DI 1.5 MIL','Non-market mat','ROLL','WH-02 คลังเคมี','DF-2602-B',89,47,12,9400,'MO-26080191',30),
+ L('RM-SM-GRN','SOLDER MASK Green HF/LF (2K)','Non-market mat','KG','WH-02 คลังเคมี','SM-2601-B',103,23,22,2900,'MO-26080155',18),
+ L('RM-SM-GRN','SOLDER MASK Green HF/LF (2K)','Non-market mat','KG','WH-02 คลังเคมี','SM-2604-A',41,86,35,2900,'MO-26080203',12),
+ L('RM-SM-BLK','SOLDER MASK Black','Non-market mat','KG','WH-02 คลังเคมี','SB-2603-A',66,58,14,3100,null,null),
+ L('RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2508-A',34,61,240,410,'MO-26080142',26),
+ L('RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2510-B',12,118,480,410,null,null),
+ L('RM-CCL-IT180A','CCL HIGH TG IT-180A 0.51mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2507-D',58,28,105,530,null,null),
+ L('RM-CCL-IT180A','CCL HIGH TG IT-180A 0.51mm','CCL mat','SHT','WH-01 คลังกลาง','CCL-2509-E',20,90,150,530,'MO-26080168',25),
+ L('RM-INK-W','LEGEND INK White','Non-market mat','KG','WH-02 คลังเคมี','IK-2602-C',71,15,7,1800,'MO-26080196',35),
+ L('RM-ETCH-MA','MICRO ETCHANT ACID','Non-market mat','KG','WH-02 คลังเคมี','ET-2606-A',33,11,120,950,'MO-26080149',8),
+ L('RM-AU-SALT','GOLD SALT KAu(CN)2','Precious metal','KG','WH-02 คลังเคมี','AU-2601-A',95,64,1.6,72000,'MO-26090012',40),
+ L('RM-DEV-NA','DEVELOPER Na2CO3','Non-market mat','KG','WH-02 คลังเคมี','DV-2607-A',18,96,260,420,null,null),
+ L('RM-PP-1080','PREPREG FR-4 1080','PP mat','ROLL','WH-03 คลังห้องเย็น','PP-2604-D',88,4,6,7900,null,null),
+];
+/* สถานะ: expd หมดอายุแล้ว · miss จะหมดอายุก่อนแผนใช้ · fefo ผิดคิว (มีล็อตเก่ากว่ายังว่างแต่ล็อตใหม่ถูกจอง) · near ≤เกณฑ์เตือน · ok */
+function classify(alertDays){
+  LOTS.forEach(l=>{l.st = l.expIn<0?'expd' : (l.useIn!=null&&l.expIn<l.useIn)?'miss' : l.expIn<=alertDays?'near':'ok';});
+  const byItem={};
+  LOTS.forEach(l=>{(byItem[l.code]=byItem[l.code]||[]).push(l);});
+  Object.values(byItem).forEach(ls=>{
+    ls.sort((a,b)=>a.expIn-b.expIn);
+    const freeOld=ls.find(l=>!l.mo&&l.expIn>=0);
+    ls.forEach(l=>{ if(l.mo&&freeOld&&l.expIn>freeOld.expIn&&l.st==='ok') l.st='fefo'; });
+  });
+}
+const ST={expd:['หมดอายุแล้ว','b-gry'],miss:['จะหมดอายุก่อนแผนใช้','b-red'],fefo:['ผิดคิว FEFO','b-org'],near:['ใกล้หมดอายุ','b-amb'],ok:['ปกติ','b-ok']};
+const RECO={expd:['แยกกลุ่ม รอตัดจำหน่าย','r'],miss:['เร่งใช้ก่อน / เสนอสลับแผน','r'],fefo:['สลับคิวไปใช้ล็อตเก่าก่อน','w'],near:['จัดคิวผลิตให้ใช้ล็อตนี้ก่อน','w'],ok:['—','a']};
+let fQ='',fGrp='',fWhs='',fSt='',fCard='';
+function alertDays(){return parseInt(document.getElementById('fe_alertSel').value);}
+function list(){
+  let l=LOTS.slice();
+  if(fQ){const q=fQ.toLowerCase();l=l.filter(x=>(x.code+x.name+x.lot).toLowerCase().includes(q));}
+  if(fGrp)l=l.filter(x=>x.grp===fGrp);
+  if(fWhs)l=l.filter(x=>x.whs===fWhs);
+  const st=fSt||fCard; if(st)l=l.filter(x=>x.st===st);
+  return l.sort((a,b)=>a.expIn-b.expIn);
+}
+function render(){
+  classify(alertDays());
+  const sum=(st)=>LOTS.filter(l=>l.st===st);
+  const val=ls=>ls.reduce((a,l)=>a+l.qty*l.price,0);
+  const near=LOTS.filter(l=>l.expIn>=0&&l.expIn<=30);
+  const cards=[
+   ['near','c-amb',`฿${nf(Math.round(val(near)))}`,'ใกล้หมดอายุ ≤ 30 วัน',`${near.length} ล็อต · เร่งจัดคิวใช้`],
+   ['miss','c-red',`฿${nf(Math.round(val(sum('miss'))))}`,'จะหมดอายุก่อนแผนใช้',`${sum('miss').length} ล็อต · ตัดจากยอดใช้ได้แล้ว`],
+   ['fefo','c-org',`${sum('fefo').length} ล็อต`,'ผิดคิว FEFO',`ล็อตใหม่ถูกจองก่อนล็อตเก่า`],
+   ['expd','c-gry',`฿${nf(Math.round(val(sum('expd'))))}`,'หมดอายุแล้ว',`${sum('expd').length} ล็อต · แยกกลุ่ม รอตัดจำหน่าย`]];
+  document.getElementById('fe_sumrow').innerHTML=cards.map(([k,c,v,t,d])=>
+    `<div class="sc ${c} ${fCard===k?'on':''}" onclick="feSetCard('${k}')"><div class="v">${v}</div><div class="t">${t}</div><div class="d">${d}</div></div>`).join('');
+  const l=list();
+  document.getElementById('fe_tb').innerHTML=l.map((x,i)=>{
+    const s=ST[x.st],r=RECO[x.st];
+    const dl=x.expIn<0?`<span class="dleft" style="color:#8aa3b8">${x.expIn}</span>`:
+      x.expIn<=14?`<span class="dleft" style="color:#c62828">${x.expIn}</span>`:
+      x.expIn<=30?`<span class="dleft" style="color:#a06a00">${x.expIn}</span>`:`<span class="dleft" style="color:#1a7a42">${x.expIn}</span>`;
+    return `<tr class="clk" onclick="feOpenLot(${LOTS.indexOf(x)})">
+      <td class="c" style="color:var(--mut)">${i+1}</td>
+      <td><span class="code">${x.code}</span> <span class="bdg b-amb" style="font-size:9.5px">Batch</span></td>
+      <td>${x.name}<small>${x.grp}</small></td>
+      <td><b>${x.lot}</b></td><td>${x.whs.split(' ')[0]}</td>
+      <td>${fmt(addD(TODAY,-x.recvAgo))}</td><td>${fmt(addD(TODAY,x.expIn))}</td>
+      <td class="c">${dl}</td><td class="r">${nf(x.qty)} <span style="color:var(--mut);font-size:10.5px">${x.unit}</span></td>
+      <td class="r"><b>${nf(Math.round(x.qty*x.price))}</b></td>
+      <td class="r">${x.mo?`<b>${x.mo}</b>`:'<span style="color:#b6c3d1">ยังไม่ถูกจอง</span>'}</td>
+      <td>${x.useIn!=null?fmt(addD(TODAY,x.useIn)):'—'}</td>
+      <td class="c"><span class="bdg ${s[1]}">${s[0]}</span></td></tr>`;
+  }).join('');
+  document.getElementById('fe_cnt').textContent=`แสดง ${l.length} จาก ${LOTS.length} ล็อต · เฉพาะ item ควบคุม Batch`;
+  document.getElementById('vtFeN').textContent=LOTS.length;
+}
+function openLot(i){
+  const x=LOTS[i],s=ST[x.st],r=RECO[x.st];
+  document.getElementById('dlgRoot').innerHTML=`
+  <div class="mask v-fefo" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><div><h3>Lot ${x.lot} — ${x.code}</h3><small>${x.name} · ${x.grp} · ${x.whs}</small></div>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="kv4">
+        <div>รับเข้า<b>${fmt(addD(TODAY,-x.recvAgo))}</b></div>
+        <div>หมดอายุ<b style="color:${x.expIn<=14?'#c62828':x.expIn<=30?'#a06a00':'#1a7a42'}">${fmt(addD(TODAY,x.expIn))} (${x.expIn<0?'เลยมา '+(-x.expIn):'อีก '+x.expIn} วัน)</b></div>
+        <div>คงเหลือ<b>${nf(x.qty)} ${x.unit}</b></div>
+        <div>มูลค่า<b>฿${nf(Math.round(x.qty*x.price))}</b></div>
+      </div>
+      <b style="font-size:13px;color:#3a5773">การจองและแผนการใช้</b>
+      <table class="dtb"><thead><tr><th>ใบสั่งผลิต</th><th>วันที่แผนจะใช้</th><th class="r">จำนวนที่จอง</th><th>คิว FEFO</th></tr></thead>
+      <tbody>${x.mo?`<tr><td><b>${x.mo}</b></td><td>${fmt(addD(TODAY,x.useIn))}</td><td class="r">${nf(x.qty)} ${x.unit}</td>
+        <td>${x.st==='fefo'?'<span class="bdg b-org">ข้ามล็อตเก่ากว่า</span>':x.st==='miss'?'<span class="bdg b-red">หมดอายุก่อนวันใช้</span>':'<span class="bdg b-ok">ตามคิว</span>'}</td></tr>`
+        :`<tr><td colspan="4" style="color:#8aa3b8;text-align:center;padding:14px">ยังไม่มีใบสั่งผลิตจองล็อตนี้</td></tr>`}</tbody></table>
+      <div style="margin-top:12px;font-size:12.5px"><b style="color:#3a5773">คำแนะนำของระบบ:</b> <span class="reco ${r[1]}">${r[0]}</span></div>
+      <div class="exf" id="fe_exf">
+        <b style="font-size:12.5px;color:#8a6a00">ขออนุมัติข้อยกเว้น FEFO — ต้องระบุเหตุผล</b>
+        <textarea id="fe_exReason" placeholder="เช่น ล็อตเก่าติดรอผล QA · ลูกค้ากำหนดสเปกล็อตผลิตใหม่"></textarea>
+        <div style="text-align:right;margin-top:8px"><button class="hbtn pri" onclick="feExc()">ส่งคำขอ</button></div>
+      </div>
+    </div>
+    <div class="dlg-ft">
+      <button class="hbtn" onclick="document.getElementById('fe_exf').style.display='block'">ขอข้อยกเว้น FEFO</button>
+      <button class="hbtn" onclick="feToast('ส่งคำขอเร่งใช้ล็อตนี้ให้ผู้วางแผนแล้ว (เดโม)')">เสนอเร่งใช้ก่อน</button>
+      <button class="hbtn pri" onclick="closeDlg()">ปิด</button>
+    </div>
+  </div></div>`;
+}
+function toast(m){const d=document.createElement('div');d.className='tst';d.textContent=m;
+  document.getElementById('fe_toastw').appendChild(d);setTimeout(()=>d.remove(),3800);}
+document.getElementById('fe_q').addEventListener('input',e=>{fQ=e.target.value.trim();render();});
+document.getElementById('fe_fGrp').onchange=e=>{fGrp=e.target.value;render();};
+document.getElementById('fe_fWhs').onchange=e=>{fWhs=e.target.value;render();};
+document.getElementById('fe_fSt').onchange=e=>{fSt=e.target.value;render();};
+document.getElementById('fe_alertSel').onchange=()=>render();
+render();
+
+/* ── เปิดให้ onclick ใน HTML และสคริปต์รายงานเรียกได้ (prefix fe) ── */
+window.feToast=toast;
+window.feOpenLot=openLot;
+window.feSetCard=function(k){fCard=(fCard===k?'':k);render();};
+window.feExc=function(){toast('บันทึกคำขอข้อยกเว้น FEFO พร้อมเหตุผลแล้ว รอผู้มีสิทธิ์อนุมัติ (เดโม)');closeDlg();};
+window.APEX_FEFO={LOTS:LOTS,ST:ST,RECO:RECO,classify:classify,alertDays:alertDays,fmt:fmt,addD:addD,TODAY:TODAY};
+})();
+</script>
+
+<script>
+/* ═══ มุมมอง 2: เงินจมในคลัง — ห่อ IIFE กันตัวแปรชนกับมุมมอง FEFO ═══ */
+(function(){
+/* ══════════════════════════════════════════════════════════
+   ข้อมูลจำลอง — วัตถุดิบพร้อมราคาต่อหน่วยและแผนใช้รายเดือน
+   ══════════════════════════════════════════════════════════ */
+const TODAY=new Date(2026,7,3);
+const MON=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const addM=(d,n)=>new Date(d.getFullYear(),d.getMonth()+n,1);
+const addD=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const fmtMY=d=>`${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
+const fmtD=d=>`${d.getDate()} ${MON[d.getMonth()]} ${String(d.getFullYear()).slice(-2)}`;
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){let s=hash(String(seed));return()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
+const pk=(a,r)=>a[Math.floor(r()*a.length)];
+const ni=n=>Math.round(n).toLocaleString('en-US');
+function baht(n){
+  if(n>=1e6) return '฿'+(n/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ล.';
+  if(n>=1e3) return '฿'+Math.round(n/1e3).toLocaleString()+'K';
+  return '฿'+Math.round(n).toLocaleString();
+}
+const bahtFull=n=>'฿'+Math.round(n).toLocaleString('en-US');
+
+/* ราคาต่อหน่วย + อัตราใช้ต่อเดือน — ข้อมูลจำลองให้ใกล้เคียงโรงงาน PCB ขนาดกลาง */
+const GRP=[
+ {g:'CCL mat',p:'RM-CCL',u:'SHT',n:34,price:[180,430],use:[800,6000],batch:true,shelf:365,
+  base:['CCL FR-4 S1000H 0.36mm','CCL HIGH TG IT-180A','CCL HALOGEN FREE S1150G','CCL CEM-3 EM-225','CCL FR-4 S1000-2M']},
+ {g:'PP mat',p:'RM-PP',u:'ROLL',n:26,price:[4500,9200],use:[15,120],batch:true,shelf:90,
+  base:['PREPREG FR-4 7628','PREPREG FR-4 2116','PREPREG 1080','PREPREG HIGH TG 3313','PREPREG HF 106']},
+ {g:'Copper mat',p:'RM-CU',u:'KG',n:20,price:[380,1450],use:[200,1500],batch:false,shelf:null,
+  base:['COPPER FOIL 1 Oz LF/HF','COPPER FOIL 0.5 Oz HTE','COPPER FOIL 2 Oz STD','COPPER ANODE Micrograin']},
+ {g:'AL mat',p:'RM-AL',u:'SHT',n:14,price:[22,68],use:[3000,20000],batch:false,shelf:null,
+  base:['ALUMINUM SHEET MVC-1240','ALUMINUM ENTRY 0.15mm','AL BACKUP BOARD']},
+ {g:'Non-market mat',p:'RM-NM',u:'KG',n:28,price:[900,3200],use:[50,600],batch:true,shelf:180,
+  base:['SOLDER MASK Green HF/LF','SOLDER MASK Black','DRY FILM E9415DI','LEGEND INK White','MICRO ETCHANT','DESMEAR CHEMICAL']},
+ {g:'Precious metal',p:'RM-AU',u:'KG',n:6,price:[42000,78000],use:[3,26],batch:true,shelf:365,
+  base:['GOLD PLATING SOLUTION 2% Au','GOLD REPLENISHER','PALLADIUM ACTIVATOR']},
+ {g:'Packaging mat',p:'PKG',u:'SET',n:16,price:[12,95],use:[2000,15000],batch:false,shelf:null,
+  base:['CARTON BOX A4 Double Wall','VACUUM BAG PE 0.08mm','DESICCANT 50g','STRETCH FILM 500mm','PALLET WOOD']},
+];
+const SUP={'CCL mat':['NAN YA PLASTICS','SHENGYI TECHNOLOGY','KINGBOARD LAMINATES'],
+ 'PP mat':['SHENGYI TECHNOLOGY','ITEQ CORPORATION'],'Copper mat':['FURUKAWA ELECTRIC','MITSUI MINING'],
+ 'AL mat':['UACJ (THAILAND)'],'Non-market mat':['TAIYO INK MFG.','ASAHI KASEI','ATOTECH'],
+ 'Precious metal':['METALOR TECHNOLOGIES','TANAKA KIKINZOKU'],'Packaging mat':['THAI CONTAINERS GROUP','SCG PACKAGING']};
+const WHS=['WH-01 คลังกลาง','WH-02 คลังเคมี','WH-03 คลังห้องเย็น','WH-04 คลังบรรจุ','WH-05 คลังของค้าง'];
+/* คลังที่เหมาะสมตามชนิดวัตถุดิบ — แผ่น/ม้วนโลหะอยู่คลังกลางหรือคลังของค้าง, PP ต้องแช่เย็น, เคมี/โลหะมีค่าอยู่คลังเคมี, บรรจุภัณฑ์อยู่คลังบรรจุ */
+const WHOPT={
+ 'CCL mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
+ 'Copper mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
+ 'AL mat':['WH-01 คลังกลาง','WH-05 คลังของค้าง'],
+ 'PP mat':['WH-03 คลังห้องเย็น'],
+ 'Non-market mat':['WH-02 คลังเคมี'],
+ 'Precious metal':['WH-02 คลังเคมี'],
+ 'Packaging mat':['WH-04 คลังบรรจุ']};
+
+const ITEMS=[];
+GRP.forEach(G=>{for(let i=0;i<G.n;i++){
+  const r=rng(G.p+'idle'+i);
+  const step=G.price[1]>1000?10:1;
+  const price=Math.round((G.price[0]+r()*(G.price[1]-G.price[0]))/step)*step;
+  const monthly=Math.round(G.use[0]+r()*(G.use[1]-G.use[0]));   // อัตราใช้ปกติต่อเดือน
+  const roll=r();
+  // 12% ไม่มีแผนใช้เลย · 18% ของเกินแผน · ที่เหลือปกติ
+  const kind = roll<0.12 ? 'dead' : (roll<0.30 ? 'over' : 'ok');
+  const fc=[0,1,2,3].map(()=> kind==='dead' ? 0 : Math.round(monthly*(0.55+r()*0.95)) );
+  const cover = kind==='dead' ? 1.0+r()*3.0
+              : kind==='over' ? 4.4+r()*3.0
+              : 0.6+r()*2.0;                                     // เดือนของสต๊อกที่ถืออยู่
+  const stock=Math.max(1,Math.round(monthly*cover/5)*5);
+  const lastUsed = kind==='dead' ? 100+Math.floor(r()*480) : Math.floor(r()*150);
+  ITEMS.push({code:`${G.p}-${1000+i*11+Math.floor(r()*7)}${String.fromCharCode(65+Math.floor(r()*26))}`,
+    name:pk(G.base,r), grp:G.g, unit:G.u, price, stock, fc, monthly, lastUsed,
+    sup:pk(SUP[G.g],r), whs:WHOPT[G.g][WHS.indexOf(pk(WHS,r))%WHOPT[G.g].length], batch:G.batch, shelf:G.shelf,
+    // วันหมดอายุมีเฉพาะ item ที่ควบคุม Batch เท่านั้น
+    expIn: G.batch? Math.floor(r()*G.shelf) : null });
+}});
+
+/* ══════════════════════════════════════════════════════════
+   คำนวณ
+   ══════════════════════════════════════════════════════════ */
+let HZ=4;
+const ACTS={
+ ret:{t:'คืนผู้ขาย',c:'act'},
+ sub:{t:'ใช้ทดแทนรุ่นอื่น',c:'act'},
+ sell:{t:'เร่งระบาย / เสนอขาย',c:'act-w'},
+ off:{t:'ตัดจำหน่าย',c:'act-r'},
+ hold:{t:'ทบทวนกับ Sales',c:'act-w'},
+};
+function compute(){
+  ITEMS.forEach(it=>{
+    const use=it.fc.slice(0,HZ).reduce((a,b)=>a+b,0);
+    const idle=Math.max(0,it.stock-use);
+    it.use=use; it.idle=idle; it.val=idle*it.price;
+    it.mos = use>0 ? it.stock/(use/HZ) : Infinity;
+    // จะหมดอายุก่อนได้ใช้หรือไม่ — ดูเฉพาะ item ที่ควบคุม Batch
+    const willExpire = it.batch && it.expIn!=null && it.expIn < HZ*30 && idle>0;
+    it.cat = use===0 ? 'dead' : (willExpire ? 'exp' : (idle>0 ? 'exc' : 'ok'));
+    if(willExpire && use>0) it.cat='exp';
+    it.act = it.cat==='ok' ? null
+           : it.expIn!=null && it.expIn<=0 ? 'off'
+           : it.expIn!=null && it.expIn<HZ*30 ? 'sell'
+           : it.lastUsed>270 ? 'ret'
+           : (it.grp==='Precious metal' && use===0) ? 'ret'
+           : it.mos>12 ? 'sub' : 'hold';
+  });
+}
+const ageBucket=d=> d<=90?0 : d<=180?1 : d<=365?2 : 3;
+const AGES=['ไม่เกิน 3 เดือน','3 – 6 เดือน','6 – 12 เดือน','เกิน 12 เดือน'];
+const AGECOL=['#7fb3e0','#e0a90c','#e07b39','#c62828'];
+const GRPCOL=['#4f9de6','#7a4fd3','#1e9e50','#7d8ea0','#e0a90c','#c62828','#31a5a5'];
+const CATS=[
+ {k:'dead',cls:'hc-dead',t:'ไม่มีใครจองเลย',d:'ไม่ถูกจองโดยใบสั่งผลิตหรือ Forecast'},
+ {k:'exc', cls:'hc-exc', t:'เหลือค้างเกินแผน',d:'ของมากกว่าที่จะใช้'},
+ {k:'exp', cls:'hc-exp', t:'จะหมดอายุก่อนใช้',d:'เฉพาะ item ควบคุม Batch'},
+];
+
+/* ══════════════════════════════════════════════════════════
+   เรนเดอร์
+   ══════════════════════════════════════════════════════════ */
+let fCat='', fQ='', fGrp='', fAct='', fSup='', fWhs='', fAge='', fMin=0, fShelf='',
+    sortKey='val', sortDir=-1;
+const idleItems=()=>ITEMS.filter(i=>i.cat!=='ok');
+
+function renderHero(){
+  const all=idleItems();
+  const total=all.reduce((a,b)=>a+b.val,0);
+  const stockTotal=ITEMS.reduce((a,b)=>a+b.stock*b.price,0);
+  document.getElementById('heroBig').textContent=baht(total);
+  document.getElementById('heroSub').innerHTML=
+    `<b>${all.length}</b> รายการ · <b>${(total/stockTotal*100).toFixed(0)}%</b> ของสต๊อกทั้งหมด ${baht(stockTotal)}<br>
+     ${fmtMY(addM(TODAY,1))} – ${fmtMY(addM(TODAY,HZ))}`;
+  document.getElementById('cards').innerHTML=CATS.map(c=>{
+    const g=all.filter(i=>i.cat===c.k), v=g.reduce((a,b)=>a+b.val,0);
+    return `<button class="hc ${c.cls} ${fCat===c.k?'on':''}" onclick="idSetCat('${c.k}')">
+      <div class="v">${baht(v)}</div><div class="t">${c.t}</div>
+      <div class="d">${g.length} รายการ · ${c.d}</div></button>`;}).join('');
+  document.getElementById('asof').textContent=`ข้อมูล ณ ${fmtD(TODAY)}`;
+  document.getElementById('hz').textContent=HZ;
+  document.getElementById('hzT').textContent=HZ;
+  document.getElementById('vtIdN').textContent=all.length;
+}
+
+function bars(el,rows,colors){
+  const max=Math.max(...rows.map(r=>r.v),1);
+  const tot=rows.reduce((a,b)=>a+b.v,0)||1;
+  /* เปอร์เซ็นต์แบบ largest remainder — ปัดแล้วรวมได้ 100% พอดี */
+  const pct=rows.map(r=>Math.floor(r.v/tot*100));
+  const rem=100-pct.reduce((a,b)=>a+b,0);
+  rows.map((r,i)=>[r.v/tot*100-pct[i],i]).sort((a,b)=>b[0]-a[0])
+    .slice(0,Math.max(0,Math.min(rem,rows.length))).forEach(([,i])=>pct[i]++);
+  document.getElementById(el).innerHTML=rows.map((r,i)=>`
+    <div class="brow">
+      <span class="nm" title="${r.n}">${r.n}</span>
+      <span class="track"><span class="fill" style="width:${r.v/max*100}%;background:${colors[i%colors.length]}"></span></span>
+      <span class="val">${baht(r.v)}</span>
+      <span class="pct">${pct[i]}%</span>
+    </div>`).join('');
+}
+function renderCharts(){
+  const all=idleItems();
+  const g={}; all.forEach(i=>g[i.grp]=(g[i.grp]||0)+i.val);
+  bars('chGrp',Object.entries(g).map(([n,v])=>({n,v})).sort((a,b)=>b.v-a.v),GRPCOL);
+  const a=[0,0,0,0]; all.forEach(i=>a[ageBucket(i.lastUsed)]+=i.val);
+  bars('chAge',a.map((v,i)=>({n:AGES[i],v})),AGECOL);
+}
+
+const SORT={code:(a,b)=>a.code.localeCompare(b.code),name:(a,b)=>a.name.localeCompare(b.name),
+ grp:(a,b)=>a.grp.localeCompare(b.grp),whs:(a,b)=>a.whs.localeCompare(b.whs),
+ stock:(a,b)=>a.stock-b.stock,use:(a,b)=>a.use-b.use,idle:(a,b)=>a.idle-b.idle,
+ val:(a,b)=>a.val-b.val,last:(a,b)=>a.lastUsed-b.lastUsed,
+ cat:(a,b)=>a.cat.localeCompare(b.cat)};
+function filtered(){
+  let l=idleItems();
+  if(fCat) l=l.filter(i=>i.cat===fCat);
+  if(fGrp) l=l.filter(i=>i.grp===fGrp);
+  if(fAct) l=l.filter(i=>i.act===fAct);
+  if(fSup) l=l.filter(i=>i.sup===fSup);
+  if(fWhs) l=l.filter(i=>i.whs===fWhs);
+  if(fAge==='2+') l=l.filter(i=>ageBucket(i.lastUsed)>=2);
+  else if(fAge!=='') l=l.filter(i=>ageBucket(i.lastUsed)===+fAge);
+  if(fMin) l=l.filter(i=>i.val>=fMin);
+  if(fShelf==='y') l=l.filter(i=>i.batch);
+  if(fShelf==='n') l=l.filter(i=>!i.batch);
+  if(fQ){const q=fQ.toLowerCase();
+    l=l.filter(i=>(i.code+' '+i.name+' '+i.grp+' '+i.sup+' '+i.whs).toLowerCase().includes(q));}
+  return l.sort((a,b)=>SORT[sortKey](a,b)*sortDir);
+}
+function renderTable(){
+  const l=filtered(), tot=l.reduce((a,b)=>a+b.val,0);
+  document.getElementById('rows').innerHTML = l.length ? l.map((i,ix)=>{
+    const c=CATS.find(x=>x.k===i.cat);
+    const a=ACTS[i.act]||{t:'—',c:'act'};
+    return `<tr onclick="idOpenItem('${i.code}')">
+      <td class="c seq">${ix+1}</td>
+      <td><span class="code">${i.code}</span></td>
+      <td>${i.name}</td>
+      <td>${i.grp}</td>
+      <td>${i.whs}</td>
+      <td class="r">${ni(i.stock)} <span style="color:var(--mut);font-size:11px">${i.unit}</span></td>
+      <td class="r">${i.use===0?'<span style="color:var(--red);font-weight:700">ไม่มีใครจอง</span>':ni(i.use)+' '+i.unit}</td>
+      <td class="r">${ni(i.idle)} <span style="color:var(--mut);font-size:11px">${i.unit}</span></td>
+      <td class="r money ${i.val>2000000?'m-hi':''}">${bahtFull(i.val)}</td>
+      <td class="c">${i.lastUsed>365?'<span style="color:var(--red)">เกิน 1 ปี</span>':fmtD(addD(TODAY,-i.lastUsed))}</td>
+      <td class="c"><span class="tag t-${i.cat}">${c.t}</span></td>
+      <td><span class="${a.c}">${a.t}</span></td></tr>`;}).join('')
+    : `<tr><td colspan="12" class="empty">ไม่พบรายการตามเงื่อนไข</td></tr>`;
+  document.getElementById('cnt').innerHTML=`แสดง <b>${l.length}</b> รายการ · รวม <b>${bahtFull(tot)}</b>`;
+  document.querySelectorAll('thead th[data-s]').forEach(th=>{
+    th.querySelector('.sm').textContent = sortKey===th.dataset.s ? (sortDir>0?'▲':'▼') : '';
+  });
+  // สรุปท้ายตาราง
+  const dead=idleItems().filter(i=>i.cat==='dead');
+  const top=[...idleItems()].sort((a,b)=>b.val-a.val)[0];
+  document.getElementById('note').innerHTML=
+    `“ไม่มีใครจอง” = ของในคลังส่วนที่ไม่ถูกจองให้ใบสั่งผลิตใด และไม่ถูกกันไว้ตาม Sale Forecast ${HZ} เดือนข้างหน้า —
+     ยอดนี้ตรงกับแถว “คงเหลือที่ยังไม่ถูกจอง” ในกระดานวางแผนวัตถุดิบ · หัก Safety Stock ออกแล้ว`;
+}
+function renderAll(){ compute(); renderHero(); renderCharts(); renderTable(); }
+
+/* ── โต้ตอบ ── */
+function setCat(k){ fCat = fCat===k?'':k; renderHero(); renderTable(); }
+function clearF(){
+  fCat=fQ=fGrp=fAct=fSup=fWhs=fAge=fShelf=''; fMin=0;
+  ['q','fGrp','fSup','fWhs','fAge'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fMin').value='0';
+  renderHero(); renderTable();
+}
+document.getElementById('hzSel').onchange=e=>{HZ=+e.target.value; renderAll();};
+let qT; document.getElementById('q').addEventListener('input',e=>{
+  clearTimeout(qT); qT=setTimeout(()=>{fQ=e.target.value.trim(); renderTable();},150);});
+document.getElementById('fGrp').onchange=e=>{fGrp=e.target.value; renderTable();};
+document.getElementById('fSup').onchange=e=>{fSup=e.target.value; renderTable();};
+document.getElementById('fWhs').onchange=e=>{fWhs=e.target.value; renderTable();};
+document.getElementById('fAge').onchange=e=>{fAge=e.target.value; renderTable();};
+document.getElementById('fMin').onchange=e=>{fMin=+e.target.value; renderTable();};
+document.querySelectorAll('thead th[data-s]').forEach(th=>{
+  th.onclick=()=>{const k=th.dataset.s; sortDir = sortKey===k?-sortDir:-1; sortKey=k; renderTable();};});
+(function init(){
+  const g=document.getElementById('fGrp');
+  GRP.forEach(x=>{const o=document.createElement('option');o.value=x.g;o.textContent=x.g;g.appendChild(o);});
+  const add=(id,arr)=>{const el=document.getElementById(id);
+    arr.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});};
+  add('fSup',[...new Set(ITEMS.map(i=>i.sup))].sort());
+  add('fWhs',[...new Set(ITEMS.map(i=>i.whs))].sort());
+})();
+
+/* ── รายละเอียดรายการ ── */
+function openItem(code){
+  const i=ITEMS.find(x=>x.code===code);
+  const max=Math.max(...i.fc.slice(0,HZ),1);
+  const months=[1,2,3,4].map(k=>fmtMY(addM(TODAY,k)));
+  const c=CATS.find(x=>x.k===i.cat), a=ACTS[i.act]||{t:'—'};
+  document.getElementById('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><h3>${i.name}
+      <small>${i.code} · ${i.grp} · ${i.sup} · ${i.whs}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="kv4">
+        <div>คงเหลือ<b>${ni(i.stock)} ${i.unit}</b></div>
+        <div>ราคาต่อหน่วย<b>${bahtFull(i.price)}</b></div>
+        <div>มูลค่าคงเหลือ<b>${bahtFull(i.stock*i.price)}</b></div>
+        <div>มูลค่าที่ไม่มีใครจอง<b style="color:var(--red)">${bahtFull(i.val)}</b></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#3a5773;margin-bottom:4px">แผนการใช้ ${HZ} เดือนข้างหน้า</div>
+      <div style="font-size:11.5px;color:var(--mut);margin-bottom:6px">ดึงจาก Sale Forecast + MPS</div>
+      <div class="fcbar">${i.fc.slice(0,HZ).map(v=>`<div class="fcb">
+        ${v>0?`<div class="bx" style="height:${Math.max(4,v/max*88)}px"></div>`:`<div class="zero"></div>`}
+      </div>`).join('')}</div>
+      <div class="fclab">${months.slice(0,HZ).map((m,k)=>`<div>${m}<b>${i.fc[k]>0?ni(i.fc[k])+' '+i.unit:'ไม่มีแผน'}</b></div>`).join('')}</div>
+
+      <div class="kv4" style="margin-top:16px">
+        <div>เบิกครั้งล่าสุด<b>${i.lastUsed>365?'เกิน 1 ปี':fmtD(addD(TODAY,-i.lastUsed))}</b></div>
+        <div>อัตราใช้ปกติ<b>${ni(i.monthly)} ${i.unit}/เดือน</b></div>
+        <div>ของพอใช้ไปอีก<b>${i.mos===Infinity?'ไม่มีกำหนด':i.mos.toFixed(1)+' เดือน'}</b></div>
+        <div>วันหมดอายุ (ราย Lot)<b>${i.batch?(i.expIn<=0?'หมดอายุแล้ว':'อีก '+i.expIn+' วัน'):'ไม่ควบคุม Batch'}</b></div>
+      </div>
+      <div class="note" style="margin-top:6px">
+        <b>ประเภท: ${c.t}</b> — ${c.d}<br>
+        <b>แนะนำให้ทำ: ${a.t}</b>
+        ${i.act==='ret'?' — ของยังไม่เปิดใช้และค้างนาน ลองเจรจาคืนผู้ขายหรือแลกเป็นรุ่นที่ใช้อยู่'
+         :i.act==='sub'?' — ตรวจ BOM ว่ามีรุ่นอื่นที่ใช้แทนกันได้ จะได้ระบายของก้อนนี้ก่อน'
+         :i.act==='sell'?' — เหลือเวลาไม่มาก ควรจัดคิวผลิตให้ใช้ก่อน หรือเสนอขายให้โรงงานอื่น'
+         :i.act==='off'?' — เลยวันหมดอายุแล้ว ควรตัดออกจากบัญชีเพื่อให้มูลค่าสต๊อกสะท้อนความจริง'
+         :' — ทบทวนกับ Sales ว่ามีโอกาสได้ออเดอร์ที่ใช้วัสดุนี้ไหม ก่อนตัดสินใจ'}
+      </div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">ราคาต่อหน่วยจากราคาซื้อล่าสุด</span>
+      <span><button class="btn" onclick="closeDlg()">ปิด</button>
+      <button class="btn btn-p" onclick="closeDlg()">ส่งให้จัดซื้อพิจารณา</button></span></div>
+  </div></div>`;
+}
+
+renderAll();
+
+/* ── เปิดให้ onclick ใน HTML และสคริปต์รายงานเรียกได้ (prefix id) ── */
+window.idSetCat=setCat;
+window.idClearF=clearF;
+window.idOpenItem=openItem;
+window.APEX_IDLE={filtered:filtered,CATS:CATS,ACTS:ACTS,hz:function(){return HZ;}};
+})();
+</script>
+
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานวัตถุดิบใกล้หมดอายุ (FEFO) ─── */
+function openFefoReport(){
+  const A=window.APEX_FEFO,F=ApexReport.fmt,ad=A.alertDays();
+  const LOTS=A.LOTS,ST=A.ST,RECO=A.RECO,fmt=A.fmt,addD=A.addD,TODAY=A.TODAY;
+  A.classify(ad);
+  const l=LOTS.slice().sort((a,b)=>a.expIn-b.expIn);
+  const c=st=>LOTS.filter(x=>x.st===st).length;
+  const v=st=>Math.round(LOTS.filter(x=>x.st===st).reduce((a,x)=>a+x.qty*x.price,0));
+  const vt=Math.round(LOTS.reduce((a,x)=>a+x.qty*x.price,0));
+  const rows=l.map((x,i)=>[i+1,x.code,x.name,x.lot,fmt(addD(TODAY,x.expIn)),x.expIn,
+    F(x.qty,Number.isInteger(x.qty)?0:1)+' '+x.unit,F(Math.round(x.qty*x.price)),ST[x.st][0],
+    x.mo?x.mo+' — '+(x.st==='fefo'?'ข้ามล็อตเก่ากว่า':x.st==='miss'?'หมดอายุก่อนวันใช้':'ตามคิว')
+        :(x.st==='ok'?'ยังไม่ถูกจอง':RECO[x.st][0])]);
+  ApexReport.open({
+    docNo:'FEFO-260803',
+    title:'รายงานวัตถุดิบใกล้หมดอายุ (FEFO)',
+    titleEn:'Expiry Management (FEFO) Report',
+    meta:[['เลขที่รายงาน','FEFO-260803'],['วันที่พิมพ์','03-08-2026'],
+          ['เกณฑ์เตือนล่วงหน้า',ad+' วัน'],['จำนวนล็อต',LOTS.length+' ล็อต · เฉพาะ item ควบคุม Batch']],
+    meta2:[['หมดอายุแล้ว',c('expd')+' ล็อต'],['จะหมดอายุก่อนแผนใช้',c('miss')+' ล็อต'],
+           ['ใกล้หมดอายุ / ผิดคิว FEFO',c('near')+' / '+c('fefo')+' ล็อต'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'30px'},{t:'รหัส'},{t:'ชื่อวัตถุดิบ'},{t:'Lot No.'},{t:'วันหมดอายุ',a:'c'},
+          {t:'อายุคงเหลือ (วัน)',a:'r'},{t:'จำนวน',a:'r'},{t:'มูลค่า (฿)',a:'r'},{t:'สถานะ'},{t:'การจัดการ / คิว FEFO'}],
+    rows,
+    totals:[['หมดอายุแล้ว ('+c('expd')+' ล็อต)',F(v('expd'))+' ฿'],
+            ['จะหมดอายุก่อนแผนใช้ ('+c('miss')+' ล็อต)',F(v('miss'))+' ฿'],
+            ['ใกล้หมดอายุ ('+c('near')+' ล็อต)',F(v('near'))+' ฿'],
+            ['ผิดคิว FEFO ('+c('fefo')+' ล็อต)',F(v('fefo'))+' ฿'],
+            ['ปกติ ('+c('ok')+' ล็อต)',F(v('ok'))+' ฿'],
+            ['มูลค่ารวมทุกล็อต ('+LOTS.length+' ล็อต)',F(vt)+' ฿','b']],
+    note:'กติกา FEFO: จ่ายล็อตที่หมดอายุเร็วก่อนเสมอ · ล็อตที่หมดอายุก่อนวันแผนใช้ถูกตัดออกจากยอดที่ใช้ได้ · การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · เรียงตามวันหมดอายุ (เร็ว → ช้า) · เกณฑ์เตือนล่วงหน้า '+ad+' วัน ตามที่เลือกบนหน้าจอ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+
+/* ─── รายงานวัตถุดิบที่ไม่มีแผนใช้ (เงินจมในคลัง) ─── */
+function openIdleReport(){
+  const A=window.APEX_IDLE,F=ApexReport.fmt,MAX=45;
+  const HZ=A.hz(),CATS=A.CATS,ACTS=A.ACTS;
+  const l=A.filtered();                       /* ใช้ตัวกรองปัจจุบันบนหน้าจอ */
+  const shown=l.slice(0,MAX);
+  const rows=shown.map((it,i)=>{
+    const c=CATS.find(x=>x.k===it.cat);
+    return [i+1,it.code,it.name,it.grp,it.whs.split(' ')[0],F(it.stock),F(it.use),F(it.idle),
+      F(it.val),c?c.t:'—',it.act&&ACTS[it.act]?ACTS[it.act].t:'—'];
+  });
+  const tot=l.reduce((a,b)=>a+b.val,0);
+  const catSum=k=>l.filter(i=>i.cat===k).reduce((a,b)=>a+b.val,0);
+  ApexReport.open({
+    docNo:'IDLE-260803',
+    title:'รายงานวัตถุดิบที่ไม่มีแผนใช้',
+    titleEn:'Idle Material — Dead Stock Value Report',
+    meta:[['เลขที่รายงาน','IDLE-260803'],['ข้อมูล ณ วันที่','03-08-2026'],
+          ['ช่วงที่พิจารณา','ล่วงหน้า '+HZ+' เดือน (Forecast + MPS)'],['จำนวนรายการ',F(l.length)+' รายการ']],
+    meta2:[['ไม่มีแผนใช้เลย',F(l.filter(i=>i.cat==='dead').length)+' รายการ'],
+           ['เหลือค้างเกินแผน',F(l.filter(i=>i.cat==='exc').length)+' รายการ'],
+           ['จะหมดอายุก่อนใช้',F(l.filter(i=>i.cat==='exp').length)+' รายการ'],
+           ['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    cols:[{t:'#',a:'c',w:'34px'},{t:'รหัส'},{t:'ชื่อวัตถุดิบ'},{t:'กลุ่ม'},{t:'คลัง',a:'c'},
+          {t:'คงเหลือ',a:'r'},{t:'แผนใช้',a:'r'},{t:'ไม่มีแผนใช้',a:'r'},{t:'มูลค่าจม (฿)',a:'r'},{t:'ประเภท'},{t:'แนะนำ'}],
+    rows,
+    totals:[['มูลค่าจม — ไม่มีแผนใช้เลย',F(catSum('dead'))+' ฿'],
+            ['มูลค่าจม — เหลือค้างเกินแผน',F(catSum('exc'))+' ฿'],
+            ['มูลค่าจม — จะหมดอายุก่อนใช้',F(catSum('exp'))+' ฿'],
+            ['มูลค่าเงินจมรวมทั้งสิ้น',F(tot)+' ฿','b']],
+    note:(l.length>MAX?'แสดง '+MAX+' รายการมูลค่าสูงสุดจากทั้งหมด '+F(l.length)+' รายการ (ตามตัวกรองปัจจุบัน) · ':'')+
+      'เรียงตามมูลค่าเงินจม · คำแนะนำการจัดการ (คืนผู้ขาย / ระบาย / ตัดจำหน่าย) ประเมินจากอายุการเบิกใช้และอายุจัดเก็บ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้จัดการคลัง','Warehouse Manager'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"บริหารสต๊อกที่มีความเสี่ยง — APEX Circuit":"Stock Risk Management — APEX Circuit",
+"บริหารสต๊อกที่มีความเสี่ยง":"Stock Risk Management",
+"วัตถุดิบที่ใกล้หมดอายุ และของที่ไม่มีแผนใช้ — ดูจากฐานข้อมูลสต๊อกชุดเดียวกัน · ข้อมูล ณ 3 ส.ค. 26":"Materials nearing expiry and stock with no planned use — from the same stock database · data as of Aug 3, 26",
+"วันหมดอายุ (FEFO)":"Expiry (FEFO)",
+"เงินจมในคลัง":"Tied-Up Capital",
+"ล็อตวัตถุดิบที่ใกล้หมดอายุ":"Material Lots Nearing Expiry",
+"ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน":"Track expiry dates per lot for batch-controlled items · issue by FEFO — first expired, first out",
+"อาทิตย์ สุดชาติ":"Arthit Sudchat",
+"บริหารวัตถุดิบใกล้หมดอายุ (FEFO)":"Expiry Management (FEFO)",
+"ติดตามวันหมดอายุราย Lot เฉพาะ item ที่ควบคุม Batch · จ่ายตามหลัก FEFO — ล็อตที่หมดอายุก่อนถูกใช้ก่อน · ข้อมูล ณ 3 ส.ค. 26":"Track expiry dates per lot for batch-controlled items · issue by FEFO — first expired, first out · data as of Aug 3, 26",
+"เตือนล่วงหน้า":"Warn ahead",
+"7 วัน":"7 Days",
+"14 วัน":"14 Days",
+"30 วัน":"30 Days",
+"60 วัน":"60 Days",
+"ส่งออก fefo-lots.xlsx เรียบร้อย (เดโม)":"Exported fefo-lots.xlsx (demo)",
+"ส่งออก Excel":"Export Excel",
+"ส่งรายการให้ผู้วางแผนแล้ว (เดโม)":"List sent to the planner (demo)",
+"ส่งให้ผู้วางแผน":"Send to Planner",
+"ค้นหารหัส / ชื่อ / เลข Lot":"Search code / name / lot no.",
+"ทุกกลุ่ม":"All Groups",
+"ทุกคลัง":"All Warehouses",
+"WH-01 คลังกลาง":"WH-01 Central Warehouse",
+"WH-02 คลังเคมี":"WH-02 Chemical Warehouse",
+"WH-03 คลังห้องเย็น":"WH-03 Cold Storage",
+"ทุกสถานะ":"All Statuses",
+"หมดอายุแล้ว":"Expired",
+"จะหมดอายุก่อนแผนใช้":"Expires Before Planned Use",
+"ผิดคิว FEFO":"FEFO Violation",
+"ใกล้หมดอายุ":"Near Expiry",
+"ปกติ":"Normal",
+"คลัง":"Warehouse",
+"รับเข้า":"Received",
+"หมดอายุ":"Expiry",
+"เหลือ (วัน)":"Left (Days)",
+"คงเหลือ":"On-Hand",
+"มูลค่า (฿)":"Value (THB)",
+"จองให้ใบสั่งผลิต":"Reserved for WO",
+"แผนใช้":"Planned Use",
+"กติกา FEFO:":"FEFO rules:",
+"ล็อตที่หมดอายุก่อนวันที่แผนจะใช้ ถูกตัดออกจากยอดที่ใช้ได้และแสดงเป็น":"Lots expiring before their planned-use date are excluded from usable stock and shown as",
+"การจ่ายของยึดล็อตหมดอายุเร็วก่อนเสมอ การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · item ที่ไม่ควบคุม Batch ไม่อยู่ในหน้าจอนี้":"Issuing always takes the earliest-expiring lot first; skipping the queue requires an approved exception with a recorded reason · non-batch-controlled items are not shown on this screen",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"แยกกลุ่ม รอตัดจำหน่าย":"Segregate, pending write-off",
+"เร่งใช้ก่อน / เสนอสลับแผน":"Use urgently / propose plan swap",
+"สลับคิวไปใช้ล็อตเก่าก่อน":"Switch queue to the older lot first",
+"จัดคิวผลิตให้ใช้ล็อตนี้ก่อน":"Schedule production to use this lot first",
+"ใกล้หมดอายุ ≤ 30 วัน":"Near Expiry ≤ 30 Days",
+"ล็อต · เร่งจัดคิวใช้":"lots · expedite usage queue",
+"ล็อต · ตัดจากยอดใช้ได้แล้ว":"lots · already cut from usable stock",
+"ล็อตใหม่ถูกจองก่อนล็อตเก่า":"Newer lot reserved before older lot",
+"ล็อต · แยกกลุ่ม รอตัดจำหน่าย":"lots · segregate, pending write-off",
+"ล็อต":"lots",
+"ยังไม่ถูกจอง":"Not Reserved",
+"แสดง":"Showing",
+"จาก":"of",
+"ล็อต · เฉพาะ item ควบคุม Batch":"lots · batch-controlled items only",
+"เลยมา":"overdue by",
+"(เลยมา":"(overdue by",
+"อีก":"in",
+"(อีก":"(in",
+"วัน)":"days)",
+"มูลค่า":"Value",
+"การจองและแผนการใช้":"Reservation & Usage Plan",
+"ใบสั่งผลิต":"Work Order",
+"วันที่แผนจะใช้":"Planned Use Date",
+"จำนวนที่จอง":"Reserved Qty",
+"คิว FEFO":"FEFO Queue",
+"ข้ามล็อตเก่ากว่า":"Skips an older lot",
+"หมดอายุก่อนวันใช้":"Expires before use date",
+"ตามคิว":"In queue",
+"ยังไม่มีใบสั่งผลิตจองล็อตนี้":"No work order has reserved this lot yet",
+"คำแนะนำของระบบ:":"System recommendation:",
+"ขออนุมัติข้อยกเว้น FEFO — ต้องระบุเหตุผล":"Request FEFO exception approval — reason required",
+"เช่น ล็อตเก่าติดรอผล QA · ลูกค้ากำหนดสเปกล็อตผลิตใหม่":"e.g. older lot held for QA results · customer requires a freshly produced lot",
+"บันทึกคำขอข้อยกเว้น FEFO พร้อมเหตุผลแล้ว รอผู้มีสิทธิ์อนุมัติ (เดโม)":"FEFO exception request saved with reason, awaiting approver (demo)",
+"ส่งคำขอ":"Submit Request",
+"ขอข้อยกเว้น FEFO":"Request FEFO Exception",
+"ส่งคำขอเร่งใช้ล็อตนี้ให้ผู้วางแผนแล้ว (เดโม)":"Expedite-use request for this lot sent to the planner (demo)",
+"เสนอเร่งใช้ก่อน":"Propose Expedited Use",
+"รายงานวัตถุดิบใกล้หมดอายุ (FEFO)":"Expiry Management (FEFO) Report",
+"เลขที่รายงาน":"Report No.",
+"วันที่พิมพ์":"Print Date",
+"เกณฑ์เตือนล่วงหน้า":"Advance Warning Threshold",
+"จำนวนล็อต":"Lot Count",
+"ใกล้หมดอายุ / ผิดคิว FEFO":"Near Expiry / FEFO Violation",
+"ผู้พิมพ์":"Printed by",
+"รหัส":"Code",
+"ชื่อวัตถุดิบ":"Material Name",
+"วันหมดอายุ":"Expiry Date",
+"อายุคงเหลือ (วัน)":"Days Left",
+"การจัดการ / คิว FEFO":"Action / FEFO Queue",
+"มูลค่ารวมทุกล็อต":"Total Value, All Lots",
+"กติกา FEFO: จ่ายล็อตที่หมดอายุเร็วก่อนเสมอ · ล็อตที่หมดอายุก่อนวันแผนใช้ถูกตัดออกจากยอดที่ใช้ได้ · การข้ามคิวต้องขออนุมัติข้อยกเว้นพร้อมบันทึกเหตุผล · เรียงตามวันหมดอายุ (เร็ว → ช้า) · เกณฑ์เตือนล่วงหน้า":"FEFO rules: always issue the earliest-expiring lot first · lots expiring before their planned-use date are excluded from usable stock · skipping the queue requires an approved exception with a recorded reason · sorted by expiry date (earliest → latest) · advance warning threshold",
+"วัน ตามที่เลือกบนหน้าจอ":"days as selected on screen",
+"ตามที่เลือกบนหน้าจอ":"as selected on screen",
+"วัน":"days",
+"฿":"THB",
+"วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง":"Unreserved Materials — Tied-Up Capital in Stock",
+"จาก Sale Forecast + MPS ล่วงหน้า":"From Sales Forecast + MPS, next",
+"เดือน ·":"months ·",
+"ช่วงที่ดู":"Horizon",
+"ล่วงหน้า 3 เดือน":"Next 3 Months",
+"ล่วงหน้า 4 เดือน":"Next 4 Months",
+"ส่งให้จัดซื้อ":"Send to Purchasing",
+"มูลค่าวัตถุดิบที่ไม่มีใครจอง":"Value of Unreserved Materials",
+"มูลค่าแยกตามกลุ่มวัตถุดิบ":"Value by Material Group",
+"มูลค่าแยกตามระยะเวลาที่ไม่ได้เบิกใช้":"Value by Time Since Last Issue",
+"ค้นหารหัส / ชื่อ":"Search code / name",
+"ทุกผู้ขาย":"All Suppliers",
+"ไม่จำกัดเวลาที่ค้าง":"Any Idle Age",
+"ค้างไม่เกิน 3 เดือน":"Idle ≤ 3 Months",
+"ค้าง 3 – 6 เดือน":"Idle 3 – 6 Months",
+"ค้างเกิน 6 เดือน":"Idle > 6 Months",
+"ค้างเกิน 12 เดือน":"Idle > 12 Months",
+"ไม่จำกัดมูลค่า":"Any Value",
+"มูลค่า ≥ ฿100,000":"Value ≥ THB 100,000",
+"มูลค่า ≥ ฿500,000":"Value ≥ THB 500,000",
+"มูลค่า ≥ ฿1 ล้าน":"Value ≥ THB 1M",
+"มูลค่า ≥ ฿3 ล้าน":"Value ≥ THB 3M",
+"ล้าง":"Clear",
+"กลุ่ม":"Group",
+"ถูกจองไว้แล้ว":"Reserved",
+"ใบสั่งผลิต + Forecast":"WO + Forecast",
+"ด.":"mo.",
+"ไม่มีใครจอง":"Unreserved",
+"มูลค่าเงินจม":"Tied-Up Value",
+"เบิกครั้งล่าสุด":"Last Issue",
+"ประเภท":"Category",
+"แนะนำให้ทำ":"Recommended Action",
+"ม.ค.":"Jan",
+"ก.พ.":"Feb",
+"มี.ค.":"Mar",
+"เม.ย.":"Apr",
+"พ.ค.":"May",
+"มิ.ย.":"Jun",
+"ก.ค.":"Jul",
+"ส.ค.":"Aug",
+"ก.ย.":"Sep",
+"ต.ค.":"Oct",
+"พ.ย.":"Nov",
+"ธ.ค.":"Dec",
+"ล.":"M",
+"WH-04 คลังบรรจุ":"WH-04 Packaging Warehouse",
+"WH-05 คลังของค้าง":"WH-05 Idle Stock Warehouse",
+"อัตราใช้ปกติต่อเดือน":"normal usage rate per month",
+"เดือนของสต๊อกที่ถืออยู่":"months of stock on hand",
+"คืนผู้ขาย":"Return to Supplier",
+"ใช้ทดแทนรุ่นอื่น":"Use as Substitute",
+"เร่งระบาย / เสนอขาย":"Expedite Use / Offer for Sale",
+"ตัดจำหน่าย":"Write Off",
+"ทบทวนกับ Sales":"Review with Sales",
+"ไม่เกิน 3 เดือน":"≤ 3 Months",
+"3 – 6 เดือน":"3 – 6 Months",
+"6 – 12 เดือน":"6 – 12 Months",
+"เกิน 12 เดือน":"> 12 Months",
+"ไม่มีใครจองเลย":"Not Reserved at All",
+"ไม่ถูกจองโดยใบสั่งผลิตหรือ Forecast":"Not reserved by any WO or forecast",
+"เหลือค้างเกินแผน":"Excess over Plan",
+"ของมากกว่าที่จะใช้":"More stock than will be used",
+"จะหมดอายุก่อนใช้":"Expiring Before Use",
+"เฉพาะ item ควบคุม Batch":"Batch-controlled items only",
+"รายการ ·":"items ·",
+"ของสต๊อกทั้งหมด":"of total stock",
+"ข้อมูล ณ":"Data as of",
+"เกิน 1 ปี":"> 1 Year",
+"ไม่พบรายการตามเงื่อนไข":"No items match the filters",
+"รายการ · รวม":"items · Total",
+"“ไม่มีใครจอง” = ของในคลังส่วนที่ไม่ถูกจองให้ใบสั่งผลิตใด และไม่ถูกกันไว้ตาม Sale Forecast":"“Unreserved” = on-hand stock not reserved for any work order and not set aside per the sales forecast for the next",
+"เดือนข้างหน้า —":"months —",
+"ยอดนี้ตรงกับแถว “คงเหลือที่ยังไม่ถูกจอง” ในกระดานวางแผนวัตถุดิบ · หัก Safety Stock ออกแล้ว":"this figure matches the “Unreserved On-Hand” row on the material planning board · Safety stock already deducted",
+"ราคาต่อหน่วยจากราคาซื้อล่าสุด":"Unit price based on latest purchase price",
+"ราคาต่อหน่วย":"Unit Price",
+"มูลค่าคงเหลือ":"On-Hand Value",
+"มูลค่าที่ไม่มีใครจอง":"Unreserved Value",
+"แผนการใช้":"Usage Plan — Next",
+"เดือนข้างหน้า":"Months",
+"ดึงจาก Sale Forecast + MPS":"Pulled from Sales Forecast + MPS",
+"ไม่มีแผน":"No Plan",
+"อัตราใช้ปกติ":"Normal Usage Rate",
+"/เดือน":"/month",
+"ของพอใช้ไปอีก":"Stock Lasts Another",
+"ไม่มีกำหนด":"Indefinite",
+"เดือน":"months",
+"วันหมดอายุ (ราย Lot)":"Expiry Date (per Lot)",
+"ไม่ควบคุม Batch":"Not Batch-Controlled",
+"— ของยังไม่เปิดใช้และค้างนาน ลองเจรจาคืนผู้ขายหรือแลกเป็นรุ่นที่ใช้อยู่":"— stock is unopened and long idle; negotiate a return to the supplier or exchange for a grade in use",
+"— ตรวจ BOM ว่ามีรุ่นอื่นที่ใช้แทนกันได้ จะได้ระบายของก้อนนี้ก่อน":"— check the BOM for interchangeable grades so this lot can be consumed first",
+"— เหลือเวลาไม่มาก ควรจัดคิวผลิตให้ใช้ก่อน หรือเสนอขายให้โรงงานอื่น":"— little time left; schedule production to consume it first, or offer it for sale to another plant",
+"— เลยวันหมดอายุแล้ว ควรตัดออกจากบัญชีเพื่อให้มูลค่าสต๊อกสะท้อนความจริง":"— already past expiry; write it off so stock value reflects reality",
+"— ทบทวนกับ Sales ว่ามีโอกาสได้ออเดอร์ที่ใช้วัสดุนี้ไหม ก่อนตัดสินใจ":"— review with Sales whether an order using this material is likely before deciding",
+"ส่งให้จัดซื้อพิจารณา":"Send to Purchasing for Review",
+"รายงานวัตถุดิบที่ไม่มีแผนใช้":"Idle Material Report",
+"ข้อมูล ณ วันที่":"Data as of",
+"ช่วงที่พิจารณา":"Period Considered",
+"ล่วงหน้า":"next",
+"จำนวนรายการ":"Item Count",
+"ไม่มีแผนใช้เลย":"No Planned Use at All",
+"ไม่มีแผนใช้":"No Planned Use",
+"มูลค่าจม (฿)":"Tied-Up Value (THB)",
+"มูลค่าจม — ไม่มีแผนใช้เลย":"Tied-Up — No Planned Use at All",
+"มูลค่าจม — เหลือค้างเกินแผน":"Tied-Up — Excess over Plan",
+"มูลค่าจม — จะหมดอายุก่อนใช้":"Tied-Up — Expiring Before Use",
+"มูลค่าเงินจมรวมทั้งสิ้น":"Total Tied-Up Value",
+"แนะนำ":"Action",
+"รายการมูลค่าสูงสุดจากทั้งหมด":"highest-value items out of",
+"ตามตัวกรองปัจจุบัน":"per current filters",
+"เรียงตามมูลค่าเงินจม · คำแนะนำการจัดการ (คืนผู้ขาย / ระบาย / ตัดจำหน่าย) ประเมินจากอายุการเบิกใช้และอายุจัดเก็บ":"Sorted by tied-up value · recommended actions (return / liquidate / write off) assessed from last-issue age and storage age",
+"ผู้จัดการคลัง":"Warehouse Manager"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>

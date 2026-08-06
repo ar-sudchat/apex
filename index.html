@@ -335,23 +335,14 @@ const GROUPS=[
    M('APEX_Substitute_Material_Mockup.html','Substitute Material','FR-3',IC.swap,'#7a4fd3',
      'กำหนดตัวแทนของวัตถุดิบหลัก ลำดับ อัตราแปลง และเงื่อนไขอนุมัติ พร้อมจับคู่ของขาดกับตัวแทนอัตโนมัติ',
      ['21 คู่','จับคู่อัตโนมัติ'],'cfg'),
-   M('APEX_Idle_Material_Dashboard.html','Idle Material Dashboard','FR-7',IC.money,'#c25f1e',
-     'เงินจมในคลัง แยกตามกลุ่มวัตถุดิบและอายุที่ค้าง พร้อมข้อเสนอว่าควรทำอะไรกับแต่ละรายการ',
-     ['มูลค่าเงินจม','แยกตามอายุ']),
-   M('APEX_Expiry_FEFO_Mockup.html','Expiry Management (FEFO)','FR-4',IC.clock,'#b25012',
-     'ติดตามวันหมดอายุราย Lot เฉพาะ item ควบคุม Batch จ่ายแบบ FEFO เตือนล่วงหน้า และแยกกลุ่มของหมดอายุรอตัดจำหน่าย',
-     ['ราย Lot','FEFO']),
-   M('APEX_Plan_History.html','Plan Run History','FR-5',IC.hist,'#7a4fd3',
-     'เก็บทุกรอบที่รันแผน เทียบรอบล่าสุดกับรอบก่อนหน้า และวัดความเสถียรของแผน',
-     ['Snapshot ทุกรอบ','Plan Stability']),
+   M('APEX_Stock_Risk_Mockup.html','Stock Risk (Expiry + Idle)','FR-4/7',IC.money,'#c25f1e',
+     'หน้าจอเดียวสองมุมมอง — วันหมดอายุราย Lot จ่ายแบบ FEFO และมูลค่าเงินจมของวัตถุดิบที่ไม่มีแผนใช้',
+     ['2 มุมมอง','FEFO · เงินจม']),
 ]},
  {g:'Purchase', ic:IC.track, col:'#c99400', nav:'Purchase', items:[
    M('APEX_Purchase_Traceability_Mockup.html','Purchase Traceability','FR-8',IC.track,'#c99400',
      'ตรวจสอบย้อนกลับทุกใบสั่งซื้อว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร ในรูปแผนผังความสัมพันธ์',
      ['แผนผัง 4 ชั้น','ที่มาของจำนวน']),
-   M('APEX_Document_Relationship_Map.html','Document Relationship Map','FR-8',IC.track,'#b07800',
-     'เห็นสายเอกสารครบทั้งเส้นของวัตถุดิบหนึ่งตัว — ออเดอร์ลูกค้า → แผนผลิต → ใบสั่งผลิต → PR/PO → รับเข้าคลัง',
-     ['สายเดียวครบทุกชั้น','คลิกเน้นเฉพาะสาย']),
 ]},
  {g:'Costing', ic:IC.cost, col:'#1e9e50', nav:'Costing', items:[
    M('APEX_StandardCostBook_Mockup.html','Standard Cost Book','—',IC.book,'#1e9e50',
@@ -430,6 +421,12 @@ function renderHome(){
 }
 
 /* ══════ เปิดหน้าจอ ══════ */
+
+/* เปิดหน้าจอตามคำขอจากหน้าลูก (ฟังก์ชันย่อยที่อยู่ในหน้าจอหลัก) */
+window.addEventListener('message',function(e){
+  var f=(e.data||{}).apexOpen;
+  if(f && /^APEX_[A-Za-z_]+\.html$/.test(f)) openScreen(f);
+});
 function openScreen(f){
   const it=ALL.find(i=>i.f===f); if(!it) return;
   CUR=f;
@@ -480,14 +477,14 @@ renderNav(); renderMenu(); renderHome(); crumb(null);
 "กำหนดตัวแทนของวัตถุดิบหลัก ลำดับ อัตราแปลง และเงื่อนไขอนุมัติ พร้อมจับคู่ของขาดกับตัวแทนอัตโนมัติ": "Define substitutes for primary materials — priority, conversion ratio and approval rules — with automatic matching of shortages to substitutes",
 "21 คู่": "21 pairs",
 "จับคู่อัตโนมัติ": "Auto matching",
-"เงินจมในคลัง แยกตามกลุ่มวัตถุดิบและอายุที่ค้าง พร้อมข้อเสนอว่าควรทำอะไรกับแต่ละรายการ": "Capital tied up in inventory, broken down by material group and aging, with a recommended action for every item",
+"หน้าจอเดียวสองมุมมอง — วันหมดอายุราย Lot จ่ายแบบ FEFO และมูลค่าเงินจมของวัตถุดิบที่ไม่มีแผนใช้": "One screen, two views — lot-level expiry with FEFO issuing, and the value of stock with no planned usage",
+"2 มุมมอง": "2 views",
+"FEFO \u00b7 เงินจม": "FEFO \u00b7 Idle value",
 "มูลค่าเงินจม": "Tied-up value",
 "แยกตามอายุ": "Aging buckets",
 "ตรวจสอบย้อนกลับทุกใบสั่งซื้อว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร ในรูปแผนผังความสัมพันธ์": "Trace every purchase order back to its work order and customer, and see how each quantity was calculated — shown as a relationship diagram",
 "ติดตามวันหมดอายุราย Lot เฉพาะ item ควบคุม Batch จ่ายแบบ FEFO เตือนล่วงหน้า และแยกกลุ่มของหมดอายุรอตัดจำหน่าย": "Track expiry dates per lot for batch-controlled items, issue by FEFO, get early warnings, and separate expired stock pending write-off",
 "ราย Lot": "Per lot",
-"เก็บทุกรอบที่รันแผน เทียบรอบล่าสุดกับรอบก่อนหน้า และวัดความเสถียรของแผน": "Stores every plan run, compares the latest run against the previous one, and measures plan stability",
-"Snapshot ทุกรอบ": "Snapshot every run",
 "เห็นสายเอกสารครบทั้งเส้นของวัตถุดิบหนึ่งตัว — ออเดอร์ลูกค้า → แผนผลิต → ใบสั่งผลิต → PR/PO → รับเข้าคลัง": "See the entire document chain of one material — customer order → production plan → work order → PR/PO → goods receipt",
 "สายเดียวครบทุกชั้น": "Full chain in one view",
 "คลิกเน้นเฉพาะสาย": "Click to highlight a chain",

@@ -256,6 +256,7 @@ html.embed .content{padding-top:14px}
           <div class="page-sub">ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร</div></div>
         <div style="display:flex;gap:8px">
           <button class="btn" onclick="toast('ส่งออกรายการเป็นไฟล์ Excel')">ส่งออก Excel</button>
+          <button class="btn" onclick="apexOpen('APEX_Document_Relationship_Map.html')" title="ดูสายเอกสารทั้งเส้นในรูปแผนผัง">แผนผังความสัมพันธ์เอกสาร</button>
           <button class="btn btn-p" onclick="openTraceReport()">พิมพ์รายงาน</button>
         </div>
       </div>
@@ -673,6 +674,10 @@ render();
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
 if(window.self!==window.top)document.documentElement.classList.add('embed');
 </script>
+<script>
+/* เปิดหน้าจอย่อยผ่าน shell หลัก (ฟังก์ชันนี้เป็นส่วนหนึ่งของหน้าจอนี้ ไม่ใช่เมนูแยก) */
+function apexOpen(f){ if(window.self!==window.top){ parent.postMessage({apexOpen:f},"*"); } else { location.href=f; } }
+</script>
 <script src="apex-report.js"></script>
 <script>
 /* ─── รายงานที่มาของการสั่งซื้อ (ทั้งหมด) ─── */
@@ -726,6 +731,8 @@ function openTracePdf(doc){
 }
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"ดูสายเอกสารทั้งเส้นในรูปแผนผัง": "View the entire document chain as a diagram",
+"แผนผังความสัมพันธ์เอกสาร": "Document Relationship Map",
 "ที่มาของการสั่งซื้อ — APEX Circuit":"Purchase Traceability — APEX Circuit",
 "ที่มาของการสั่งซื้อ":"Purchase Traceability",
 "ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ว่ามาจากใบสั่งผลิตใด ของลูกค้ารายใด และคำนวณจำนวนมาจากอะไร":"Trace every purchase order back to its work orders, end customers, and how the quantity was calculated",
