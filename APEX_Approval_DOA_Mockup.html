@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="apex-logo.png" />
+<meta name="robots" content="noindex, nofollow" />
+<title>สายอนุมัติเอกสาร — APEX Circuit</title>
+<link rel="icon" type="image/png" href="apex-logo.png" />
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --hdr:#4f9de6; --strip:#bfdff6; --bg:#eef4fb;
+  --blue:#1f6fc4; --green:#1e9e50; --amber:#d9a400; --red:#d93838; --purple:#7a4fd3;
+  --orange:#c25f1e; --cyan:#0e8ca8;
+  --ink:#2b3a4a; --mut:#7d8ea0;
+  --p-blue:#f1f8fe; --p-green:#f4fbf7; --p-red:#fdf4f4; --p-amber:#fdfaef; --p-purple:#f8f4fd; --p-cyan:#f0fafd;
+  --th:#5b9fe0; --line:#edf2f8; --line-d:#d7e2ee;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Sarabun","Segoe UI",Tahoma,"Thonburi",sans-serif;background:var(--bg);
+     color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+#app{min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--hdr);display:flex;align-items:stretch;height:76px;flex:none;position:sticky;top:0;z-index:100}
+.logo-tab{background:#fff;border-radius:0 0 26px 0;width:212px;display:flex;align-items:center;justify-content:center;flex:none}
+.apexlogo{height:44px;width:auto;display:block}
+nav{display:flex;align-items:center;gap:4px;padding:0 10px;flex:1;min-width:0;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+.mi{display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff;font-size:12.5px;
+    padding:8px 12px;border-radius:10px;white-space:nowrap;opacity:.94;cursor:pointer;transition:.2s;text-decoration:none}
+.mi:hover{background:rgba(255,255,255,.12)}
+.mi svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.mi.active{background:rgba(255,255,255,.22);opacity:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;color:#fff;padding-right:24px;flex:none}
+.user svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.user b{font-size:14.5px;font-weight:600;display:block;line-height:1.3}
+.user span{font-size:12px;opacity:.85}
+.topstrip{background:var(--strip);color:#2b567c;font-size:12.5px;text-align:right;padding:5px 24px;flex:none}
+.content{flex:1;padding:16px 20px 64px}
+footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padding:14px;flex:none}
+.card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(31,80,140,.08);padding:16px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:700;color:var(--blue)}
+.page-sub{font-size:12.5px;color:var(--mut);margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:20px;
+     border:1px solid #dfe7f0;background:#fff;font-family:inherit;font-size:13px;
+     font-weight:500;color:var(--ink);cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{border-color:#9dbdd9;box-shadow:0 1px 4px rgba(31,80,140,.1)}
+.btn:active{transform:translateY(.5px)}
+.btn-p{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.btn-p:hover{background:#3d8ad6;border-color:#3d8ad6}
+.btn-s{padding:5px 12px;font-size:12px}
+.btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.sel,.inp{padding:7px 11px;border:1px solid #dfe7f0;border-radius:8px;background:#fff;
+     font-family:inherit;font-size:13px;color:var(--ink);outline:none;transition:.15s}
+.sel{padding-right:30px;cursor:pointer;appearance:none;
+     background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%237d8ea0' stroke-width='1.7' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+     background-repeat:no-repeat;background-position:right 11px center;background-size:10px}
+.sel:hover,.inp:hover{border-color:#c2d5e8}
+.sel:focus,.inp:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+
+/* ── แถบสถานะ ── */
+.strip{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+       margin-bottom:14px;flex-wrap:wrap}
+.sc{padding:11px 20px 11px 0;margin-right:20px;border-right:1px solid var(--line);flex:none}
+.sc:last-child{border-right:none}
+.sc .n{font-size:23px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.sc .t{font-size:12px;color:var(--mut);margin-top:2px}
+.sc .t2{font-size:11px;color:#a8b6c4;margin-top:3px;line-height:1.5}
+.c-blue .n{color:var(--blue)} .c-cyan .n{color:var(--cyan)} .c-red .n{color:var(--red)}
+.c-amber .n{color:#a06a00} .c-green .n{color:var(--green)} .c-orange .n{color:var(--orange)}
+
+/* ── แถบสายอนุมัติ (stepper) ── */
+.apvcard{margin-bottom:14px}
+.apv-hd{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-bottom:11px;border-bottom:1px solid var(--line)}
+.apv-hd .no{font-size:16.5px;font-weight:700;color:var(--blue);font-variant-numeric:tabular-nums}
+.apv-hd .sj{font-size:13px;color:#4a6b86}
+.apv-hd .rt{margin-left:auto;font-size:12px;color:var(--mut)}
+.stpwrap{overflow-x:auto;padding-bottom:2px}
+.stp{display:flex;position:relative;min-width:720px;padding:14px 0 4px}
+.stp-s{flex:1;position:relative;text-align:center;padding:48px 10px 0}
+.stp-s .ln{position:absolute;top:22px;height:3px;background:var(--line-d);border-radius:2px}
+.stp-s .ln.l{left:0;right:50%}
+.stp-s .ln.r{left:50%;right:0}
+.stp-s .ln.on{background:var(--green)}
+.stp-mk{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:33px;height:33px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;background:#fff;z-index:2;box-shadow:0 0 0 4px #fff}
+.stp-mk svg{width:17px;height:17px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.stp-s.done .stp-mk{background:var(--green)}
+.stp-s.done .stp-mk svg{stroke:#fff}
+.stp-s.cur .stp-mk{border:3px solid var(--green);background:#fff}
+.stp-s.cur .stp-mk svg{stroke:var(--green)}
+.stp-s.rej .stp-mk{background:var(--red)}
+.stp-s.rej .stp-mk svg{stroke:#fff}
+.stp-s.todo .stp-mk i{display:block;width:13px;height:13px;border-radius:50%;background:#cfd9e4}
+.stp-t{font-size:12.8px;font-weight:700;color:var(--ink);line-height:1.45}
+.stp-w{font-size:12.3px;color:#33546f;margin-top:4px;font-weight:600}
+.stp-r{font-size:11px;color:var(--mut);margin-top:1px}
+.stp-d{font-size:11.5px;color:var(--mut);margin-top:4px;font-variant-numeric:tabular-nums}
+.stp-s.todo .stp-t{color:#aebccb;font-weight:600}
+.stp-s.todo .stp-w{color:#bcc8d5;font-weight:500}
+.stp-s.todo .stp-r{color:#c9d4de}
+.stp-s.cur .stp-t{color:var(--green)}
+.stp-act{display:flex;gap:7px;justify-content:center;margin-top:9px;flex-wrap:wrap}
+.bt-ok{background:var(--green);border-color:var(--green);color:#fff}
+.bt-ok:hover{background:#188945;border-color:#188945}
+.bt-no{background:var(--red);border-color:var(--red);color:#fff}
+.bt-no:hover{background:#c22f2f;border-color:#c22f2f}
+.stp-why{font-size:11.5px;color:#b32b2b;background:var(--p-red);border:1px solid #f0c9c7;
+  border-radius:7px;padding:6px 9px;margin-top:8px;line-height:1.55;text-align:left}
+.stp-leg{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--mut);
+  border-top:1px solid var(--line);padding-top:9px;margin-top:4px}
+.stp-leg i{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.lg-done i{background:var(--green)}
+.lg-cur i{background:#fff;border:2.5px solid var(--green)}
+.lg-todo i{background:#cfd9e4}
+.lg-rej i{background:var(--red)}
+
+/* ── สองคอลัมน์ กล่องขาเข้า + รายละเอียด ── */
+.two{display:grid;grid-template-columns:minmax(320px,388px) 1fr;gap:18px;align-items:start}
+@media (max-width:1180px){.two{grid-template-columns:1fr}}
+.ftabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ftab{border:1px solid #dfe7f0;background:#fff;border-radius:20px;padding:6px 13px;font-family:inherit;
+  font-size:12.5px;color:var(--ink);cursor:pointer;transition:.15s;display:inline-flex;gap:7px;align-items:center}
+.ftab:hover{border-color:#9dbdd9}
+.ftab.on{background:var(--hdr);border-color:var(--hdr);color:#fff}
+.ftab .n{font-weight:700;font-variant-numeric:tabular-nums}
+.search{position:relative;margin-bottom:10px}
+.search input{width:100%;padding:7px 11px 7px 32px;border:1px solid #dfe7f0;border-radius:8px;
+  font-family:inherit;font-size:13px;outline:none;transition:.15s}
+.search input:hover{border-color:#c2d5e8}
+.search input:focus{border-color:#7FB3E0;box-shadow:0 0 0 3px rgba(127,179,224,.16)}
+.search .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--mut);display:flex}
+.ibx{border:1px solid var(--line-d);border-radius:10px;overflow:hidden}
+.ibx-r{padding:10px 13px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
+.ibx-r:last-child{border-bottom:0}
+.ibx-r:hover{background:#fafcfe}
+.ibx-r.on{background:var(--p-blue);box-shadow:inset 3px 0 0 var(--hdr)}
+.ibx-r .r1{display:flex;align-items:center;gap:8px}
+.ibx-r .r1 .no{font-weight:700;color:var(--blue);font-size:12.8px;font-variant-numeric:tabular-nums}
+.ibx-r .r1 .ag{margin-left:auto;font-size:11.5px;color:var(--mut);white-space:nowrap}
+.ibx-r .r1 .ag.hot{color:var(--orange);font-weight:700}
+.ibx-r .sj{font-size:12.8px;color:var(--ink);margin-top:5px;line-height:1.55}
+.ibx-r .r3{display:flex;gap:12px;margin-top:6px;font-size:11.5px;color:var(--mut);flex-wrap:wrap}
+.ibx-r .r3 b{color:#4a6b86;font-weight:600}
+.ibx-e{padding:34px 14px;text-align:center;color:var(--mut);font-size:13px}
+.pager{display:flex;align-items:center;justify-content:space-between;padding:9px 2px 0;font-size:12.5px;color:var(--mut)}
+
+/* ── รายละเอียดเอกสาร ── */
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:11px 18px;margin-bottom:14px}
+.mgrid .m{border-left:2px solid var(--line-d);padding-left:11px}
+.mgrid .m .k{font-size:11.5px;color:var(--mut)}
+.mgrid .m .v{font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;line-height:1.5}
+.chip{display:inline-block;padding:2px 9px;border-radius:11px;font-size:10.5px;font-weight:700;white-space:nowrap}
+.t-pr{background:var(--p-blue);color:var(--blue)}
+.t-unl{background:#fdf3e3;color:#a5730a}
+.t-cost{background:var(--p-green);color:#1a7a42}
+.s-pend{background:var(--p-amber);color:#a06a00}
+.s-done{background:var(--p-green);color:#1a7a42}
+.s-rej{background:var(--p-red);color:#b32b2b}
+.dtb{width:100%;border-collapse:collapse;font-size:12.5px}
+.dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:8px 10px;
+        border-bottom:1px solid var(--line-d);white-space:nowrap}
+.dtb td{padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dtb tr:hover td{background:#fafcfe}
+.dtb .r{text-align:right;font-variant-numeric:tabular-nums}
+.dtb .c{text-align:center}
+.dtb tr.sum td{background:#f7fafd;font-weight:700}
+.dtb .why{white-space:normal;color:#b32b2b;line-height:1.55}
+.code{font-weight:700;color:var(--blue)}
+.sup{color:#4a6b86;font-size:12.5px}
+.up{color:var(--red)} .dn{color:var(--green)}
+.sect{font-size:12.5px;font-weight:700;color:#3a5773;margin:15px 0 8px;display:flex;align-items:center;gap:9px}
+.sect:first-child{margin-top:0}
+.sect small{font-weight:400;color:var(--mut);font-size:11.5px}
+.fld{margin:12px 0}
+.fld label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:5px}
+.fld textarea{width:100%;min-height:64px;border:1px solid var(--line-d);border-radius:8px;padding:9px 11px;
+  font-family:inherit;font-size:13px;color:var(--ink);resize:vertical;outline:none}
+.fld textarea:focus{border-color:var(--hdr)}
+.hint{background:#f5f9fd;border-left:3px solid var(--hdr);border-radius:0 7px 7px 0;padding:10px 14px;
+      font-size:12.5px;color:#4a6b86;line-height:1.65;margin-top:12px}
+.redbox{background:#fdf7f7;border:1px solid #f0c9c7;border-radius:9px;padding:11px 14px;
+        font-size:12.5px;color:#b32b2b;line-height:1.65;margin-bottom:12px}
+.okbox{background:var(--p-green);border:1px solid #c6e8d5;border-radius:9px;padding:11px 14px;
+        font-size:12.5px;color:#1a7a42;line-height:1.65;margin-bottom:12px}
+.demo{background:#fdf3e3;color:#a5730a;border:1px solid #f0d9a8;border-radius:20px;
+  padding:5px 13px;font-size:12px;font-weight:600;white-space:nowrap}
+.expl{background:#fbfdff;border:1px solid var(--line-d);border-left:3px solid var(--hdr);
+  border-radius:0 9px 9px 0;padding:10px 14px;margin:0 0 14px;font-size:12.5px;line-height:1.75;color:#4a6b86}
+.expl b{color:var(--ink);font-weight:600}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.u{font-style:normal;color:var(--mut);font-size:11.5px;font-weight:400}
+.mono{font-variant-numeric:tabular-nums}
+
+/* ── กล่อง ── */
+.mask{position:fixed;inset:0;background:rgba(18,40,72,.4);z-index:200;display:flex;
+      align-items:flex-start;justify-content:center;padding:44px 20px;overflow:auto}
+.dlg{background:#fff;border-radius:10px;box-shadow:0 14px 44px rgba(15,40,80,.3);width:90%;max-width:1080px;overflow:hidden}
+.dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
+.dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
+.dlg-x{background:transparent;border:none;color:#fff;font-size:21px;cursor:pointer;padding:1px 7px;border-radius:5px;font-family:inherit}
+.dlg-x:hover{background:rgba(255,255,255,.24)}
+.dlg-bd{padding:16px 18px;max-height:72vh;overflow:auto}
+.dlg-ft{padding:10px 18px;border-top:1px solid var(--line);background:#fbfdff;display:flex;justify-content:space-between;align-items:center;gap:9px}
+.toast{position:fixed;right:22px;bottom:22px;z-index:300;display:flex;flex-direction:column;gap:8px}
+.tst{background:#0f3f8c;color:#fff;border-radius:9px;padding:11px 16px;font-size:13px;
+     box-shadow:0 6px 20px rgba(15,40,80,.28);animation:sl .2s ease-out;max-width:450px;line-height:1.55}
+.tst.ok{background:#1a7a42} .tst.warn{background:#a06a00} .tst.bad{background:#b32b2b}
+@keyframes sl{from{transform:translateX(20px);opacity:0}to{transform:none;opacity:1}}
+::selection{background:#cfe6fa;color:#1a3a5c}
+*::-webkit-scrollbar{width:9px;height:9px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#d6e2ee;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+td,th,input[type=number]{font-variant-numeric:tabular-nums}
+
+/* ── ซ่อนหัวและท้ายอัตโนมัติเมื่อถูกเปิดในหน้ารวม ── */
+html.embed header,html.embed footer,html.embed .topstrip{display:none!important}
+html.embed .content{padding-top:14px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo-tab"><img class="apexlogo" src="apex-logo.png" alt="APEX Circuit" /></div>
+    <nav>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3.2-6.5 7-6.5s7 2.5 7 6.5"/><circle cx="18.5" cy="6" r="2.5"/></svg>Administrator</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="5" rx="1"/><rect x="3" y="14" width="18" height="5" rx="1"/></svg>Master Data</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="7" height="6" rx="1"/><rect x="14" y="8" width="7" height="6" rx="1"/><rect x="8" y="15" width="8" height="5" rx="1"/></svg>Items</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 19V9M9.5 19V5M15 19v-7M20.5 19v-4"/></svg>Sale</a>
+      <a class="mi active"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 13h3M8 17h6"/></svg>Planning</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V9l6-4 6 4v11"/><path d="M4 20h16"/><path d="M16 12h4v8"/><rect x="8" y="13" width="4" height="7"/></svg>Production</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>Quality Control</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v10H3z"/><path d="M9 20v-7h6v7"/></svg>Warehouse</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h5M9.5 14.5h5"/></svg>Costing</a>
+      <a class="mi"><svg viewBox="0 0 24 24"><path d="M3 7h5l2-3h9v5"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg>Purchase</a>
+    </nav>
+    <div class="user">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+      <div><b>อาทิตย์ สุดชาติ</b><span>Production Planner</span></div>
+    </div>
+  </header>
+  <div class="topstrip">Monday, August 3, 2026 (apex production)</div>
+
+  <div class="content">
+    <!-- แถบสายอนุมัติของเอกสารที่เลือก -->
+    <div class="card apvcard" id="apvCard"></div>
+
+    <div class="card">
+      <div class="page-head">
+        <div><div class="page-title">สายอนุมัติเอกสาร</div>
+          <div class="page-sub">อนุมัติเป็นลำดับขั้นตามอำนาจอนุมัติ · ปลดล็อกแผนในช่วงล็อก · ส่งรายการขอซื้อ · ประกาศใช้ต้นทุนมาตรฐานรอบใหม่</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="demo">ตัวอย่างหน้าจอ · ข้อมูลจำลอง</span>
+          <button class="btn" onclick="openDoaMatrix()">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M9 9.5V20"/></svg>ผังอำนาจอนุมัติ</button>
+          <button class="btn" onclick="openDoaReport()"><svg viewBox="0 0 24 24"><path d="M7 8V3.5h10V8"/><rect x="4" y="8" width="16" height="8.5" rx="1.5"/><path d="M7 14h10v6H7z"/></svg>พิมพ์รายงาน</button>
+        </div>
+      </div>
+
+      <div class="expl">
+        เอกสารทุกใบเดินผ่าน <b>4 ขั้น</b> เหมือนกันคือ บันทึก → ส่งอนุมัติ → ผู้มีอำนาจอนุมัติ → ดำเนินการปลายทาง ·
+        <b>ผู้มีอำนาจในขั้นที่ 3 เปลี่ยนตามมูลค่าหรือผลกระทบ</b> ตามผังอำนาจอนุมัติ ·
+        ไม่อนุมัติต้องระบุเหตุผลเสมอ และเหตุผลจะถูกเก็บไว้ในประวัติของเอกสาร
+      </div>
+
+      <div class="strip" id="strip"></div>
+
+      <div class="two">
+        <div>
+          <div class="sect">กล่องขาเข้า <small>เอกสารที่ส่งเข้ามาให้พิจารณา</small></div>
+          <div class="ftabs" id="ftabs"></div>
+          <div class="search"><span class="si"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
+            <input id="q" placeholder="ค้นหา เลขที่เอกสาร / เรื่อง / ผู้ขอ" /></div>
+          <div class="ibx" id="ibx"></div>
+          <div class="pager"><span id="pg"></span></div>
+        </div>
+        <div id="detail"></div>
+      </div>
+    </div>
+  </div>
+  <footer>Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)</footer>
+</div>
+<div id="dlgRoot"></div><div class="toast" id="toast"></div>
+
+<script>
+const g=id=>document.getElementById(id);
+const nf=(n,d=0)=>Number(n).toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const TODAY=new Date(2026,7,3);          /* วันจันทร์ที่ 3 สิงหาคม 2026 — ตรึงไว้ทั้งระบบ */
+const pD=s=>{const[d,m,y]=s.split('-').map(Number);return new Date(y,m-1,d);};
+const ageOf=s=>Math.round((TODAY-pD(s))/86400000);
+function toast(m,c=''){const d=document.createElement('div');d.className='tst '+c;d.innerHTML=m;
+  g('toast').appendChild(d);setTimeout(()=>d.remove(),4200);}
+
+/* ── ไปหน้าจออื่นในชุดเดียวกัน ── */
+function goScreen(f){
+  try{ if(window.self!==window.top && window.parent.openScreen){ window.parent.openScreen(f); return; } }catch(e){}
+  window.open(f,'_blank');
+}
+
+/* ── นาฬิกาจำลอง : เดินหน้าครั้งละ 6 นาทีทุกครั้งที่มีการตัดสินใจ (ไม่ใช้เวลาจริง) ── */
+let CLK=10*60+22;
+function stamp(){ CLK+=6;
+  const h=Math.floor(CLK/60)%24, m=CLK%60;
+  return '03/08/2026 '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'); }
+
+/* ═════════ ผังอำนาจอนุมัติ (DOA Matrix) ═════════ */
+const TIER={
+ PR:[{cap:'ไม่เกิน 100,000 บาท',role:'หัวหน้าแผนกวางแผน',step:'หัวหน้าแผนกวางแผนอนุมัติ',who:'อภิชาติ ส.'},
+     {cap:'100,001 – 1,000,000 บาท',role:'ผู้จัดการวางแผน',step:'ผู้จัดการวางแผนอนุมัติ',who:'ชลธิชา พ.'},
+     {cap:'1,000,001 – 5,000,000 บาท',role:'ผู้จัดการโรงงาน',step:'ผู้จัดการโรงงานอนุมัติ',who:'ประเสริฐ จ.'},
+     {cap:'เกิน 5,000,000 บาท',role:'กรรมการผู้จัดการ',step:'กรรมการผู้จัดการอนุมัติ',who:'สมชาย เ.'}],
+ UNLOCK:[{cap:'ไม่เกิน 2 รายการจอง และไม่กระทบวันส่งลูกค้า',role:'หัวหน้าแผนกวางแผน',step:'หัวหน้าแผนกวางแผนอนุมัติ',who:'อภิชาติ ส.'},
+     {cap:'3 – 10 รายการจอง',role:'ผู้จัดการผลิต',step:'ผู้จัดการผลิตอนุมัติ',who:'วิชัย ธ.'},
+     {cap:'เกิน 10 รายการจอง หรือกระทบวันส่งลูกค้า',role:'กรรมการผู้จัดการ',step:'กรรมการผู้จัดการอนุมัติ',who:'สมชาย เ.'}],
+ COST:[{cap:'ต้นทุนรวมเปลี่ยนไม่เกิน 2%',role:'ผู้จัดการบัญชีต้นทุน',step:'ผู้จัดการบัญชีต้นทุนอนุมัติ',who:'ศิริพร ม.'},
+     {cap:'ต้นทุนรวมเปลี่ยน 2 – 5%',role:'ผู้จัดการโรงงาน',step:'ผู้จัดการโรงงานอนุมัติ',who:'ประเสริฐ จ.'},
+     {cap:'ต้นทุนรวมเปลี่ยนเกิน 5%',role:'กรรมการผู้จัดการ',step:'กรรมการผู้จัดการอนุมัติ',who:'สมชาย เ.'}]
+};
+const TYPE={
+ PR:{n:'ใบขอซื้อ',full:'ใบขอซื้อจาก MRP',cls:'t-pr',scr:'APEX_MRP_Advanced.html',scrN:'กระดานวางแผนวัตถุดิบ (MRP) ↗'},
+ UNLOCK:{n:'ปลดล็อกแผน',full:'ขอปลดล็อกแผนในช่วงล็อก',cls:'t-unl',scr:'APEX_Priority_Freeze_Mockup.html',scrN:'จัดลำดับและล็อกแผน ↗'},
+ COST:{n:'ต้นทุนมาตรฐาน',full:'ประกาศใช้ต้นทุนมาตรฐานรอบใหม่',cls:'t-cost',scr:'APEX_StandardCostBook_Mockup.html',scrN:'ทะเบียนต้นทุนมาตรฐาน ↗'}
+};
+/* ขั้นที่ 3 ของทุกสาย = ขั้นอนุมัติตามอำนาจ (ชื่อขั้นดึงจาก TIER) */
+const FLOW={
+ PR:[{t:'บันทึกคำขอ',role:'ผู้ขอซื้อ'},
+     {t:'ส่งอนุมัติ',role:'ผู้ขอซื้อ'},
+     {t:'',role:''},
+     {t:'ส่งจัดซื้อออก PO',role:'ฝ่ายจัดซื้อ',who:'สุภาพร ก.'}],
+ UNLOCK:[{t:'บันทึกคำขอ',role:'ผู้วางแผน'},
+     {t:'ส่งอนุมัติ',role:'ผู้วางแผน'},
+     {t:'',role:''},
+     {t:'ปลดล็อกแผน',role:'ผู้วางแผน',who:'อาทิตย์ สุดชาติ'}],
+ COST:[{t:'บันทึกคำขอ',role:'เจ้าหน้าที่บัญชีต้นทุน'},
+     {t:'ส่งอนุมัติ',role:'เจ้าหน้าที่บัญชีต้นทุน'},
+     {t:'',role:''},
+     {t:'ประกาศใช้',role:'เจ้าหน้าที่บัญชีต้นทุน',who:'ธนิดา พ.'}]
+};
+
+/* ═════════ เอกสารในกล่องขาเข้า ═════════ */
+const DOCS=[
+{no:'PR-26080142',ty:'PR',date:'31-07-2026',req:'อาทิตย์ สุดชาติ',dept:'ฝ่ายวางแผน',
+ subj:'ขอซื้อ COPPER FOIL 1 Oz เร่งด่วนตามผลรัน MRP',
+ ref:'MRP-2608 · WO-26080168 · WO-26080184',
+ rsnReq:'ผลรัน MRP รอบวันจันทร์พบว่าของคงเหลือไม่พอสำหรับใบสั่งผลิต 2 ใบในช่วง 14 วันข้างหน้า',
+ items:[['RM-CU-FOIL1','COPPER FOIL 1 Oz (34.3 um) LF/HF','KG',95,1180],
+        ['RM-NM-SM-GRN','SOLDER MASK Green HF/LF (2K)','KG',24,520],
+        ['RM-PP-7628','PREPREG FR-4 S1000HB 7628','SHT',8,490]],
+ cur:2,st:'pending',ts:['31/07/2026 09:12','31/07/2026 09:40',null,null]},
+
+{no:'PR-26080156',ty:'PR',date:'30-07-2026',req:'กิตติพงษ์ ร.',dept:'ฝ่ายวางแผน',
+ subj:'ขอซื้อ CCL FR-4 S1000H รอบไตรมาส 4',
+ ref:'MRP-2608 · MPS-2609',
+ rsnReq:'สั่งล่วงหน้าตามแผนผลิตไตรมาส 4 เพราะผู้ขายมี Lead Time 42 วัน',
+ items:[['RM-CCL-S1000H','CCL FR-4 S1000H 0.36mm 37x49 inch','SHT',9600,168],
+        ['RM-CU-FOIL1','COPPER FOIL 1 Oz (34.3 um) LF/HF','KG',240,1180]],
+ cur:3,st:'pending',ts:['30/07/2026 14:05','30/07/2026 14:22','31/07/2026 11:48',null]},
+
+{no:'PR-26080160',ty:'PR',date:'03-08-2026',req:'อาทิตย์ สุดชาติ',dept:'ฝ่ายวางแผน',
+ subj:'ขอซื้อ GOLD SALT เติมอ่างชุบทองรอบเดือนสิงหาคม',
+ ref:'MRP-2608 · WO-26080131',
+ rsnReq:'ปริมาณในอ่างชุบเหลือต่ำกว่าจุดสั่งซื้อ ต้องเติมก่อนเริ่มงานชุบทองล็อตถัดไป',
+ items:[['RM-AU-SALT','GOLD SALT KAu(CN)2','KG',0.8,72000],
+        ['RM-NM-SM-GRN','SOLDER MASK Green HF/LF (2K)','KG',20,520]],
+ cur:2,st:'pending',ts:['03/08/2026 08:35','03/08/2026 08:41',null,null]},
+
+{no:'UNL-26080007',ty:'UNLOCK',date:'01-08-2026',req:'อาทิตย์ สุดชาติ',dept:'ฝ่ายวางแผน',
+ subj:'ขอปลดล็อกแผน WO-26080142 ในช่วงล็อก 7 วัน',
+ ref:'WO-26080142 · FC-2609-01 · SEMCO',
+ rsnReq:'ลูกค้า SEMCO ขอเลื่อนวันส่งออกไป 5 วัน ต้องขยับคิวใบสั่งผลิตออกจากช่วงล็อก',
+ items:[['WO-26080142','RM-CCL-S1000H','SHT',1780,'07-08-2026'],
+        ['WO-26080142','RM-PP-7628','SHT',240,'07-08-2026'],
+        ['WO-26080142','RM-AU-SALT','KG',0.64,'09-08-2026']],
+ cur:2,st:'pending',ts:['01/08/2026 16:20','01/08/2026 16:33',null,null]},
+
+{no:'UNL-26080009',ty:'UNLOCK',date:'29-07-2026',req:'กิตติพงษ์ ร.',dept:'ฝ่ายวางแผน',
+ subj:'ขอปลดล็อกแผน WO-26080131 เพื่อสลับคิวให้ลูกค้า DENSO',
+ ref:'WO-26080131 · FC-2609-07 · DENSO',
+ rsnReq:'ลูกค้า DENSO ขอรับของเร็วขึ้น 4 วัน ต้องดึงคิวขึ้นมาก่อนงานอื่น',
+ items:[['WO-26080131','RM-AU-SALT','KG',0.72,'06-08-2026'],
+        ['WO-26080131','RM-CCL-S1000H','SHT',640,'06-08-2026'],
+        ['WO-26080131','RM-CU-FOIL1','KG',48,'06-08-2026'],
+        ['WO-26080131','RM-NM-SM-GRN','KG',18,'07-08-2026']],
+ cur:2,st:'rejected',ts:['29/07/2026 10:04','29/07/2026 10:11','30/07/2026 09:26',null],
+ why:'อยู่ในช่วงล็อก 7 วันและยืนยันแผนกับฝ่ายผลิตแล้ว ให้เพิ่มกะทำงานแทนการสลับคิว'},
+
+{no:'STD-26080003',ty:'COST',date:'03-08-2026',req:'ธนิดา พ.',dept:'ฝ่ายบัญชีต้นทุน',
+ subj:'ประกาศใช้ต้นทุนมาตรฐานรอบ 2026-Q4',
+ ref:'COST-BOOK-2026Q4 · BOM + Routing ฉบับปัจจุบัน',
+ rsnReq:'ราคาวัตถุดิบและค่าแรงรอบไตรมาส 4 เปลี่ยน ต้องตั้งต้นทุนมาตรฐานรอบใหม่ก่อนเปิดรอบบัญชี',
+ items:[['A048T-168BJ','PCB 4L Gold Finger 1.6mm',84.20,85.66],
+        ['G120A-017A','PCB 2L HASL 1.0mm',42.75,43.40],
+        ['D617P-140S','PCB 6L ENIG 1.6mm',128.40,130.62],
+        ['T118M-204R','PCB 4L OSP 1.2mm',66.10,67.02]],
+ cur:2,st:'pending',ts:['03/08/2026 07:55','03/08/2026 08:02',null,null]},
+
+{no:'STD-26080001',ty:'COST',date:'24-07-2026',req:'ธนิดา พ.',dept:'ฝ่ายบัญชีต้นทุน',
+ subj:'ประกาศใช้ต้นทุนมาตรฐานรอบ 2026-Q3',
+ ref:'COST-BOOK-2026Q3 · BOM + Routing ฉบับปัจจุบัน',
+ rsnReq:'ปิดรอบไตรมาส 3 ตามปฏิทินบัญชีต้นทุน',
+ items:[['A048T-168BJ','PCB 4L Gold Finger 1.6mm',83.45,84.20],
+        ['G120A-017A','PCB 2L HASL 1.0mm',42.40,42.75],
+        ['D617P-140S','PCB 6L ENIG 1.6mm',127.30,128.40]],
+ cur:4,st:'done',ts:['24/07/2026 09:00','24/07/2026 09:15','24/07/2026 15:32','27/07/2026 08:10']}
+];
+
+/* ═════════ ตัวเลขของเอกสาร ═════════ */
+function amtOf(d){ return d.ty==='PR'? d.items.reduce((a,r)=>a+r[3]*r[4],0) : 0; }
+function pctOf(d){
+  if(d.ty!=='COST') return 0;
+  const o=d.items.reduce((a,r)=>a+r[2],0), n=d.items.reduce((a,r)=>a+r[3],0);
+  return (n-o)/o*100;
+}
+function tierIdx(d){
+  if(d.ty==='PR'){const v=amtOf(d);return v<=100000?0:v<=1000000?1:v<=5000000?2:3;}
+  if(d.ty==='UNLOCK'){const n=d.items.length;return n<=2?0:n<=10?1:2;}
+  const p=pctOf(d);return p<=2?0:p<=5?1:2;
+}
+/* ค่าที่ใช้เทียบกับผังอำนาจอนุมัติ */
+function baseTxt(d){
+  if(d.ty==='PR')   return nf(amtOf(d))+' <i class="u">บาท</i>';
+  if(d.ty==='UNLOCK')return d.items.length+' <i class="u">รายการจอง</i>';
+  return d.items.length+' <i class="u">รายการสินค้า</i> · '+(pctOf(d)>=0?'+':'')+pctOf(d).toFixed(1)+'%';
+}
+function baseRpt(d){
+  if(d.ty==='PR')   return ApexReport.fmt(amtOf(d))+' THB';
+  if(d.ty==='UNLOCK')return d.items.length+' รายการจอง';
+  return d.items.length+' รายการสินค้า · '+(pctOf(d)>=0?'+':'')+pctOf(d).toFixed(1)+'%';
+}
+
+/* ═════════ สร้างขั้นตอนของแต่ละเอกสาร ═════════ */
+DOCS.forEach(d=>{
+  const T=TIER[d.ty][tierIdx(d)];
+  d.tier=T;
+  d.steps=FLOW[d.ty].map((s,i)=>({
+    t: i===2 ? T.step : s.t,
+    role: i===2 ? T.role : s.role,
+    who: i===2 ? T.who : (s.who || d.req),
+    ts: d.ts[i]||null, st:'todo', why:''
+  }));
+  d.steps.forEach((s,i)=>{
+    if(i<d.cur) s.st='done';
+    else if(i===d.cur) s.st = d.st==='rejected' ? 'rej' : (d.st==='done'?'done':'cur');
+    else s.st='todo';
+  });
+  if(d.st==='rejected') d.steps[d.cur].why=d.why;
+});
+
+/* ═════════ สถานะหน้าจอ ═════════ */
+let SEL=0, FLT='pending', fq='';
+const ST={pending:{t:'รออนุมัติ',c:'s-pend'},done:{t:'เสร็จสิ้น',c:'s-done'},rejected:{t:'ไม่อนุมัติ',c:'s-rej'}};
+const I_CHK='<svg viewBox="0 0 24 24"><path d="M5 12.6l4.6 4.6L19 6.8"/></svg>';
+const I_CLK='<svg viewBox="0 0 24 24"><path d="M3.6 9.2A9 9 0 1 1 3 12"/><path d="M3 4.4V9.2h4.8"/><path d="M12 8.2v4.4l3 1.8"/></svg>';
+const I_XX ='<svg viewBox="0 0 24 24"><path d="M6.8 6.8l10.4 10.4M17.2 6.8L6.8 17.2"/></svg>';
+
+function base(){
+  if(!fq) return DOCS.slice();
+  const q=fq.toLowerCase();
+  return DOCS.filter(d=>(d.no+' '+d.subj+' '+d.req+' '+d.dept+' '+d.ref+' '+TYPE[d.ty].n).toLowerCase().includes(q));
+}
+function list(){ const b=base(); return FLT==='all'?b:b.filter(d=>d.st===FLT); }
+function curStepTxt(d){
+  if(d.st==='done') return 'ครบทุกขั้นแล้ว';
+  if(d.st==='rejected') return 'หยุดที่ขั้นที่ '+(d.cur+1);
+  return 'ขั้นที่ '+(d.cur+1)+' · '+d.steps[d.cur].t;
+}
+
+/* ── แถบตัวเลขสรุป ── */
+function drawStrip(){
+  const p=DOCS.filter(d=>d.st==='pending');
+  const hot=p.filter(d=>ageOf(d.date)>2).length;
+  const S=[['c-blue',p.length,'รออนุมัติทั้งหมด','เอกสารที่รอการพิจารณาอยู่ตอนนี้'],
+           ['c-orange',hot,'ค้างเกิน 2 วัน','ควรเร่งพิจารณาก่อนกระทบแผน'],
+           ['c-green',DOCS.filter(d=>d.st==='done').length,'อนุมัติแล้ว','ผ่านครบทุกขั้นและดำเนินการเรียบร้อย'],
+           ['c-red',DOCS.filter(d=>d.st==='rejected').length,'ไม่อนุมัติ','ตีกลับพร้อมเหตุผลในประวัติ']];
+  g('strip').innerHTML=S.map(([c,n,t,d])=>`<div class="sc ${c}">
+    <div class="n">${n}</div><div class="t">${t}</div><div class="t2">${d}</div></div>`).join('');
+}
+
+/* ── ตัวกรองสถานะ ── */
+function drawTabs(){
+  const b=base();
+  const T=[['pending','รออนุมัติ'],['done','อนุมัติแล้ว'],['rejected','ไม่อนุมัติ'],['all','ทั้งหมด']];
+  g('ftabs').innerHTML=T.map(([k,t])=>{
+    const n=k==='all'?b.length:b.filter(d=>d.st===k).length;
+    return `<button class="ftab ${FLT===k?'on':''}" onclick="setFilter('${k}')">${t}<span class="n">${n}</span></button>`;
+  }).join('');
+}
+function setFilter(k){ FLT=k; draw(); }
+
+/* ── กล่องขาเข้า ── */
+function drawInbox(){
+  const L=list();
+  g('ibx').innerHTML = L.length? L.map(d=>{
+    const i=DOCS.indexOf(d), age=ageOf(d.date), T=TYPE[d.ty];
+    return `<div class="ibx-r ${i===SEL?'on':''}" onclick="selDoc(${i})">
+      <div class="r1"><span class="chip ${T.cls}">${T.n}</span><span class="no">${d.no}</span>
+        <span class="ag ${d.st==='pending'&&age>2?'hot':''}">${d.st==='pending'?age+' <i class="u">วัน</i>':'<i class="u">ปิดแล้ว</i>'}</span></div>
+      <div class="sj">${d.subj}</div>
+      <div class="r3"><span>${d.req}</span><span>${d.date}</span><span><b>${baseTxt(d)}</b></span></div>
+      <div class="r3"><span class="chip ${ST[d.st].c}">${ST[d.st].t}</span>
+        <span>${curStepTxt(d)}</span></div>
+    </div>`;
+  }).join('') : `<div class="ibx-e">ไม่พบเอกสารตามเงื่อนไข</div>`;
+  g('pg').innerHTML=`แสดง <b>${L.length}</b> จาก <b>${DOCS.length}</b> เอกสาร`;
+}
+function selDoc(i){ SEL=i; draw(); }
+
+/* ── แถบสายอนุมัติ (stepper) ── */
+function drawStepper(){
+  const d=DOCS[SEL], S=d.steps, T=TYPE[d.ty];
+  const body=S.map((s,i)=>{
+    const lOn=i>0&&S[i-1].st==='done', rOn=s.st==='done';
+    const mk=s.st==='done'?`<span class="stp-mk">${I_CHK}</span>`
+            :s.st==='rej'?`<span class="stp-mk">${I_XX}</span>`
+            :s.st==='cur'?`<span class="stp-mk">${I_CLK}</span>`
+            :`<span class="stp-mk"><i></i></span>`;
+    return `<div class="stp-s ${s.st}">
+      ${i>0?`<span class="ln l ${lOn?'on':''}"></span>`:''}
+      ${i<S.length-1?`<span class="ln r ${rOn?'on':''}"></span>`:''}
+      ${mk}
+      <div class="stp-t">${s.t}</div>
+      <div class="stp-w">${s.who}</div>
+      <div class="stp-r">${s.role}</div>
+      ${s.ts?`<div class="stp-d">${s.ts}</div>`:''}
+      ${s.st==='cur'&&d.st==='pending'?`<div class="stp-act">
+        <button class="btn btn-s bt-ok" onclick="doApprove()"><svg viewBox="0 0 24 24"><path d="M5 12.6l4.6 4.6L19 6.8"/></svg>อนุมัติ</button>
+        <button class="btn btn-s bt-no" onclick="doReject()"><svg viewBox="0 0 24 24"><path d="M6.8 6.8l10.4 10.4M17.2 6.8L6.8 17.2"/></svg>ไม่อนุมัติ</button></div>`:''}
+      ${s.st==='rej'&&s.why?`<div class="stp-why">${esc(s.why)}</div>`:''}
+    </div>`;}).join('');
+  g('apvCard').innerHTML=`
+    <div class="apv-hd"><span class="chip ${T.cls}">${T.n}</span>
+      <span class="no">${d.no}</span><span class="sj">${d.subj}</span>
+      <span class="chip ${ST[d.st].c}">${ST[d.st].t}</span>
+      <span class="rt">${curStepTxt(d)}</span></div>
+    <div class="stpwrap"><div class="stp">${body}</div></div>
+    <div class="stp-leg">
+      <span class="lg-done"><i></i>ผ่านแล้ว</span>
+      <span class="lg-cur"><i></i>รอพิจารณาอยู่ตอนนี้</span>
+      <span class="lg-todo"><i></i>ยังไม่ถึงคิว</span>
+      <span class="lg-rej"><i></i>ไม่อนุมัติ</span>
+      <span style="margin-left:auto">ผู้มีอำนาจในขั้นที่ 3 กำหนดตามผังอำนาจอนุมัติ</span>
+    </div>`;
+}
+
+/* ── ตารางรายการของเอกสาร ── */
+function itemTable(d){
+  if(d.ty==='PR'){
+    const tot=amtOf(d);
+    return `<table class="dtb">
+      <thead><tr><th style="width:150px">รหัสวัตถุดิบ</th><th>รายละเอียด</th>
+        <th class="r" style="width:100px">จำนวน</th><th class="c" style="width:64px">หน่วย</th>
+        <th class="r" style="width:110px">ราคาต่อหน่วย</th><th class="r" style="width:120px">มูลค่า</th></tr></thead>
+      <tbody>${d.items.map(r=>`<tr><td><span class="code">${r[0]}</span></td><td class="sup">${r[1]}</td>
+        <td class="r">${nf(r[3],r[3]<10?2:0)}</td><td class="c sup">${r[2]}</td>
+        <td class="r">${nf(r[4],2)}</td><td class="r">${nf(r[3]*r[4],2)}</td></tr>`).join('')}
+        <tr class="sum"><td colspan="5" class="r">รวมมูลค่าใบขอซื้อ</td><td class="r">${nf(tot,2)}</td></tr>
+      </tbody></table>`;
+  }
+  if(d.ty==='UNLOCK'){
+    return `<table class="dtb">
+      <thead><tr><th style="width:150px">ใบสั่งผลิต</th><th style="width:170px">วัตถุดิบ</th>
+        <th class="r" style="width:120px">จำนวนที่จองไว้</th><th class="c" style="width:64px">หน่วย</th>
+        <th class="c" style="width:130px">วันที่ต้องใช้</th></tr></thead>
+      <tbody>${d.items.map(r=>`<tr><td><span class="code">${r[0]}</span></td><td class="sup">${r[1]}</td>
+        <td class="r">${nf(r[3],r[3]<10?2:0)}</td><td class="c sup">${r[2]}</td>
+        <td class="c mono">${r[4]}</td></tr>`).join('')}
+        <tr class="sum"><td colspan="4" class="r">รวมรายการจองที่ขอปลดล็อก</td>
+          <td class="c">${d.items.length}</td></tr>
+      </tbody></table>`;
+  }
+  const o=d.items.reduce((a,r)=>a+r[2],0), n=d.items.reduce((a,r)=>a+r[3],0), p=pctOf(d);
+  return `<table class="dtb">
+    <thead><tr><th style="width:150px">รหัสสินค้า</th><th>ชื่อสินค้า</th>
+      <th class="r" style="width:110px">ต้นทุนเดิม</th><th class="r" style="width:110px">ต้นทุนใหม่</th>
+      <th class="r" style="width:100px">ส่วนต่าง</th><th class="r" style="width:100px">เปลี่ยนแปลง</th></tr></thead>
+    <tbody>${d.items.map(r=>{const df=r[3]-r[2],pc=df/r[2]*100;
+      return `<tr><td><span class="code">${r[0]}</span></td><td class="sup">${r[1]}</td>
+      <td class="r">${nf(r[2],2)}</td><td class="r">${nf(r[3],2)}</td>
+      <td class="r ${df>=0?'up':'dn'}">${df>=0?'+':''}${nf(df,2)}</td>
+      <td class="r ${df>=0?'up':'dn'}">${pc>=0?'+':''}${pc.toFixed(1)}%</td></tr>`;}).join('')}
+      <tr class="sum"><td colspan="2" class="r">รวมทุกรายการ</td>
+        <td class="r">${nf(o,2)}</td><td class="r">${nf(n,2)}</td>
+        <td class="r ${n>=o?'up':'dn'}">${n>=o?'+':''}${nf(n-o,2)}</td>
+        <td class="r ${n>=o?'up':'dn'}">${p>=0?'+':''}${p.toFixed(1)}%</td></tr>
+    </tbody></table>`;
+}
+
+/* ── ตารางประวัติการอนุมัติ ── */
+function logTable(d){
+  const rows=d.steps.map((s,i)=>({i,s})).filter(x=>x.s.st==='done'||x.s.st==='rej');
+  if(!rows.length) return `<div class="hint">ยังไม่มีประวัติการดำเนินการของเอกสารใบนี้</div>`;
+  return `<table class="dtb">
+    <thead><tr><th class="c" style="width:52px">ลำดับ</th><th style="width:210px">ขั้นตอน</th>
+      <th style="width:150px">ผู้ดำเนินการ</th><th class="c" style="width:110px">ผลลัพธ์</th>
+      <th class="c" style="width:140px">วันเวลา</th><th>เหตุผล</th></tr></thead>
+    <tbody>${rows.map((x,k)=>`<tr>
+      <td class="c sup">${k+1}</td><td>${x.s.t}</td><td class="sup">${x.s.who}</td>
+      <td class="c"><span class="chip ${x.s.st==='rej'?'s-rej':'s-done'}">${x.s.st==='rej'?'ไม่อนุมัติ':(x.i<2?'ดำเนินการแล้ว':'อนุมัติ')}</span></td>
+      <td class="c mono">${x.s.ts||'—'}</td>
+      <td class="why">${x.s.why?esc(x.s.why):'<span style="color:#c3d0dd">—</span>'}</td></tr>`).join('')}
+    </tbody></table>`;
+}
+
+/* ── รายละเอียดเอกสารที่เลือก ── */
+function drawDetail(){
+  const d=DOCS[SEL], T=TYPE[d.ty], age=ageOf(d.date);
+  const box = d.st==='rejected'
+    ? `<div class="redbox"><b>เอกสารใบนี้ไม่ได้รับอนุมัติ</b><br>${esc(d.why||'')}</div>`
+    : d.st==='done'
+    ? `<div class="okbox"><b>ผ่านครบทุกขั้นแล้ว</b> — เอกสารเปลี่ยนสถานะเป็นเสร็จสิ้น และดำเนินการปลายทางเรียบร้อย</div>`
+    : '';
+  const act = d.st==='pending'? `
+    <div class="fld"><label>เหตุผล / หมายเหตุประกอบการตัดสินใจ</label>
+      <textarea id="rsn" placeholder="กรอกเหตุผล — บังคับกรอกเมื่อกดไม่อนุมัติ"></textarea></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-s bt-ok" onclick="doApprove()"><svg viewBox="0 0 24 24"><path d="M5 12.6l4.6 4.6L19 6.8"/></svg>อนุมัติ</button>
+      <button class="btn btn-s bt-no" onclick="doReject()"><svg viewBox="0 0 24 24"><path d="M6.8 6.8l10.4 10.4M17.2 6.8L6.8 17.2"/></svg>ไม่อนุมัติ</button>
+      <span style="font-size:12px;color:var(--mut);align-self:center">กดไม่อนุมัติโดยไม่กรอกเหตุผลระบบจะไม่บันทึกให้</span>
+    </div>` : '';
+  g('detail').innerHTML=`
+    <div class="sect">รายละเอียดเอกสาร <small>${T.full}</small>
+      <span style="margin-left:auto"><span class="lnk" onclick="goScreen('${T.scr}')">${T.scrN}</span></span></div>
+    ${box}
+    <div class="mgrid">
+      <div class="m"><div class="k">เลขที่เอกสาร</div><div class="v"><span class="code">${d.no}</span></div></div>
+      <div class="m"><div class="k">ผู้ขอ</div><div class="v">${d.req}</div></div>
+      <div class="m"><div class="k">แผนกผู้ขอ</div><div class="v">${d.dept}</div></div>
+      <div class="m"><div class="k">วันที่ขอ</div><div class="v mono">${d.date}</div></div>
+      <div class="m"><div class="k">มูลค่า / จำนวน</div><div class="v">${baseTxt(d)}</div></div>
+      <div class="m"><div class="k">อายุคำขอ</div><div class="v">${d.st==='pending'?age+' <i class="u">วัน</i>':'<i class="u">ปิดแล้ว</i>'}</div></div>
+      <div class="m"><div class="k">ระดับอำนาจอนุมัติ</div><div class="v">${d.tier.role}</div></div>
+      <div class="m"><div class="k">เกณฑ์ตามผังอำนาจ</div><div class="v" style="font-weight:500">${d.tier.cap}</div></div>
+      <div class="m"><div class="k">ขั้นที่ค้างอยู่</div><div class="v">${curStepTxt(d)}</div></div>
+      <div class="m"><div class="k">เอกสารอ้างอิง</div><div class="v" style="font-weight:500">${d.ref}</div></div>
+    </div>
+    <div class="hint"><b>เหตุผลที่ขอ</b> — ${d.rsnReq}</div>
+    <div class="sect">รายการในเอกสาร <small>${d.items.length} บรรทัด</small></div>
+    ${itemTable(d)}
+    ${act}
+    <div class="sect">ประวัติการอนุมัติ <small>เก็บทุกการตัดสินใจพร้อมผู้ทำ วันเวลา และเหตุผล</small></div>
+    ${logTable(d)}`;
+}
+
+function draw(){ drawStrip(); drawTabs(); drawInbox(); drawStepper(); drawDetail(); }
+
+/* ═════════ การตัดสินใจ ═════════ */
+function doApprove(){
+  const d=DOCS[SEL];
+  if(d.st!=='pending'){ toast('เอกสารใบนี้ปิดเรื่องแล้ว ไม่สามารถตัดสินใจซ้ำได้','warn'); return; }
+  const s=d.steps[d.cur];
+  s.st='done'; s.ts=stamp();
+  const why=(g('rsn')&&g('rsn').value||'').trim();
+  if(why) s.why=why;
+  d.cur++;
+  if(d.cur>=d.steps.length){
+    d.st='done';
+    toast('อนุมัติครบทุกขั้นแล้ว · เอกสารเปลี่ยนสถานะเป็นเสร็จสิ้น','ok');
+  }else{
+    d.steps[d.cur].st='cur';
+    toast('บันทึกการอนุมัติแล้ว · ส่งต่อไปยังขั้นถัดไป','ok');
+  }
+  draw();
+}
+function doReject(){
+  const d=DOCS[SEL];
+  if(d.st!=='pending'){ toast('เอกสารใบนี้ปิดเรื่องแล้ว ไม่สามารถตัดสินใจซ้ำได้','warn'); return; }
+  const box=g('rsn'), why=(box&&box.value||'').trim();
+  if(!why){
+    toast('กรุณากรอกเหตุผลก่อนกดไม่อนุมัติ','warn');
+    if(box){ box.style.borderColor='var(--red)'; box.focus(); }
+    return;
+  }
+  const s=d.steps[d.cur];
+  s.st='rej'; s.ts=stamp(); s.why=why;
+  d.st='rejected'; d.why=why;
+  draw();
+  toast('บันทึกการไม่อนุมัติแล้ว · เอกสารถูกตีกลับพร้อมเหตุผล','bad');
+}
+
+/* ═════════ กล่อง : ผังอำนาจอนุมัติ ═════════ */
+function closeDlg(){ g('dlgRoot').innerHTML=''; }
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
+function openDoaMatrix(){
+  const order=['PR','UNLOCK','COST'];
+  const rows=order.map(k=>TIER[k].map((t,i)=>`<tr>
+      ${i===0?`<td rowspan="${TIER[k].length}"><span class="chip ${TYPE[k].cls}">${TYPE[k].n}</span>
+        <div class="sup" style="margin-top:5px;white-space:normal">${TYPE[k].full}</div></td>`:''}
+      <td class="c sup">${i+1}</td>
+      <td style="white-space:normal">${t.cap}</td>
+      <td><b style="color:var(--blue)">${t.role}</b></td>
+      <td class="sup">${t.who}</td>
+      <td class="sup" style="white-space:normal">${t.step}</td>
+    </tr>`).join('')).join('');
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+    <div class="dlg-hd"><h3>ผังอำนาจอนุมัติ (DOA Matrix)
+      <small>เอกสารประเภทใด มูลค่าหรือผลกระทบเท่าใด ต้องผ่านใครบ้าง · ใช้กำหนดผู้อนุมัติในขั้นที่ 3 ของทุกสาย</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="expl">ทุกสายอนุมัติมี 4 ขั้นเท่ากัน — <b>ขั้นที่ 1 บันทึก</b> · <b>ขั้นที่ 2 ส่งอนุมัติ</b> ·
+        <b>ขั้นที่ 3 ผู้มีอำนาจอนุมัติ</b> · <b>ขั้นที่ 4 ดำเนินการปลายทาง</b> ·
+        ผู้มีอำนาจในขั้นที่ 3 จะยกระดับขึ้นเองตามมูลค่าหรือผลกระทบของเอกสาร ไม่ต้องตั้งค่าใหม่รายใบ</div>
+      <table class="dtb">
+        <thead><tr><th style="width:180px">ประเภทเอกสาร</th><th class="c" style="width:52px">ระดับ</th>
+          <th style="width:260px">เงื่อนไข</th><th style="width:180px">ผู้มีอำนาจอนุมัติ</th>
+          <th style="width:130px">ผู้ถือสิทธิ์ปัจจุบัน</th><th>ชื่อขั้นในสายอนุมัติ</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+      <div class="sect">เอกสารในระบบตอนนี้เข้าเกณฑ์ระดับใดบ้าง</div>
+      <table class="dtb">
+        <thead><tr><th style="width:150px">เลขที่เอกสาร</th><th style="width:140px">ประเภท</th>
+          <th class="r" style="width:190px">มูลค่า / จำนวน</th><th style="width:190px">ระดับอำนาจอนุมัติ</th>
+          <th>ผู้อนุมัติในขั้นที่ 3</th></tr></thead>
+        <tbody>${DOCS.map(d=>`<tr><td><span class="code">${d.no}</span></td>
+          <td><span class="chip ${TYPE[d.ty].cls}">${TYPE[d.ty].n}</span></td>
+          <td class="r">${baseTxt(d)}</td><td><b style="color:var(--blue)">${d.tier.role}</b></td>
+          <td class="sup">${d.tier.who}</td></tr>`).join('')}</tbody></table>
+      <div class="hint">ถ้าผู้มีอำนาจไม่อยู่ ระบบให้ตั้งผู้รักษาการแทนได้ตามช่วงเวลา โดยประวัติจะบันทึกชื่อผู้ทำจริงเสมอ
+        เพื่อให้ตรวจสอบย้อนกลับได้ว่าใครเป็นคนอนุมัติ</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
+      ${order.reduce((a,k)=>a+TIER[k].length,0)} ระดับอำนาจ · ${order.length} ประเภทเอกสาร</span>
+      <span><button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
+  </div></div>`;
+}
+
+g('q').addEventListener('input',e=>{fq=e.target.value.trim();draw();});
+draw();
+</script>
+<script>
+/* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
+if(window.self!==window.top)document.documentElement.classList.add('embed');
+</script>
+<script src="apex-report.js"></script>
+<script>
+/* ─── รายงานรายการรออนุมัติและประวัติการอนุมัติ ─── */
+function openDoaReport(){
+  const F=ApexReport.fmt;
+  const rows=[]; let seq=0;
+  DOCS.forEach(d=>{
+    seq++;
+    d.steps.forEach((s,i)=>{
+      const res = s.st==='done' ? (i<2?'ดำเนินการแล้ว':'อนุมัติ')
+                : s.st==='rej'  ? 'ไม่อนุมัติ'
+                : s.st==='cur'  ? 'รออนุมัติ' : 'ยังไม่ถึงคิว';
+      const when = (s.ts||'—') + (s.why?' · '+s.why:'');
+      rows.push([ i===0?seq:'', i===0?d.no:'', i===0?TYPE[d.ty].n:'',
+                  i===0?d.subj:'', i===0?baseRpt(d):'',
+                  (i+1)+'. '+s.t, s.who, res, when ]);
+    });
+  });
+  const pend=DOCS.filter(d=>d.st==='pending').length;
+  const done=DOCS.filter(d=>d.st==='done').length;
+  const rej =DOCS.filter(d=>d.st==='rejected').length;
+  const hot =DOCS.filter(d=>d.st==='pending'&&ageOf(d.date)>2).length;
+  ApexReport.open({
+    docNo:'DOA-260803',
+    title:'รายงานรายการรออนุมัติและประวัติการอนุมัติ',
+    titleEn:'Approval Queue and History Report',
+    meta:[['เลขที่รายงาน','DOA-260803'],['วันที่พิมพ์','03-08-2026'],
+          ['ช่วงข้อมูล','24-07-2026 – 03-08-2026'],['ผู้พิมพ์','อาทิตย์ สุดชาติ']],
+    meta2:[['จำนวนเอกสาร',DOCS.length+' รายการ'],['ประเภทเอกสาร','3 ประเภท'],
+           ['จำนวนขั้นอนุมัติ','4 ขั้นต่อเอกสาร'],['ผังอำนาจอนุมัติ','DOA-MATRIX-2026']],
+    cols:[{t:'#',a:'c',w:'26px'},{t:'เลขที่เอกสาร',w:'96px'},{t:'ประเภท',w:'74px'},{t:'เรื่อง'},
+          {t:'มูลค่า / จำนวน',a:'r',w:'92px'},{t:'ขั้นตอน',w:'118px'},{t:'ผู้ดำเนินการ',w:'82px'},
+          {t:'ผลลัพธ์',a:'c',w:'66px'},{t:'วันเวลา / เหตุผล',w:'112px'}],
+    rows,
+    totals:[['รออนุมัติ',pend+' รายการ'],
+            ['ค้างเกิน 2 วัน',hot+' รายการ'],
+            ['อนุมัติแล้ว',done+' รายการ'],
+            ['ไม่อนุมัติ',rej+' รายการ'],
+            ['รวมเอกสารทั้งหมด',DOCS.length+' รายการ','b']],
+    note:'ทุกเอกสารเดินผ่าน 4 ขั้นเท่ากัน — บันทึก · ส่งอนุมัติ · ผู้มีอำนาจอนุมัติ · ดำเนินการปลายทาง · ผู้มีอำนาจในขั้นที่ 3 กำหนดตามผังอำนาจอนุมัติจากมูลค่าหรือผลกระทบของเอกสาร · การไม่อนุมัติต้องระบุเหตุผลเสมอ และเหตุผลถูกเก็บไว้ในประวัติเพื่อตรวจสอบย้อนกลับ',
+    signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติ','Approved by']]
+  });
+}
+</script>
+<script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"สายอนุมัติเอกสาร — APEX Circuit":"Document Approval Chain — APEX Circuit",
+"สายอนุมัติเอกสาร":"Document Approval Chain",
+"อาทิตย์ สุดชาติ":"Artit Sudchat",
+"อนุมัติเป็นลำดับขั้นตามอำนาจอนุมัติ · ปลดล็อกแผนในช่วงล็อก · ส่งรายการขอซื้อ · ประกาศใช้ต้นทุนมาตรฐานรอบใหม่":"Multi-level approval by delegation of authority · Unlock the plan inside the freeze window · Submit purchase requisitions · Release a new standard cost cycle",
+"ตัวอย่างหน้าจอ · ข้อมูลจำลอง":"Screen Mockup · Sample Data",
+"Copyright © บริษัท จีเอเบิล จำกัด (G-Able Company Limited)":"Copyright © G-Able Company Limited",
+"ผังอำนาจอนุมัติ":"Authority Matrix",
+"ผังอำนาจอนุมัติ (DOA Matrix)":"Delegation of Authority (DOA Matrix)",
+"เอกสารทุกใบเดินผ่าน":"Every document runs through",
+"4 ขั้น":"4 steps",
+"เหมือนกันคือ บันทึก → ส่งอนุมัติ → ผู้มีอำนาจอนุมัติ → ดำเนินการปลายทาง ·":"in the same order: create → submit → authorized approver → downstream action ·",
+"ผู้มีอำนาจในขั้นที่ 3 เปลี่ยนตามมูลค่าหรือผลกระทบ":"The approver at step 3 changes with the value or impact",
+"ตามผังอำนาจอนุมัติ ·":"per the authority matrix ·",
+"ไม่อนุมัติต้องระบุเหตุผลเสมอ และเหตุผลจะถูกเก็บไว้ในประวัติของเอกสาร":"A rejection always requires a reason, and that reason is kept in the document history",
+"กล่องขาเข้า":"Inbox",
+"เอกสารที่ส่งเข้ามาให้พิจารณา":"Documents submitted for your decision",
+"ค้นหา เลขที่เอกสาร / เรื่อง / ผู้ขอ":"Search document no. / subject / requester",
+"รออนุมัติทั้งหมด":"Awaiting Approval",
+"เอกสารที่รอการพิจารณาอยู่ตอนนี้":"Documents currently waiting for a decision",
+"ค้างเกิน 2 วัน":"Pending Over 2 Days",
+"ควรเร่งพิจารณาก่อนกระทบแผน":"Should be cleared before the plan is affected",
+"อนุมัติแล้ว":"Approved",
+"ผ่านครบทุกขั้นและดำเนินการเรียบร้อย":"Passed every step and fully executed",
+"ไม่อนุมัติ":"Rejected",
+"ตีกลับพร้อมเหตุผลในประวัติ":"Returned with a reason recorded in the history",
+"รออนุมัติ":"Pending",
+"ทั้งหมด":"All",
+"เสร็จสิ้น":"Completed",
+"ไม่พบเอกสารตามเงื่อนไข":"No documents match the filter",
+"แสดง":"Showing",
+"จาก":"of",
+"เอกสาร":"documents",
+"วัน":"days",
+"ปิดแล้ว":"Closed",
+"บาท":"Baht",
+"รายการจอง":"reservations",
+"รายการสินค้า":"products",
+"ครบทุกขั้นแล้ว":"All steps completed",
+"หยุดที่ขั้นที่":"Stopped at step",
+"ขั้นที่":"Step",
+"ใบขอซื้อ":"Purchase Requisition",
+"ใบขอซื้อจาก MRP":"Purchase requisition raised from MRP",
+"กระดานวางแผนวัตถุดิบ (MRP) ↗":"Material Planning Board (MRP) ↗",
+"ปลดล็อกแผน":"Plan Unlock",
+"ขอปลดล็อกแผนในช่วงล็อก":"Request to unlock the plan inside the freeze window",
+"จัดลำดับและล็อกแผน ↗":"Priority & Plan Freeze ↗",
+"ต้นทุนมาตรฐาน":"Standard Cost",
+"ประกาศใช้ต้นทุนมาตรฐานรอบใหม่":"Release a new standard cost cycle",
+"ทะเบียนต้นทุนมาตรฐาน ↗":"Standard Cost Book ↗",
+"บันทึกคำขอ":"Request Created",
+"ส่งอนุมัติ":"Submitted for Approval",
+"ส่งจัดซื้อออก PO":"Purchasing Issues the PO",
+"ประกาศใช้":"Released for Use",
+"ผู้ขอซื้อ":"Requester",
+"ผู้วางแผน":"Planner",
+"เจ้าหน้าที่บัญชีต้นทุน":"Cost Accounting Officer",
+"ฝ่ายจัดซื้อ":"Purchasing",
+"ฝ่ายวางแผน":"Planning Department",
+"ฝ่ายบัญชีต้นทุน":"Cost Accounting Department",
+"หัวหน้าแผนกวางแผน":"Planning Section Head",
+"หัวหน้าแผนกวางแผนอนุมัติ":"Planning Section Head Approval",
+"ผู้จัดการวางแผน":"Planning Manager",
+"ผู้จัดการวางแผนอนุมัติ":"Planning Manager Approval",
+"ผู้จัดการโรงงาน":"Plant Manager",
+"ผู้จัดการโรงงานอนุมัติ":"Plant Manager Approval",
+"กรรมการผู้จัดการ":"Managing Director",
+"กรรมการผู้จัดการอนุมัติ":"Managing Director Approval",
+"ผู้จัดการผลิต":"Production Manager",
+"ผู้จัดการผลิตอนุมัติ":"Production Manager Approval",
+"ผู้จัดการบัญชีต้นทุน":"Cost Accounting Manager",
+"ผู้จัดการบัญชีต้นทุนอนุมัติ":"Cost Accounting Manager Approval",
+"อภิชาติ ส.":"Apichat S.",
+"ชลธิชา พ.":"Chonticha P.",
+"ประเสริฐ จ.":"Prasert J.",
+"สมชาย เ.":"Somchai A.",
+"วิชัย ธ.":"Wichai T.",
+"ศิริพร ม.":"Siriporn M.",
+"สุภาพร ก.":"Supaporn K.",
+"ธนิดา พ.":"Thanida P.",
+"กิตติพงษ์ ร.":"Kittipong R.",
+"ไม่เกิน 100,000 บาท":"Up to 100,000 Baht",
+"100,001 – 1,000,000 บาท":"100,001 – 1,000,000 Baht",
+"1,000,001 – 5,000,000 บาท":"1,000,001 – 5,000,000 Baht",
+"เกิน 5,000,000 บาท":"Over 5,000,000 Baht",
+"ไม่เกิน 2 รายการจอง และไม่กระทบวันส่งลูกค้า":"Up to 2 reservations and no impact on the customer delivery date",
+"3 – 10 รายการจอง":"3 – 10 reservations",
+"เกิน 10 รายการจอง หรือกระทบวันส่งลูกค้า":"Over 10 reservations, or the customer delivery date is affected",
+"ต้นทุนรวมเปลี่ยนไม่เกิน 2%":"Total cost changes by no more than 2%",
+"ต้นทุนรวมเปลี่ยน 2 – 5%":"Total cost changes by 2 – 5%",
+"ต้นทุนรวมเปลี่ยนเกิน 5%":"Total cost changes by more than 5%",
+"ขอซื้อ COPPER FOIL 1 Oz เร่งด่วนตามผลรัน MRP":"Urgent purchase of COPPER FOIL 1 Oz per the MRP run",
+"ผลรัน MRP รอบวันจันทร์พบว่าของคงเหลือไม่พอสำหรับใบสั่งผลิต 2 ใบในช่วง 14 วันข้างหน้า":"The Monday MRP run shows on-hand stock is short for 2 work orders in the next 14 days",
+"ขอซื้อ CCL FR-4 S1000H รอบไตรมาส 4":"Purchase of CCL FR-4 S1000H for the Q4 cycle",
+"สั่งล่วงหน้าตามแผนผลิตไตรมาส 4 เพราะผู้ขายมี Lead Time 42 วัน":"Ordered ahead against the Q4 production plan because the supplier lead time is 42 days",
+"ขอซื้อ GOLD SALT เติมอ่างชุบทองรอบเดือนสิงหาคม":"Purchase of GOLD SALT to replenish the gold plating bath for August",
+"ปริมาณในอ่างชุบเหลือต่ำกว่าจุดสั่งซื้อ ต้องเติมก่อนเริ่มงานชุบทองล็อตถัดไป":"The plating bath is below its reorder point and must be topped up before the next gold plating lot",
+"ขอปลดล็อกแผน WO-26080142 ในช่วงล็อก 7 วัน":"Request to unlock WO-26080142 inside the 7-day freeze window",
+"ลูกค้า SEMCO ขอเลื่อนวันส่งออกไป 5 วัน ต้องขยับคิวใบสั่งผลิตออกจากช่วงล็อก":"SEMCO asked to push the delivery out by 5 days, so the work order must be moved out of the freeze window",
+"ขอปลดล็อกแผน WO-26080131 เพื่อสลับคิวให้ลูกค้า DENSO":"Request to unlock WO-26080131 to reorder the queue for DENSO",
+"ลูกค้า DENSO ขอรับของเร็วขึ้น 4 วัน ต้องดึงคิวขึ้นมาก่อนงานอื่น":"DENSO asked to receive goods 4 days earlier, so its queue slot must be moved ahead of other jobs",
+"อยู่ในช่วงล็อก 7 วันและยืนยันแผนกับฝ่ายผลิตแล้ว ให้เพิ่มกะทำงานแทนการสลับคิว":"It is inside the 7-day freeze window and the plan is already confirmed with Production — add a work shift instead of reordering the queue",
+"ประกาศใช้ต้นทุนมาตรฐานรอบ 2026-Q4":"Release the 2026-Q4 standard cost cycle",
+"ราคาวัตถุดิบและค่าแรงรอบไตรมาส 4 เปลี่ยน ต้องตั้งต้นทุนมาตรฐานรอบใหม่ก่อนเปิดรอบบัญชี":"Material prices and labour rates changed for Q4, so a new standard cost must be set before the accounting period opens",
+"ประกาศใช้ต้นทุนมาตรฐานรอบ 2026-Q3":"Release the 2026-Q3 standard cost cycle",
+"ปิดรอบไตรมาส 3 ตามปฏิทินบัญชีต้นทุน":"Q3 close per the cost accounting calendar",
+"BOM + Routing ฉบับปัจจุบัน":"Current BOM + Routing revision",
+"ผ่านแล้ว":"Completed",
+"รอพิจารณาอยู่ตอนนี้":"Awaiting decision now",
+"ยังไม่ถึงคิว":"Not yet reached",
+"ผู้มีอำนาจในขั้นที่ 3 กำหนดตามผังอำนาจอนุมัติ":"The approver at step 3 is set by the authority matrix",
+"รายละเอียดเอกสาร":"Document Detail",
+"เลขที่เอกสาร":"Document No.",
+"ผู้ขอ":"Requester",
+"แผนกผู้ขอ":"Requesting Department",
+"วันที่ขอ":"Request Date",
+"มูลค่า / จำนวน":"Value / Quantity",
+"อายุคำขอ":"Request Age",
+"ระดับอำนาจอนุมัติ":"Authority Level",
+"เกณฑ์ตามผังอำนาจ":"Authority Threshold",
+"ขั้นที่ค้างอยู่":"Pending Step",
+"เอกสารอ้างอิง":"Reference Documents",
+"เหตุผลที่ขอ":"Reason for the Request",
+"รายการในเอกสาร":"Document Lines",
+"บรรทัด":"lines",
+"เอกสารใบนี้ไม่ได้รับอนุมัติ":"This document was rejected",
+"ผ่านครบทุกขั้นแล้ว":"All steps completed",
+"— เอกสารเปลี่ยนสถานะเป็นเสร็จสิ้น และดำเนินการปลายทางเรียบร้อย":"— the document moved to Completed and the downstream action is done",
+"เหตุผล / หมายเหตุประกอบการตัดสินใจ":"Reason / note supporting the decision",
+"กรอกเหตุผล — บังคับกรอกเมื่อกดไม่อนุมัติ":"Enter a reason — required when rejecting",
+"อนุมัติ":"Approve",
+"กดไม่อนุมัติโดยไม่กรอกเหตุผลระบบจะไม่บันทึกให้":"Rejecting without a reason will not be recorded",
+"ประวัติการอนุมัติ":"Approval History",
+"เก็บทุกการตัดสินใจพร้อมผู้ทำ วันเวลา และเหตุผล":"Every decision is kept with its actor, timestamp and reason",
+"ยังไม่มีประวัติการดำเนินการของเอกสารใบนี้":"No action history for this document yet",
+"ลำดับ":"Seq",
+"ขั้นตอน":"Step",
+"ผู้ดำเนินการ":"Actor",
+"ผลลัพธ์":"Result",
+"วันเวลา":"Timestamp",
+"เหตุผล":"Reason",
+"ดำเนินการแล้ว":"Done",
+"รหัสวัตถุดิบ":"Material Code",
+"รายละเอียด":"Description",
+"ราคาต่อหน่วย":"Unit Price",
+"มูลค่า":"Amount",
+"รวมมูลค่าใบขอซื้อ":"Total requisition value",
+"ใบสั่งผลิต":"Work Order",
+"วัตถุดิบ":"Material",
+"จำนวนที่จองไว้":"Reserved Qty",
+"วันที่ต้องใช้":"Required By",
+"รวมรายการจองที่ขอปลดล็อก":"Total reservations requested for unlock",
+"รหัสสินค้า":"Product Code",
+"ชื่อสินค้า":"Product Name",
+"ต้นทุนเดิม":"Old Cost",
+"ต้นทุนใหม่":"New Cost",
+"ส่วนต่าง":"Difference",
+"เปลี่ยนแปลง":"Change",
+"รวมทุกรายการ":"Total, all lines",
+"เอกสารประเภทใด มูลค่าหรือผลกระทบเท่าใด ต้องผ่านใครบ้าง · ใช้กำหนดผู้อนุมัติในขั้นที่ 3 ของทุกสาย":"Which document type, at which value or impact, must pass whom · this sets the step-3 approver on every chain",
+"ทุกสายอนุมัติมี 4 ขั้นเท่ากัน —":"Every approval chain has the same 4 steps —",
+"ขั้นที่ 1 บันทึก":"Step 1 Create",
+"ขั้นที่ 2 ส่งอนุมัติ":"Step 2 Submit",
+"ขั้นที่ 3 ผู้มีอำนาจอนุมัติ":"Step 3 Authorized approver",
+"ขั้นที่ 4 ดำเนินการปลายทาง":"Step 4 Downstream action",
+"ผู้มีอำนาจในขั้นที่ 3 จะยกระดับขึ้นเองตามมูลค่าหรือผลกระทบของเอกสาร ไม่ต้องตั้งค่าใหม่รายใบ":"The step-3 approver escalates on its own with the value or impact of the document — no per-document setup",
+"ประเภทเอกสาร":"Document Type",
+"ระดับ":"Level",
+"เงื่อนไข":"Condition",
+"ผู้มีอำนาจอนุมัติ":"Authorized Approver",
+"ผู้ถือสิทธิ์ปัจจุบัน":"Current Holder",
+"ชื่อขั้นในสายอนุมัติ":"Step Name in the Chain",
+"เอกสารในระบบตอนนี้เข้าเกณฑ์ระดับใดบ้าง":"Which level each document in the system currently falls under",
+"ผู้อนุมัติในขั้นที่ 3":"Step-3 Approver",
+"ถ้าผู้มีอำนาจไม่อยู่ ระบบให้ตั้งผู้รักษาการแทนได้ตามช่วงเวลา โดยประวัติจะบันทึกชื่อผู้ทำจริงเสมอ":"If an approver is away, a stand-in can be assigned for a period, while the history always records who actually acted",
+"เพื่อให้ตรวจสอบย้อนกลับได้ว่าใครเป็นคนอนุมัติ":"so it is always traceable who approved",
+"ระดับอำนาจ ·":"authority levels ·",
+"ประเภท":"Type",
+"เอกสารใบนี้ปิดเรื่องแล้ว ไม่สามารถตัดสินใจซ้ำได้":"This document is already closed — it cannot be decided again",
+"อนุมัติครบทุกขั้นแล้ว · เอกสารเปลี่ยนสถานะเป็นเสร็จสิ้น":"Every step approved · the document is now Completed",
+"บันทึกการอนุมัติแล้ว · ส่งต่อไปยังขั้นถัดไป":"Approval recorded · forwarded to the next step",
+"กรุณากรอกเหตุผลก่อนกดไม่อนุมัติ":"Please enter a reason before rejecting",
+"บันทึกการไม่อนุมัติแล้ว · เอกสารถูกตีกลับพร้อมเหตุผล":"Rejection recorded · the document was returned with the reason",
+"รายงานรายการรออนุมัติและประวัติการอนุมัติ":"Approval Queue and History Report",
+"เลขที่รายงาน":"Report No.",
+"วันที่พิมพ์":"Print Date",
+"ช่วงข้อมูล":"Data Period",
+"ผู้พิมพ์":"Printed by",
+"จำนวนเอกสาร":"Document Count",
+"3 ประเภท":"3 types",
+"จำนวนขั้นอนุมัติ":"Approval Steps",
+"4 ขั้นต่อเอกสาร":"4 steps per document",
+"เรื่อง":"Subject",
+"วันเวลา / เหตุผล":"Timestamp / Reason",
+"รวมเอกสารทั้งหมด":"Total Documents",
+"ทุกเอกสารเดินผ่าน 4 ขั้นเท่ากัน — บันทึก · ส่งอนุมัติ · ผู้มีอำนาจอนุมัติ · ดำเนินการปลายทาง · ผู้มีอำนาจในขั้นที่ 3 กำหนดตามผังอำนาจอนุมัติจากมูลค่าหรือผลกระทบของเอกสาร · การไม่อนุมัติต้องระบุเหตุผลเสมอ และเหตุผลถูกเก็บไว้ในประวัติเพื่อตรวจสอบย้อนกลับ":"Every document runs through the same 4 steps — create · submit · authorized approver · downstream action · The step-3 approver is set by the authority matrix from the value or impact of the document · A rejection always requires a reason, and that reason is kept in the history for traceability"
+};</script>
+<script src="apex-i18n.js"></script>
+</body>
+</html>
