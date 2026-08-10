@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="gable-mark.png" />
+<meta name="robots" content="noindex, nofollow" />
+<title>APEX Planning &amp; Costing System — Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --org:#FF8006; --org-d:#D96A00; --org-l:#FFF4E8;
+  --ink:#414041; --mut:#6B6F74; --grey:#919091; --line:#DFE2E6; --line-d:#C6CBD1;
+  --bg:#F3F3F3; --bg2:#F8F8F8; --blue:#1F6FC4; --blue-l:#F1F8FE;
+  --green:#00B28F; --teal:#245477; --sky:#0A96E8; --red:#A32311; --navy:#232A40;
+  --sw:1600px;                    /* ความกว้างสไลด์ 20" @80dpi */
+  --sh:900px;                     /* 11.25" */
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Sarabun","G-Able",Arial,Helvetica,sans-serif;background:#E9EBEE;color:var(--ink);
+  font-size:15px;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+
+/* ─────────── control bar ─────────── */
+header{flex:0 0 auto;background:#fff;border-bottom:1px solid var(--line);padding:0 16px;height:56px;
+  display:flex;align-items:center;gap:12px;z-index:30;box-shadow:0 1px 10px rgba(0,0,0,.06)}
+header .brand{display:flex;align-items:center;gap:10px}
+header .brand img{height:26px}
+header .sub{font-size:12.5px;color:var(--mut);border-left:1px solid var(--line);padding-left:12px}
+header .spacer{flex:1}
+header button{background:#fff;color:var(--ink);border:1px solid var(--line-d);border-radius:9px;
+  height:34px;min-width:36px;padding:0 12px;font-family:inherit;font-size:14px;cursor:pointer;transition:.15s}
+header button:hover{background:var(--bg2);border-color:var(--org)}
+header button.on{background:var(--org);border-color:var(--org);color:#fff;font-weight:700}
+.count{font-size:14px;color:var(--mut);min-width:62px;text-align:center;font-variant-numeric:tabular-nums}
+#zoom,#lang{display:flex;gap:4px}#zoom button,#lang button{font-size:12.5px;padding:0 10px}
+#lang{margin-right:4px}
+
+/* ─────────── layout ─────────── */
+.body{flex:1;display:flex;min-height:0;position:relative}
+.edge{position:absolute;left:0;top:0;bottom:0;width:16px;z-index:18;cursor:pointer}
+.edge::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:4px;height:76px;border-radius:0 5px 5px 0;background:var(--org);opacity:.45}
+.edge:hover::after{opacity:1}
+.scrim{position:absolute;inset:0;background:rgba(35,42,64,.18);z-index:19;opacity:0;
+  pointer-events:none;transition:opacity .22s}
+.scrim.on{opacity:1;pointer-events:auto}
+body.pinned .scrim{display:none}
+nav{background:#fff;border-right:1px solid var(--line);overflow-y:auto;padding:0 0 16px;
+  position:absolute;left:0;top:0;bottom:0;width:300px;z-index:20;
+  transform:translateX(-100%);transition:transform .22s cubic-bezier(.4,0,.2,1);
+  box-shadow:4px 0 22px rgba(0,0,0,.1)}
+nav.on,body.pinned nav{transform:translateX(0)}
+body.pinned .body{padding-left:300px}
+nav .head{display:flex;align-items:center;gap:8px;padding:13px 14px 11px;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:#fff;z-index:2}
+nav .head .t{font-weight:800;font-size:13px;letter-spacing:.08em;color:var(--ink);flex:1}
+nav .head button{background:#fff;border:1px solid var(--line-d);border-radius:8px;height:29px;
+  min-width:31px;cursor:pointer;font-size:12.5px}
+nav .head button.on{background:var(--org-l);border-color:var(--org)}
+nav a{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;text-decoration:none;
+  color:var(--ink);border-left:3px solid transparent;transition:.12s}
+nav a:hover{background:var(--bg2)}
+nav a.on{background:var(--org-l);border-left-color:var(--org)}
+nav a .idx{flex:0 0 25px;height:25px;border-radius:7px;background:var(--bg);color:var(--mut);
+  font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+nav a.on .idx{background:var(--org);color:#fff}
+nav a .nm{display:block;font-size:13.5px;font-weight:600;line-height:1.3}
+nav a .cd{display:block;font-size:11px;color:var(--grey);margin-top:2px;letter-spacing:.03em}
+nav a .bd{display:inline-block;font-size:9.5px;font-weight:700;border-radius:5px;padding:1px 6px;
+  margin-left:6px;background:#E6F7F3;color:#00785F}
+
+/* ─────────── G-Able slide frame ───────────
+   ถอดพิกัดจริงจาก APEX_Presentation_TH RV01.2.pptx (สไลด์ 20" × 11.25" → 80px/นิ้ว)
+   · หน้าเนื้อหา  = layout "Light theme_Page"  พื้นขาว · โลโก้เทาขวาบน · แถบล่างเต็มความกว้าง
+   · หน้าปก/คั่น  = layout "Title Slide"       พื้น #414042 · โลโก้ขาวซ้ายบน · ตัว g ยักษ์ขวา   */
+.stage{flex:1;overflow:auto;padding:20px;display:flex;justify-content:center;align-items:flex-start}
+.sheet{width:var(--sw);height:var(--sh);background:#fff;flex:none;position:relative;overflow:hidden;
+  box-shadow:0 10px 40px rgba(0,0,0,.16);transform-origin:top center;
+  display:flex;flex-direction:column}
+
+/* ── หน้าเนื้อหา (Light theme_Page) ── */
+.gh{position:absolute;right:43px;top:39px;z-index:2}      /* โลโก้ x=17.77" y=0.49" w=1.69" */
+.gh img{width:135px;display:block}
+.gf{position:absolute;left:0;right:0;bottom:0;height:36px;z-index:2}  /* แถบล่าง y=10.855" h=0.445" */
+.gf img{width:100%;height:100%;object-fit:fill;display:block}
+.gf .cf{position:absolute;left:1192px;top:0;bottom:0;display:flex;align-items:center;
+  font-size:12.5px;color:#fff;letter-spacing:.01em}
+.gf .pg{position:absolute;left:59px;top:0;bottom:0;display:flex;align-items:center;
+  font-size:12.5px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+/* เนื้อหาทุกหน้าเป็น flex column และให้บล็อกหลักยืดเต็มความสูง
+   เพราะนำเสนอแบบ Fit page — ที่ว่างด้านล่างคือตัวหนังสือที่เล็กลงเปล่า ๆ */
+.gb{flex:1;min-height:0;padding:44px 59px 50px 59px;overflow:hidden;
+  display:flex;flex-direction:column}
+.gb>*{flex:0 0 auto}
+.gb>.grid,.gb>table.tb,.gb>.tl,.gb>.fill,.gb>.demo-wrap{flex:1 1 auto;min-height:0}
+/* Server spec — ตารางมีไม่กี่แถว ถ้ายืดเต็มความสูงแถวจะสูงผิดสัดส่วนและหัวตารางบวม
+   จึงให้ตารางสูงตามเนื้อหา แล้วจัดทั้งบล็อกกึ่งกลางแนวตั้งแทน */
+.srv>div{display:flex;flex-direction:column;min-height:0}
+.srv>div>table.tb{flex:0 0 auto}
+.grid.srv{grid-auto-rows:auto;align-content:center;gap:16px 34px}
+.srv table.tb{font-size:22px}
+.srv table.tb th{font-size:16px;padding:18px 20px}
+.srv table.tb td{padding:22px 20px}
+.srv>div>h4{font-size:18px!important}
+
+h2.tt{font-size:46px;font-weight:800;letter-spacing:.01em;line-height:1.08;color:var(--ink);
+  text-transform:uppercase}
+h2.tt em{font-style:normal;color:var(--org)}
+.rule{width:104px;height:6px;background:var(--org);margin:14px 0 16px}
+p.lead{font-size:19.5px;color:var(--mut);line-height:1.5;max-width:1300px;margin-bottom:20px}
+
+/* blocks */
+.grid{display:grid;gap:16px;grid-auto-rows:1fr;align-content:stretch}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 22px;
+  border-top:4px solid var(--c,var(--org));min-height:0}
+.card h4{font-size:21px;font-weight:800;color:var(--c,var(--ink));line-height:1.22;text-transform:uppercase}
+.card p{font-size:16.5px;color:var(--mut);margin-top:8px;line-height:1.55}
+.card ul{margin:10px 0 0 19px;font-size:16px;line-height:1.65}
+/* Project delivery — เอากล่อง "ไม่รวมในขอบเขต" ออกแล้ว การ์ดจึงสูงเต็มหน้า
+   ขยายตัวหนังสือทั้งชุดให้อ่านออกจากท้ายห้อง และเปลี่ยนหัวข้อย่อยเป็นจุดสีประจำก้อน */
+.grid.scp .card{padding:26px 24px 24px;border-radius:14px}
+.grid.scp .card h4{font-size:29px}
+.grid.scp .card .chip{font-size:13.5px;padding:5px 14px;margin-top:12px}
+.grid.scp .card ul{margin:24px 0 0;padding:0;list-style:none;font-size:24px;line-height:1.5}
+.grid.scp .card li{position:relative;padding-left:29px;margin-bottom:20px}
+.grid.scp .card li:last-child{margin-bottom:0}
+.grid.scp .card li::before{content:'';position:absolute;left:2px;top:.6em;width:9px;height:9px;
+  border-radius:50%;background:var(--c)}
+/* Pre-requisite — รายการสั้นแต่การ์ดสูงเต็มหน้า ขยายตัวหนังสือให้อ่านออกจากท้ายห้อง
+   21px คือขนาดใหญ่สุดที่บรรทัดยาวสุด (Inventory stock with lots and expiry dates) ยังไม่ตกบรรทัด */
+.card.prqc{padding:24px 26px}
+.card.prqc h4{font-size:25px}
+.card.prqc ul{margin:16px 0 0 22px;font-size:21px;line-height:1.6}
+.card.prqc li{margin-bottom:16px}
+.card.prqc li:last-child{margin-bottom:0}
+/* เหลือกลุ่มเดียว (Master Data) — การ์ดกินเต็มหน้า แตกรายการเป็นสองคอลัมน์
+   แต่ละข้อเป็นแถบพื้นอ่อนเต็มช่อง ที่ว่างจึงเป็นจังหวะของหน้า ไม่ใช่ช่องโหว่
+   28px คือขนาดใหญ่สุดที่บรรทัดยาวสุด (Routing and standard time per process) ยังไม่ตกบรรทัด */
+.card.prqc.solo{padding:30px 34px;display:flex;flex-direction:column}
+.card.prqc.solo h4{font-size:30px}
+.card.prqc.solo ul{flex:1;min-height:0;margin:18px 0 0;padding:0;list-style:none;
+  display:grid;grid-auto-flow:column;column-gap:54px;row-gap:0}
+.card.prqc.solo li{margin:0;display:flex;align-items:center;gap:22px;padding:0 6px;
+  border-top:1px solid var(--line);font-size:30px;line-height:1.3}
+.card.prqc.solo li.lr{border-bottom:1px solid var(--line)}   /* ปิดเส้นท้ายคอลัมน์ */
+.card.prqc.solo li::before{content:'';flex:0 0 28px;height:28px;background:#fff;
+  border:3px solid var(--c);border-radius:6px}
+.qa{background:var(--bg);border-radius:12px;padding:34px 38px 30px;border-left:7px solid var(--org);
+  display:flex;flex-direction:column;position:relative;overflow:hidden}
+/* ลายน้ำ ? — ใช้แพตเทิร์นเดียวกับเลขจางบนสไลด์ Workflow (.fw .st .no)
+   วางคุมมุมขวาล่าง ให้ที่ว่างใต้ข้อความกลายเป็นพื้นที่หายใจ ไม่ใช่ช่องโหว่ */
+.qa::after{content:'?';position:absolute;right:30px;bottom:-118px;font-size:350px;font-weight:800;
+  line-height:1;color:var(--org);opacity:.10;pointer-events:none}
+.qa .tm{font-size:15px;letter-spacing:.14em;font-weight:800;color:var(--org)}
+.qa .qb{position:relative;z-index:1}
+.qa .q{font-size:35px;font-weight:700;line-height:1.24;margin-top:16px}
+.qa .a{font-size:21px;color:var(--mut);margin-top:13px;line-height:1.45}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:18px}
+.stat{background:var(--ink);color:#fff;border-radius:10px;padding:15px 19px}
+.stat .v{font-size:35px;font-weight:800;color:var(--org);line-height:1.1}
+.stat .l{font-size:15px;opacity:.88;margin-top:5px;line-height:1.35}
+.note{margin-top:16px;background:var(--org-l);border-left:5px solid var(--org);border-radius:8px;
+  padding:15px 20px;font-size:16px;line-height:1.55}
+.note b{color:var(--org-d)}
+table.tb{width:100%;border-collapse:collapse;font-size:16px}
+table.tb th{background:var(--ink);color:#fff;text-align:left;padding:12px 15px;font-weight:700;
+  font-size:14px;letter-spacing:.05em;text-transform:uppercase}
+table.tb td{padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.45}
+table.tb tr:nth-child(even) td{background:var(--bg2)}
+/* Technology stack — 8 แถวยืดเต็มความสูง แถวสูง ~80px แต่ตัวหนังสือเดิมสูงแค่ 23px
+   ขยายเป็น 21px แล้วบีบคอลัมน์ซ้ายจาก 22% เหลือ 19% เพื่อให้แถว Database
+   ('Microsoft SQL Server Standard or higher · …') ยังจบในบรรทัดเดียว          */
+table.tb.tech{font-size:21px}
+table.tb.tech th{font-size:17px;padding:15px 18px}
+table.tb.tech td{padding:14px 18px}
+/* 4 คำถามสำคัญ — มีแค่ 4 แถวยืดเต็มความสูง แถวสูง 148px ต่อข้อความบรรทัดเดียว
+   ขยายคำถามได้ถึง 28px เพราะข้อ EN ที่ยาวที่สุด ('WHAT SHOULD WE DO IF RAW
+   MATERIAL PRICES CHANGE?') เริ่มตัดสองบรรทัดที่ 30px บนคอลัมน์ 54% (800px)   */
+table.tb.four th{font-size:17px;padding:15px 18px}
+table.tb.four td{padding:14px 18px}
+table.tb.four td.q{font-weight:700;font-size:28px;line-height:1.3}
+table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
+.chip{display:inline-block;font-size:11.5px;font-weight:700;border-radius:14px;padding:3px 10px;
+  background:var(--org-l);color:var(--org-d)}
+.chip.b{background:var(--blue-l);color:var(--blue)}
+
+/* live demo — จอเต็มความกว้าง, คำอธิบายเป็นแถบล่าง */
+.demo-wrap{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px}
+.screen{flex:1;min-height:0;display:flex;flex-direction:column;
+  border:1px solid var(--line-d);border-radius:10px;overflow:hidden;background:#fff;position:relative}
+.screen .bar{flex:0 0 auto;background:var(--ink);color:#fff;padding:7px 13px;display:flex;align-items:center;gap:9px;font-size:12.5px}
+.screen .bar .dots{display:flex;gap:5px}
+.screen .bar .dots i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.28)}
+.screen .bar .url{flex:1;background:rgba(255,255,255,.1);border-radius:6px;padding:3px 9px;font-size:11.5px;
+  opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.screen .bar a{color:#fff;background:var(--org);border-radius:7px;padding:4px 11px;font-size:12px;
+  font-weight:700;text-decoration:none}
+.screen .bar a:hover{background:var(--org-d)}
+/* ซูมหน้าจอในกรอบให้ตัวหนังสือใหญ่ขึ้น — render แคบลงแล้วขยายกลับเต็ม 1480
+   ความกว้างขั้นต่ำที่ไม่มีคอลัมน์ถูกตัดคือ 1380 (Stock at Risk) หน้าอื่นลงได้ถึง 1200 */
+.frame{position:relative;background:var(--bg);flex:1;min-height:0;overflow:hidden}
+.frame>iframe{width:1220px;height:1400px;border:0;display:block;
+  transform:scale(1.2131);transform-origin:top left}
+/* หน้ากากก่อนกด Play — บอกที่มาของหน้าจอและประโยชน์ที่ได้ ก่อนเข้าโปรแกรมจริง
+   โทนสว่างเข้าชุดกับสไลด์ · ประโยคหลักตัวใหญ่อ่านออกจากท้ายห้อง
+   · การ์ดประโยชน์ยืดเต็มความสูงกรอบ ไม่เหลือที่ว่างกลางจอ */
+.frame .veil{position:absolute;inset:0;cursor:pointer;z-index:3;
+  background:linear-gradient(148deg,#FFFFFF 0%,#F5F8FB 58%,#EDF2F7 100%);
+  color:var(--ink);display:flex;flex-direction:column;padding:30px 38px 28px}
+.frame.live .veil{display:none}
+/* คอลัมน์ซ้ายกว้างขึ้นจากเดิม 31% — แผงนี้เป็นภาพหน้าจอแล้ว ไม่ใช่ย่อหน้า ยิ่งกว้างยิ่งดูออก */
+.veil .vin{flex:1;min-height:0;display:grid;grid-template-columns:41% 1fr;gap:30px}
+.veil .vh{display:block;font-size:12.5px;font-weight:800;letter-spacing:.16em;color:var(--org-d)}
+.veil .vl,.veil .vr{display:flex;flex-direction:column;min-height:0}
+/* คอลัมน์ซ้าย — เหตุผลของหน้าจอ วางเป็นแผงเต็มความสูงให้เท่ากับการ์ดฝั่งขวา
+   เดิมย่อหน้าถูก margin-top:auto ดันลงไปติดปุ่มล่าง (เพราะถอดบรรทัดสรุปเล็ก p.sm ออกแล้ว)
+   หัวข้อจึงลอยเดี่ยวอยู่บน เหลือรูโหว่ใต้หัวข้อ 335–436px ทุกหน้า
+   ย้ายเนื้อหาเข้าแผง แล้วให้ย่อหน้าลอยกึ่งกลางแผง ปุ่มอยู่ก้นแผง
+   ที่ว่างที่เหลือกลายเป็นระยะขอบในกรอบ ไม่ใช่ช่องโหว่กลางจอ */
+/* ไม่มีแถบส้มด้านซ้าย — แผงนี้สูงเต็มกรอบ แถบ 4px จึงกลายเป็นเส้นส้มยาวทั้งจอ
+   แย่งสายตาไปจากตัวหนังสือ ปล่อยเป็นกรอบบาง ๆ เฉย ๆ (การ์ดฝั่งขวายังมีแถบอยู่) */
+.veil .vl .vp{flex:1;min-height:0;margin-top:14px;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);
+  border-radius:11px;padding:28px 30px 24px;
+  box-shadow:0 2px 8px rgba(30,40,55,.05)}
+/* margin auto บน-ล่าง = ย่อหน้าลอยกึ่งกลางที่ว่างที่เหลือ ปุ่มถูกดันไปชิดก้นแผง */
+.veil .vl .vp>p{font-size:33px;line-height:1.34;margin:auto 0;color:var(--ink);
+  font-weight:600;letter-spacing:-.006em;position:relative;z-index:1}
+/* ── ภาพหน้าจอย่อส่วนในแผงซ้าย ──
+   iframe ตัวเดียวกับหน้าจอจริง เรนเดอร์ที่ความกว้าง 1480 แล้วย่อด้วย transform
+   กันคลิก (pointer-events:none) เพราะทั้งแผงเป็นปุ่มเปิดหน้าจอจริงอยู่แล้ว */
+.veil .vl .vp:has(.vshot){padding:16px 16px 20px}
+/* กล่องพรีวิวเป็นสัดส่วนจอแนวนอนคงที่ แล้วลอยกึ่งกลางแผง (margin auto บน-ล่าง)
+   ถ้าปล่อยให้ยืดเต็มแผงที่เป็นทรงสูง หน้าจอข้างในจะถูกยืดจนดูไม่ออกว่าเป็นหน้าจออะไร */
+.veil .vshot{width:100%;aspect-ratio:1480/940;margin:auto 0;flex:none;
+  position:relative;overflow:hidden;border-radius:9px;
+  border:1px solid var(--line);background:#eef4fb;box-shadow:0 2px 10px rgba(30,40,55,.08)}
+.veil .vshot iframe{position:absolute;top:0;left:0;border:0;transform-origin:top left;
+  pointer-events:none}
+.veil .vgo{padding-top:22px;border-top:1px solid var(--line);position:relative;z-index:1}
+.veil .vtip{display:block;font-size:13.5px;color:var(--grey);line-height:1.45;margin-top:13px}
+/* คอลัมน์ขวา — ประโยชน์ 4 ข้อเรียงเป็นแถว ยืดเต็มความสูงกรอบพอดี
+   การ์ดสูง 136px แต่ตัวหนังสือเดิมสูงแค่ 52px จึงขยายตัวอักษรให้เต็มการ์ดขึ้น */
+.veil .vr ul{list-style:none;margin-top:14px;flex:1;min-height:0;display:grid;
+  grid-auto-rows:1fr;gap:12px}
+.veil .vr li{background:#fff;border:1px solid var(--line);border-left:4px solid var(--org);
+  border-radius:11px;padding:14px 26px;display:flex;align-items:center;gap:24px;
+  box-shadow:0 2px 8px rgba(30,40,55,.05)}
+.veil .vr li i{flex:0 0 50px;font-style:normal;font-size:50px;font-weight:800;line-height:1;
+  color:var(--org);text-align:center;letter-spacing:-.02em}
+.veil .vr li .tx{min-width:0}
+.veil .vr li b{display:block;font-size:23px;font-weight:800;line-height:1.25;color:var(--ink)}
+.veil .vr li .tx>span{display:block;font-size:17px;color:var(--mut);line-height:1.45;
+  margin-top:6px}
+.frame .play{background:var(--org);color:#fff;border:0;border-radius:11px;padding:15px 32px;
+  font-family:inherit;font-size:17px;font-weight:800;cursor:pointer;
+  box-shadow:0 8px 22px rgba(255,128,6,.30);transition:.15s}
+.frame .play:hover{background:var(--org-d);box-shadow:0 10px 26px rgba(255,128,6,.42)}
+.screen .bar .tag{background:var(--green);color:#fff;font-size:11px;font-weight:700;
+  border-radius:12px;padding:2px 10px;visibility:hidden}
+.screen.live .bar .tag{visibility:visible}
+.screen .bar .hint{font-size:11.5px;color:rgba(255,255,255,.6);display:none}
+.screen.live .bar .hint{display:inline}
+/* ปุ่มกลับไปแผงคำอธิบาย — โผล่เฉพาะตอนหน้าจอจริงเปิดอยู่
+   ทำเป็นปุ่มโปร่งขอบบาง ไม่ใช่สีส้ม เพราะปุ่ม "เปิดเต็มจอ" ข้าง ๆ เป็นตัวหลักอยู่แล้ว
+   ลูกค้าที่อยากอ่านคำอธิบายซ้ำจึงกดกลับได้ ไม่ต้องเดาว่าต้องกดลูกศรออกแล้วกดกลับ */
+.screen .bar .back{display:none;font-family:inherit;color:#fff;background:transparent;
+  border:1px solid rgba(255,255,255,.34);border-radius:7px;padding:4px 11px;font-size:12px;
+  font-weight:700;cursor:pointer;transition:.15s}
+.screen.live .bar .back{display:inline-block}
+.screen .bar .back:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.6)}
+/* คำอธิบายใต้จอ — เหลือเฉพาะหัวข้อสั้น ไม่มีคำขยาย */
+.pins{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pin{background:var(--bg2);border:1px solid var(--line);border-left:3px solid var(--org);
+  border-radius:8px;padding:0 13px;height:40px;display:flex;gap:10px;align-items:center}
+.pin .n{flex:0 0 21px;height:21px;border-radius:50%;background:var(--org);color:#fff;font-weight:800;
+  font-size:11.5px;display:flex;align-items:center;justify-content:center}
+.pin b{font-size:13.5px;font-weight:700;line-height:1.25}
+/* หัวสไลด์เดโมแบบกระชับ เพื่อคืนพื้นที่ให้จอโปรแกรม */
+.demo-head{flex:0 0 auto;margin-bottom:11px}
+.demo-head h2{font-size:31px;font-weight:800;letter-spacing:.01em;line-height:1.1;
+  color:var(--ink);text-transform:uppercase}
+.demo-head h2 em{font-style:normal;color:var(--org)}
+
+/* ─── system workflow: การ์ดขั้นตอนต่อกันด้วยลูกศร + แถบสูตร ─── */
+.fill{display:flex;flex-direction:column;min-height:0}
+/* ─── flow เป็นกราฟฟิก: รางเส้นเดียวไล่สีตามขั้น + วงกลมเลขคร่อมบนราง ───
+   --rail สร้างจากสีของทุกขั้นในตัว render จึงใช้ได้ทั้งสไลด์ Planning และ Costing
+   ระยะ 100%/14 = จุดกึ่งกลางการ์ดใบแรก/ใบสุดท้าย รางจึงเริ่มและจบตรงวงกลมพอดี */
+.fw{flex:0 0 auto;display:flex;gap:24px;position:relative;padding-top:46px;margin:auto 0}
+.fw::before{content:'';position:absolute;top:20px;left:calc(100%/14);right:calc(100%/14);
+  height:4px;border-radius:3px;background:var(--rail);opacity:.5}
+.fw .stw{flex:1;min-width:0;position:relative;display:flex}
+.fw .node{position:absolute;top:-46px;left:50%;transform:translateX(-50%);
+  width:44px;height:44px;border-radius:50%;background:var(--c);color:#fff;
+  font-size:18px;font-weight:800;font-style:normal;letter-spacing:0;
+  display:flex;align-items:center;justify-content:center;z-index:2;
+  box-shadow:0 0 0 7px #fff,0 3px 10px rgba(30,40,55,.2)}
+/* หัวลูกศรบนราง บอกทิศทางว่าไหลไปทางไหน */
+.fw .stw+.stw .node::before{content:'';position:absolute;left:-34px;top:50%;width:10px;height:10px;
+  border-top:3px solid var(--line-d);border-right:3px solid var(--line-d);
+  transform:translateY(-50%) rotate(45deg)}
+.fw .st{flex:1;min-width:0;min-height:452px;position:relative;background:#fff;border:1px solid var(--line);
+  border-top:5px solid var(--c);border-radius:12px;padding:22px 20px 16px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 2px 10px rgba(30,40,55,.06)}
+.fw .st .cd{align-self:flex-start;font-size:12px;font-weight:800;letter-spacing:.1em;
+  color:var(--c);background:var(--bg);border-radius:20px;padding:5px 12px}
+.fw .st .nm{font-size:25px;font-weight:800;line-height:1.16;margin-top:15px;color:var(--ink)}
+.fw .st .ds{font-size:16.5px;line-height:1.45;margin-top:11px;color:var(--mut)}
+.fw .st .no{position:absolute;right:4px;bottom:-42px;font-size:168px;font-weight:800;
+  line-height:1;color:var(--c);opacity:.10;pointer-events:none}
+.fx{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.fx .f{background:var(--bg2);border:1px solid var(--line);border-top:5px solid var(--c);
+  border-radius:10px;padding:20px 22px;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.fx .f .lb{font-size:13.5px;font-weight:800;letter-spacing:.1em;color:var(--c);text-transform:uppercase}
+.fx .f .eq{font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:17px;font-weight:600;
+  line-height:1.55;margin-top:13px;color:var(--ink);background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:14px 16px}
+.fx .f .ex{font-size:16px;color:var(--mut);line-height:1.45;margin-top:14px}
+
+
+/* ─── Costing flow: แตกจากข้อมูลหลัก → 4 ส่วนประกอบคู่ขนาน → รวมเป็น Cost Book → Simulation
+   วางบนผืนพิกัดตายตัว 1470×700 เพราะ .sheet เป็น 1600×900 คงที่แล้วค่อยสเกลทั้งแผ่น
+   ผืนกินพื้นที่ .fill เกือบเต็ม (ว่างจริง 1482×720) — ตัวหนังสือจึงใหญ่พอสำหรับท้ายห้อง
+   เส้นโค้งวาดด้วย SVG จึงคุมหัวลูกศรและจุดบรรจบได้ตรงขอบกล่องพอดี            */
+.cflow{position:relative;width:1470px;height:700px;margin:auto;flex:0 0 auto}
+.cflow .cwire{position:absolute;inset:0;overflow:visible}
+.cflow .cwire>path{fill:none;stroke-width:3.6;stroke-linecap:round;opacity:.72}
+.cflow .box{position:absolute;background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 2px 12px rgba(30,40,55,.07);display:flex;flex-direction:column;justify-content:center}
+.cflow .cd{align-self:flex-start;font-size:15px;font-weight:800;letter-spacing:.1em;
+  color:var(--c);background:var(--bg);border-radius:20px;padding:5px 14px}
+.cflow .nm{font-weight:800;color:var(--ink);line-height:1.15}
+.cflow .ds{color:var(--mut);line-height:1.42}
+/* ต้นทาง — ข้อมูลหลัก */
+.cflow .hub{left:0;top:210px;width:280px;height:280px;border-radius:50%;
+  border:3px solid var(--c);align-items:center;text-align:center;padding:0 30px}
+.cflow .hub .cd{align-self:center}
+.cflow .hub .nm{font-size:30px;margin-top:12px}
+.cflow .hub .ds{font-size:19px;margin-top:10px}
+/* 4 ส่วนประกอบ — .ds เพดานอยู่ที่ 19px เพราะ 'Standard minutes × rate per cost centre'
+   (EN, บรรทัดที่ยาวที่สุด) เริ่มตัดบรรทัดที่ 19.5px บนความกว้างเนื้อหา 334px
+   ถ้าปล่อยให้ตัด การ์ดใบเดียวจะสูงกว่าเพื่อน ปลายเส้นก็เลยไม่ชนกึ่งกลาง        */
+.cflow .comp{left:385px;width:390px;padding:18px 24px;border-left:7px solid var(--c)}
+
+.cflow .comp .nm{font-size:28px;margin-top:9px}
+.cflow .comp .ds{font-size:19px;margin-top:6px}
+/* ปลายทาง — Cost Book เป็นพระเอก ถมสีทึบ */
+.cflow .book{left:925px;top:230px;width:300px;height:240px;padding:0 26px;
+  background:var(--c);border-color:var(--c);box-shadow:0 6px 20px -6px rgba(30,40,55,.35)}
+.cflow .book .cd{background:rgba(255,255,255,.9)}
+.cflow .book .nm{font-size:37px;color:#fff;margin-top:13px}
+.cflow .book .ds{font-size:20.5px;color:rgba(255,255,255,.92);margin-top:10px}
+/* ต่อยอด — Simulation */
+.cflow .sim{left:1255px;top:250px;width:215px;height:200px;padding:0 22px;
+  border-left:7px solid var(--c)}
+/* สูตรประกอบร่าง — วางใต้ Cost Book เพราะเป็นตัวอธิบายว่า 4 ส่วนบนรวมกันยังไง */
+.cflow .eqn{position:absolute;left:895px;top:488px;width:360px;text-align:center;
+  font-family:"SFMono-Regular",Menlo,Consolas,monospace;font-size:18.5px;font-weight:600;
+  line-height:1.5;color:var(--org-d);background:var(--org-l);border-radius:9px;padding:12px 14px}
+.cflow .sim .nm{font-size:29px;margin-top:10px}
+.cflow .sim .ds{font-size:20px;margin-top:7px}
+
+
+/* ─── Planning flow: 2 ก้อนใหญ่ + ปลายทาง + แถบสูตร ──────────────────────
+   7 ขั้นยุบเหลือ 3 ชิ้นให้ตาจับ — ฝั่งวางแผนผลิต (FR-1.x) · ฝั่งวางแผนวัตถุดิบ
+   (FR-2.x, FR-6) · แล้วส่งกลับ ERP  การแบ่งตรงกับรหัส FR ในเอกสารพอดี
+   หน้าอ่านเป็น 3 ชั้น: สายงาน → สูตรที่อยู่เบื้องหลัง → บรรทัดปิดท้าย
+   ชั้นบนยืดกินที่ว่างที่เหลือทั้งหมด หน้าจึงไม่เหลือช่องว่างลอย ๆ บนล่าง
+   วางด้วย grid ไม่ใช่พิกัด absolute — สลับภาษาแล้วข้อความยาวขึ้นก็ไม่ล้นกรอบ */
+.gwrap{gap:18px}
+.gflow{flex:1 1 auto;min-height:0;display:grid;align-items:stretch;
+  grid-template-columns:1fr 60px 1fr 60px 340px}
+.gflow .pan{position:relative;overflow:hidden;display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#fff 0%,var(--bg2) 100%);
+  border:1px solid var(--line);border-radius:18px;padding:20px 24px 16px;
+  box-shadow:0 4px 16px -12px rgba(35,42,64,.75)}
+.gflow .pan::before,.gflow .term::before{content:'';position:absolute;left:0;right:0;top:0;
+  height:5px;background:var(--c)}
+.gflow .ph{flex:0 0 auto;display:flex;align-items:center;gap:11px;
+  font-size:20px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c);
+  padding-bottom:14px;border-bottom:1px solid var(--line)}
+.gflow .ph b{flex:0 0 auto;width:11px;height:11px;border-radius:50%;background:var(--c)}
+.gflow .ps{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+/* ทุกขั้นสูงเท่ากันและจัดกึ่งกลางแนวตั้ง ระยะห่างจึงเท่ากันหมดโดยไม่ต้องตั้งค่าเอง
+   และไม่เหลือช่องว่างค้างใต้ขั้นสุดท้าย */
+.gflow .gr{flex:1 1 0;min-height:0;position:relative;display:flex;align-items:center;gap:16px}
+.gflow .gr+.gr{border-top:1px solid var(--line)}   /* แบ่งเป็นแถบ ที่ว่างจึงอ่านเป็นจังหวะ ไม่ใช่ช่องโหว่ */
+/* เส้นไต่จากเลขข้อลงไปหาข้อถัดไป — สายตารู้ทันทีว่าเป็นลำดับ ไม่ใช่ 3 กล่องวางเรียงกันเฉย ๆ
+   เส้นลากเต็มความสูงแถวแล้วให้วงกลมทึบทับบัง หัวท้ายจึงไม่มีเส้นโผล่ */
+.gflow .gr::before{content:'';position:absolute;left:24px;top:0;bottom:0;width:2px;background:var(--line-d)}
+.gflow .gr:first-child::before{top:50%}
+.gflow .gr:last-child::before{bottom:50%}
+.gflow .gn{position:relative;z-index:1;flex:0 0 50px;width:50px;height:50px;border-radius:50%;
+  background:var(--c);color:#fff;font-size:21px;font-weight:800;font-style:normal;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 9px -4px var(--c)}
+.gflow .gt{flex:1;min-width:0;padding-top:1px}
+.gflow .gl{display:flex;align-items:center;gap:12px}
+.gflow .gnm{font-size:34px;font-weight:800;color:var(--ink);line-height:1.16}
+.gflow .gcd{margin-left:auto;flex:0 0 auto;font-size:15px;font-weight:800;letter-spacing:.09em;
+  color:var(--c);background:#fff;border:1px solid var(--c);border-radius:20px;padding:5px 15px}
+.gflow .gds{display:block;font-size:21px;color:var(--mut);line-height:1.45;margin-top:7px}
+.gflow .garr{display:flex;align-items:center;justify-content:center}
+/* ปลายทาง — ส่งกลับ ERP ถมสีเข้มให้เป็นจุดจบสายตา
+   ขอบบนไล่สีแดง→ส้ม เพราะสีแดงเดี่ยว ๆ บนพื้นเข้มแทบมองไม่เห็น */
+.gflow .term{position:relative;overflow:hidden;color:#fff;border-radius:18px;padding:0 28px;
+  background:linear-gradient(155deg,#3A4152 0%,#202634 62%,#171C27 100%);
+  display:flex;flex-direction:column;justify-content:center;
+  box-shadow:0 16px 32px -18px rgba(20,26,40,.85)}
+.gflow .term::before{background:linear-gradient(90deg,var(--c) 0%,var(--org) 100%)}
+.gflow .term .wm{position:absolute;right:-30px;bottom:-34px;width:214px;height:214px;opacity:.085}
+.gflow .term .eb{font-size:15px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--org)}
+.gflow .term .gl{margin-top:14px}
+.gflow .term .gnm{font-size:42px;color:#fff}
+.gflow .term .gcd{color:#fff;background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.3)}
+.gflow .term .gds{max-width:268px;font-size:21px;color:rgba(255,255,255,.84);margin-top:12px}
+/* ชั้นสอง — สูตรที่อยู่เบื้องหลัง 3 ขั้นสำคัญ ผูกสีกับขั้นตอนบนโดยตรง */
+.gwrap .eqh{flex:0 0 auto;display:flex;align-items:center;gap:14px;
+  font-size:14px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;color:var(--grey)}
+.gwrap .eqh::after{content:'';flex:1;height:1px;background:var(--line)}
+.gwrap .eqs{flex:0 0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.gwrap .eq{border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;
+  background:var(--bg2);padding:14px 19px 15px}
+.gwrap .eq .k{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.gwrap .eq .m{display:block;margin-top:8px;font-family:"SFMono-Regular",Menlo,Consolas,monospace;
+  font-size:15.5px;font-weight:600;line-height:1.45;color:var(--ink)}
+.gwrap .eq .n{display:block;margin-top:7px;font-size:15px;color:var(--mut);line-height:1.45}
+.gwrap .gfoot{flex:0 0 auto;display:flex;align-items:flex-start;gap:12px;
+  font-size:16px;color:var(--mut);line-height:1.45}
+.gwrap .gfoot::before{content:'';flex:0 0 4px;width:4px;height:18px;border-radius:2px;
+  background:var(--org);margin-top:2px}
+
+/* ─── timeline (Gantt) ─────────────────────────────────────────
+   · แท่งงานเป็นชิ้นเดียวยาวต่อเนื่องด้วย grid-column span ไม่ใช่ช่องรายสัปดาห์ต่อกัน
+   · หัวตารางสองชั้น เดือน → สัปดาห์ ให้มีลำดับชั้น ไม่ใช่เส้น 11 เส้นเท่ากันหมด
+   · ชื่องานชิดขวาเข้าหากราฟ สายตาไม่ต้องกระโดดข้ามช่องว่าง 300px
+   · สีอ่อนทั้งกราฟ ตัวหนังสือในแท่งเป็นสีเข้ม — น้ำหนักสายตาไปที่ชื่อเรื่องก่อน */
+/* --lbw 340 ไม่ใช่ 296 เพราะชื่องาน EN ที่ยาวที่สุด ('Training, install and acceptance'
+   กับ 'Master data preparation (APEX)') เริ่มตัดสองบรรทัดที่ 20px บนคอลัมน์ 296px
+   ขยายคอลัมน์ให้ชื่อยังอยู่บรรทัดเดียวที่ 21px — กราฟเสียไป 44px ไม่กระทบแท่งงาน */
+.tl{--lbw:340px;--tlbar:#B9CBD9;--tlbar2:#C7D5E0;--tltx:#33536B;
+  display:flex;flex-direction:column;min-height:0}
+.tl .tlhd{flex:0 0 auto;display:grid;grid-template-columns:var(--lbw) 1fr}
+.tl .mo{display:grid;grid-template-columns:repeat(var(--w),1fr);margin-bottom:8px}
+.tl .mo span{grid-row:1;font-size:14px;font-weight:800;letter-spacing:.16em;color:var(--grey);
+  text-transform:uppercase;text-align:center}
+.tl .wk{display:grid;grid-template-columns:repeat(var(--w),1fr);margin-bottom:9px}
+.tl .wk span{font-size:17px;font-weight:700;color:var(--mut);text-align:center;letter-spacing:.04em}
+.tl .tlbd{position:relative;flex:1;min-height:0;display:flex;
+  border-top:1px solid var(--line-d);border-bottom:1px solid var(--line)}
+.tl .lines{position:absolute;inset:0 0 0 var(--lbw);pointer-events:none;
+  display:grid;grid-template-columns:repeat(var(--w),1fr)}
+.tl .lines i{border-left:1px solid rgba(65,64,65,.06)}
+.tl .lines i.mb{border-left-color:rgba(65,64,65,.16)}    /* ขอบเดือน — เข้มกว่าเส้นสัปดาห์ */
+.tl .lines i.gl{background:rgba(255,128,6,.05)}           /* สัปดาห์ที่ใช้งานจริง */
+/* หมุดหมาย — วางกึ่งกลางสัปดาห์นั้น อ่านได้ว่า "ภายในสัปดาห์นี้" ไม่ทับขอบตาราง */
+.tl .mk{position:absolute;inset:0 0 0 var(--lbw);pointer-events:none;z-index:2}
+.tl .mk u{position:absolute;top:0;bottom:0;border-left:1px dashed rgba(65,64,65,.17)}
+.tl .mk u::before{content:'';position:absolute;left:-6px;top:-7px;width:12px;height:12px;
+  background:var(--org);transform:rotate(45deg);border-radius:2px}
+.tl .rows{position:relative;z-index:1;flex:1;min-width:0;display:grid;grid-auto-rows:1fr}
+.tl .r{display:grid;grid-template-columns:var(--lbw) 1fr;align-items:center}
+.tl .r .lb{text-align:right;padding-right:28px;font-size:21px;font-weight:500;
+  color:var(--ink);line-height:1.25}
+.tl .trk{display:grid;grid-template-columns:repeat(var(--w),1fr);align-items:center}
+/* แท่งสูง 52 ในแถว ~68 — เหลือช่องไฟระหว่างแถว 16px แท่งยังไม่ชนกัน */
+.tl .bar{height:52px;margin:0 3px;border-radius:999px;
+  background:linear-gradient(180deg,var(--tlbar2),var(--tlbar));
+  border:1px solid rgba(51,83,107,.16);
+  display:flex;align-items:center;justify-content:flex-end;padding:0 22px;
+  color:var(--tltx);font-size:17px;font-weight:700;letter-spacing:.02em}
+/* หมุดหมายด้านล่าง — บรรทัดข้อความคั่นด้วยเส้นบาง ไม่มีกล่อง ไม่มีเงา */
+.ms{display:grid;grid-template-columns:repeat(5,1fr);margin-top:18px;
+  border-top:1px solid var(--line)}
+.ms .m{padding:14px 20px 0 0;display:flex;align-items:baseline;gap:10px}
+.ms .m+.m{padding-left:24px;border-left:1px solid var(--line)}
+.ms .m b{flex:0 0 auto;font-size:17px;font-weight:800;color:var(--org-d);letter-spacing:.03em}
+.ms .m span{font-size:18px;line-height:1.35;color:var(--mut)}
+
+/* ── หน้าปก / หน้าคั่น (Title Slide · พื้นเข้ม #414042) ── */
+.sheet.dark{background:#414042}
+.sheet.dark .gb{padding:0}
+.cover{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  padding:0 93px;overflow:hidden}
+.cover .gwm{position:absolute;left:975px;top:-131px;width:623px;opacity:.62}  /* ตัว g x=12.19" */
+.cover .obar{position:absolute;left:54px;top:0;width:251px;height:20px;background:var(--org)}
+.cover .clogo{position:absolute;left:61px;top:42px;width:172px}
+.cover .cmark{position:absolute;left:54px;top:808px;width:57px}
+.cover .in{position:relative;z-index:2;max-width:1414px}   /* กล่องหัวเรื่อง w=18.4" ตาม ppt */
+/* หน้าปกเหลือข้อมูลชิ้นเดียว (จัดทำให้) — ตัวหนังสือจึงขยายได้ทั้งชุด
+   ชื่อเรื่อง 72px ยังพอดีกล่อง 1414px ทั้งอังกฤษและไทย ไม่ตกบรรทัด */
+.cover .kick{font-size:15px;letter-spacing:.26em;color:#fff;font-weight:700;opacity:.72}
+.cover h1{font-size:72px;font-weight:800;line-height:1.1;margin-top:18px;color:#FF8220;
+  text-transform:uppercase;letter-spacing:.04em}
+.cover .bar{width:140px;height:7px;background:#fff;opacity:.35;margin:30px 0 26px}
+.cover .lead{font-size:23px;color:#F3F3F3;opacity:.9;max-width:1120px;line-height:1.55}
+.cover .meta{display:flex;gap:60px;margin-top:52px;flex-wrap:wrap}
+.cover .meta div b{display:block;font-size:13px;letter-spacing:.13em;color:var(--org);font-weight:800}
+.cover .meta div span{display:block;font-size:22px;margin-top:8px;font-weight:600;color:#fff}
+/* โหมดนำเสนอเต็มจอ — ซ่อนแถบควบคุม สไลด์กินพื้นที่ทั้งจอ */
+body.fs header{display:none}
+body.fs .stage{padding:0;align-items:center;background:#2E2E2F}
+body.fs .sheet{box-shadow:none}
+@media print{header,nav,.edge,.scrim{display:none}.stage{padding:0}.sheet{box-shadow:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="menu" title="Toggle slide list (M)">☰</button>
+  <span class="brand"><img src="gable-logo-dark.png" alt="G-Able" /></span>
+  <span class="sub">APEX Planning &amp; Costing System · Presentation</span>
+  <span class="spacer"></span>
+  <span id="lang" title="Language of the embedded screens (L)">
+    <button data-l="en" class="on">EN</button><button data-l="th">ไทย</button>
+  </span>
+  <span id="zoom">
+    <button data-m="width" title="Fit width (1)">Fit width</button><button data-m="page" class="on" title="Fit page (2)">Fit page</button>
+  </span>
+  <button id="full" title="Full screen (F)">⛶</button>
+  <button id="prev" title="Previous (←)">‹</button>
+  <span class="count" id="count"></span>
+  <button id="next" title="Next (→)">›</button>
+</header>
+
+<div class="body">
+  <div class="edge" title="Move to the left edge to open the slide list"></div>
+  <div class="scrim"></div>
+  <nav id="nv">
+    <div class="head"><span class="t">SLIDES</span><button id="pin" title="Pin the list (P)">📌</button></div>
+    <div id="navlist"></div>
+  </nav>
+  <div class="stage" id="stage"></div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   Slide content — English deck, G-Able frame
+   ══════════════════════════════════════════════════════════ */
+const P=(n,t,d)=>({n,t,d});
+const SLIDES=[
+
+{k:'cover',nm:'Cover',cd:'APEX PLANNING & COSTING',type:'cover',
+ kick:'PROJECT PROPOSAL · 2026',
+ h1:'APEX Planning &amp; Costing System',
+ lead:'Plans production, plans material, and works out standard cost — running next to the ERP.',
+ meta:[['PREPARED FOR','APEX Circuit (Thailand) Co., Ltd.']]},
+
+{k:'agenda',nm:'Agenda',cd:'AGENDA',type:'agenda',
+ tt:'Agenda',
+ rows:[['1','DAILY QUESTIONS','The questions you hear every day that nobody can answer on the spot'],
+       ['2','4 IMPORTANT QUESTIONS FOR YOUR BUSINESS','What the system has to answer, and which screen answers it'],
+       ['3','SYSTEM WORKFLOW — PLANNING AND COSTING','Two flows, start to end. Then the real screens — all live, all clickable'],
+       ['4','PROJECT DELIVERY PLAN AND PRE-REQUISITE','What we deliver, when, and what APEX has to get ready'],
+       ['5','TECHNOLOGY STACK','System design, security and server size']]},
+
+{k:'daily',nm:'Daily Questions',cd:'DAILY QUESTIONS',type:'daily',
+ tt:'Daily <em>Questions</em>',
+ lead:'You hear these every day. Every one of them means walking over to ask somebody else first.',
+ items:[['09:00 · SALES','When will we ship the customer order?','It depends on the material. Nobody can confirm on the spot.'],
+        ['11:00 · PRODUCTION','The customer needs this item urgently. What do we do?','Check raw material, then talk to everyone it affects.'],
+        ['14:00 · WAREHOUSE','What do we do with overstocked items?','Check the item against the sale forecast.'],
+        ['16:00 · FINANCE','The cost went up. Where did it come from?','Split it into material, labour and scrap.']],
+ stats:[['4','departments needed to answer one question'],['3','plants to look at together'],
+        ['~4,000','made-to-order item codes'],['1.5 : 3','months you can plan vs months of lead time']]},
+
+{k:'four',nm:'4 Important Questions',cd:'4 IMPORTANT QUESTIONS',type:'four',
+ tt:'4 Important Questions <em>for Your Business</em>',
+ lead:'Each question has a screen that answers it — down to the document it came from, not just a total.',
+ rows:[['WHO IS THE OWNER OF THIS MATERIAL?','Priority &amp; Freeze › MRP › Sale Forecast'],
+       ['WHERE IS OUR CAPITAL TIED UP?','Stock at Risk › Purchase Traceability'],
+       ['HOW MUCH DOES A PCB COST?','Standard Cost Book › Cost Sheet'],
+       ['WHAT SHOULD WE DO IF RAW MATERIAL PRICES CHANGE?','Cost Simulation']]},
+
+{k:'delivery',nm:'Project Delivery',cd:'PROJECT DELIVERY',type:'scope',
+ tt:'Project <em>Delivery</em>',
+ lead:'What is in this project — and, just as important, what is not.',
+ cards:[['Production Planning','8 SCREENS','#1F6FC4',
+   ['MPS board with capacity check','MRP board','Priority &amp; freeze','Substitute materials','Stock at risk — expiry and idle money','Idle material — money nobody has reserved','Purchase traceability &amp; document map','Planning parameters']],
+  ['Costing','3 SCREENS','#00B28F',
+   ['Standard Cost Book','Cost Sheet','Cost simulation — price shock']],
+  ['Shared Platform','1 SCREEN + REPORTS','#FF8006',
+   ['Approval chain (DOA)','10 standard reports — you pick which ones','ERP data integration']]],
+ excl:['PR and PO are still issued in the ERP. This system collects what to buy, sends it through approval, then hands the approved lines to the ERP.',
+       'Actual cost per work order and variance reports are not included. This project is standard cost only.',
+       'Shop-floor data capture and machine control are not included.']},
+
+{k:'flow',nm:'Workflow — Planning',cd:'SYSTEM WORKFLOW · 1 OF 2',type:'flowp',
+ tt:'Planning <em>Workflow</em>',
+ lead:'How a customer order turns into a purchase requisition — every step inside this scope.',
+ groups:['Production Planning','Material Planning'],
+ steps:[['INPUT','Demand','Sale forecast &amp; sale order','#245477'],
+        ['FR-1','MPS','Production plan by period','#1F6FC4'],
+        ['FR-1.4','MO','Planner adjusts, then approves','#0A96E8'],
+        ['FR-2.1','BOM Explosion','Material needed per work order','#00B28F'],
+        ['FR-2.3','MRP','What to buy, how much, when','#FF8006'],
+        ['FR-6','Allocation','Priority and freeze','#C25F1E'],
+        ['FR-2.6','ERP','Data handed back to ERP','#A32311']],
+ formulas:[['Demand','#245477','Forecast − Sale Order = Demand',
+            'Forecast minus the orders you already have, so the same demand is never counted twice.'],
+           ['BOM explosion','#00B28F','BOM = MO + (MO × % scrap)',
+            'Scrap is added per process, so the number matches what the line really uses.'],
+           ['MRP net requirement','#FF8006','Net requirement = (gross + safety stock) − available − scheduled receipts − allocated',
+            'Then rounded up to the supplier MOQ before the requisition goes out.']],
+ foot:'Every step points back to the document it came from — from a purchase line all the way to the customer order and the salesperson in charge.'},
+
+{k:'flowc',nm:'Workflow — Costing',cd:'SYSTEM WORKFLOW · 2 OF 2',type:'flowc',
+ tt:'Costing <em>Workflow</em>',
+ lead:'How the standard cost of one board is built up — and what happens to it when prices move.',
+ steps:[['INPUT','Master Data','BOM · routing · standard time · rates','#245477'],
+        ['STEP 1','Direct Material','BOM quantity × price of the period','#1E9E50'],
+        ['STEP 2','Direct Labour','Standard minutes × rate per cost centre','#0E8CA8'],
+        ['STEP 3','Overhead','Machine and labour hours × OH rate','#1F6FC4'],
+        ['','Waste &amp; Scrap Resale','Loss per plant, minus the scrap you sell back','#C25F1E'],
+        ['STEP 4','Cost Book','Standard cost per board, one version per period','#FF8006'],
+        ['STEP 5','Simulation','What-if on price, wage and exchange rate','#A32311']],
+ formulas:[['Standard cost','#FF8006','Standard cost = DM + DL + OH + Waste − Scrap Resale',
+            'Costed on the real BOM and routing of each item code. Never a plant average.'],
+           ['Direct labour','#0E8CA8','DL = Σ (standard minutes ÷ 60) × rate per hour × manpower',
+            'Taken process by process, so changing one work centre only moves the items that pass through it.'],
+           ['Break-even on material','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
+            'How much more material price can rise before profit on that item hits zero.']],
+ foot:'Every number opens down to the line — which material, which process, and which cost book period it came from.'},
+
+/* ─── live demo screens ─── */
+{k:'mps',nm:'MPS',cd:'SCREEN 01',type:'demo',file:'APEX_MPS_Planning.html',
+ tt:'MPS — <em>Master Production Schedule</em>',
+ lead:'Shows what to build next month, how much and when — and whether the plant has the capacity to do it.',
+ why:'Sales, planning and production work from the same monthly picture — so the date given to a customer is a date the plant can keep.',
+ pins:[P(1,'Forecast minus sales order','So the same demand is never counted twice in the balance'),
+       P(2,'Net stock balance by period','Red cells are where stock runs out — you see it months ahead'),
+       P(3,'Create a work order from the cell','The system suggests the quantity and date. The planner adjusts, then confirms'),
+       P(4,'Capacity check by plant','Warns you when the plan is more than that plant can take')],
+ foot:'Every planning run is saved, so you can go back and see what the plan was built from.'},
+
+{k:'mrp',nm:'MRP',cd:'SCREEN 02',type:'demo',file:'APEX_MRP_Advanced.html',
+ tt:'MRP — <em>Material Requirements Planning</em>',
+ lead:'The whole material list, with the problem ones pulled to the top and the date each requisition has to go out.',
+ why:'Purchasing sees next month problems today — with time left to chase a supplier, pull a delivery in, or find another way, before any of it reaches the line.',
+ pins:[P(1,'Nothing slips past you','Risk is scored across the whole list, and whatever needs action today sits at the top'),
+       P(2,'Net requirement covers everything','Gross need, minus stock and incoming, plus reserved, expiring stock and safety stock'),
+       P(3,'Full timeline per material','Receipts · issues · expiring stock · planned orders · balance · reserved'),
+       P(4,'Tells you when to raise the requisition','Counted back from the need date using each supplier lead time')],
+ foot:'Every run is saved, so you can compare the new plan against the last one line by line.'},
+
+{k:'freeze',nm:'Priority & Freeze',cd:'SCREEN 03',type:'demo',file:'APEX_Priority_Freeze_Mockup.html',
+ tt:'Priority <em>&amp; Freeze</em>',
+ lead:'Answers the question “who owns this material, and who gets hurt if we move it?”',
+ why:'Which job gets the material first has an answer everyone can see — and whoever has to wait knows the moment the call is made.',
+ pins:[P(1,'See who this material is for','Tied to a work order, a customer and a salesperson — you see it at a glance'),
+       P(2,'Freeze what production has confirmed','Inside that window the plan does not move without approval'),
+       P(3,'Lot binding follows FEFO','And flags it right away when a lot is bound out of order'),
+       P(4,'Options when stock is short','Delay lower-priority work · use a substitute · raise an urgent requisition')],
+ foot:'One rule holds all the way through — material reserved for a work order is never moved automatically.'},
+
+{k:'sub',nm:'Substitute Material',cd:'SCREEN 04',type:'demo',file:'APEX_Substitute_Material_Mockup.html',
+ tt:'Substitute <em>Materials</em>',
+ lead:'Use an approved alternative without changing the original BOM.',
+ why:'A shortage does not have to stop the line. The alternatives your engineers have already accepted sit inside the plan, waiting for the day they are needed.',
+ pins:[P(1,'Registered pairs with priority','Which alternative to use first, and at what rate'),
+       P(2,'Approval level per pair','Ready to use · needs QA · needs customer approval'),
+       P(3,'Matched to shortages automatically','Shows how much of the gap it closes and the cost difference'),
+       P(4,'Usage history kept','Which period used which substitute, and how much')],
+ foot:'A real case in the system — 1 Oz copper foil can replace 0.5 Oz, but it has to be etched down, so it uses twice as much. The system already counts that.'},
+
+{k:'risk',nm:'Stock at Risk',cd:'SCREEN 05',type:'demo',file:'APEX_Stock_Risk_Mockup.html',vw:1380,
+ tt:'Stock <em>at Risk</em>',
+ lead:'One screen, two views — expiry lot by lot, and the money sitting in stock nobody has planned to use.',
+ why:'Material on the shelf still holds its value. This is where you see which of it is quietly losing that value, while a decision is still worth making.',
+ pins:[P(1,'Expiry view, lot by lot','Issued FEFO, with an early warning at a level you set'),
+       P(2,'Catches lots bound out of order','Older stock still on hand while a newer lot was reserved — the system spots it'),
+       P(3,'Tied-up money view','Split by cause: over plan, near expiry, and never reserved'),
+       P(4,'One action per line','Return to supplier · use as a substitute · push to sell · write off')],
+ foot:'Both views run on the same data and the same filters, so the two numbers can never disagree.'},
+
+{k:'idle',nm:'Idle Material',cd:'SCREEN 06',type:'demo',file:'APEX_Idle_Material_Dashboard.html',vw:1380,
+ tt:'Idle <em>Material</em>',
+ lead:'The money sitting in raw material that no work order and no forecast has claimed.',
+ why:'Stock can come down without putting the line at risk, because the money that is genuinely free to release is kept apart from the stock the plan still needs.',
+ pins:[P(1,'Matched against the real plan','Stock is matched to work orders and the sales forecast 3 or 4 months ahead'),
+       P(2,'Idle value split by cause','Never reserved · more than the plan needs · will expire before it is used'),
+       P(3,'How long it has been sitting','Value grouped by last issue date, from under 3 months to over a year'),
+       P(4,'A recommended action per item','Return to supplier · use as a substitute · push to sell · write off · review with Sales')],
+ foot:'The list goes straight to purchasing, so the decision is made before the next order is raised.'},
+
+{k:'trace',nm:'Purchase Traceability',cd:'SCREEN 07',type:'demo',file:'APEX_Purchase_Traceability_Mockup.html',
+ tt:'Purchase <em>Traceability</em>',
+ lead:'Answers purchasing’s question — “why are we buying this, and why this much?”',
+ why:'Every baht spent on material ties back to the customer it was bought for — so a buy stands up when it is questioned, and is cut cleanly when an order changes.',
+ pins:[P(1,'Four levels back','Purchase line → work order → production plan → customer order or forecast'),
+       P(2,'The quantity explained line by line','Gross − stock − incoming + reserved + safety stock, then rounded to the MOQ'),
+       P(3,'Backward timeline','Warns you when the date to raise the document has already passed'),
+       P(4,'Document map','The whole document chain on one page')],
+ foot:'If a customer cancels an order, the system tells you right away which purchase line to cut and by how much.'},
+
+{k:'doa',nm:'Approval Chain (DOA)',cd:'SCREEN 08',type:'demo',file:'APEX_Approval_DOA_Mockup.html',
+ tt:'Approval <em>Chain (DOA)</em>',
+ lead:'The approval chain an approver sees on the document itself — for everything that changes the plan or the cost.',
+ why:'Approvals move at the speed of the plan — and the record of who decided what stays intact for as long as anyone needs to look at it.',
+ pins:[P(1,'The same four steps every time','Create → submit → authorized approver → downstream action, whatever the document type'),
+       P(2,'Goes up to the right approver','By value, following your own DOA table'),
+       P(3,'A reject must have a reason','Recorded in the history every time, and checkable later'),
+       P(4,'The document read in full','Header, lines and the reason for the request, all on the approval screen')],
+ foot:'Built on the central DOA component you already have, so this is integration work, not new development.'},
+
+{k:'param',nm:'Planning Parameters',cd:'SCREEN 09',type:'demo',file:'APEX_Planning_Parameter_Mockup.html',
+ tt:'Planning <em>Parameters</em>',
+ lead:'The values that make MRP correct — and the checks that catch a bad value before it throws off the plan.',
+ why:'MRP is only as good as the numbers underneath it. Keeping those values straight is what lets the plan be trusted from the first run.',
+ pins:[P(1,'Core values pulled from the ERP','MOQ · lead time · safety stock — nothing re-typed by hand'),
+       P(2,'Seven checks for odd values','For example one order covering more than six months, or a lead time in the wrong unit'),
+       P(3,'Edit only what the ERP does not hold','Such as the freeze window, which belongs to planning'),
+       P(4,'Change history kept','Who changed which value, and when')],
+ foot:'One wrong parameter throws off a whole month of planning, which is why the checks are built in from the start.'},
+
+{k:'cost',nm:'Standard Cost Book',cd:'SCREEN 10',type:'demo',file:'APEX_StandardCostBook_Mockup.html',
+ tt:'Standard <em>Cost Book</em>',
+ lead:'Shows what one board costs — and exactly which lines that number came from.',
+ why:'Cost becomes a number you can stand behind in a pricing meeting — one agreed figure per item per period, and a clear reason whenever it moves.',
+ pins:[P(1,'Built from the real BOM and routing','Not an average — costed on the route of each item code'),
+       P(2,'Material, labour and overhead kept apart','Plus scrap cost and the money you get back from selling scrap'),
+       P(3,'Cost sheet down to the line','Open it to see which material and which process the cost came from'),
+       P(4,'Flags items that cannot be costed yet','With the reason, down to the material line that has no price')],
+ foot:'Saved as one version per period, so you can compare periods and say exactly why the cost moved.'},
+
+/* เปิด Standard Cost Book พร้อม Cost Sheet Report เด้งขึ้นมาเลย (#sheet=<รหัสสินค้า>) */
+{k:'sheet',nm:'Cost Sheet',cd:'SCREEN 11',type:'demo',
+ file:'APEX_StandardCostBook_Mockup.html#sheet=A048T-168BJ',url:'APEX_StandardCostBook_Mockup.html',
+ vw:1480,   /* ไม่ซูม — รายงานกว้าง 14 คอลัมน์ ต้องการ viewport กว้างสุดเท่าที่กรอบมี */
+ tt:'Cost <em>Sheet</em>',
+ lead:'The cost of one item opened up line by line — every material, every process, in the order the board is built.',
+ why:'The total opens up into the steps behind it. You can see where along the process the money goes — and that is where any serious cost-down has to start.',
+ pins:[P(1,'Material, labour and machine side by side','Each process step carries its own numbers, read across a single row'),
+       P(2,'Every routing step listed','Cut · dry film · AOI · hot press · drill · laser via · plating · solder mask · surface finish · final test · packing'),
+       P(3,'Scrap and resale value included','Waste cost and the money back from selling scrap are part of the same total'),
+       P(4,'Open any number to see how it got there','Each cost band expands into the quantity × unit price and the hours × rate behind it')],
+ foot:'Printable and exportable as it stands, so it can go straight into a pricing pack or an audit file.'},
+
+{k:'sim',nm:'Cost Simulation',cd:'SCREEN 12',type:'demo',file:'APEX_PriceShockSimulator_Mockup.html',
+ tt:'Cost <em>Simulation</em>',
+ lead:'If material prices or wages move, which items are hit and by how much — and what price should you quote?',
+ why:'A price rise from a supplier can be answered the same day — you know where it lands on your margin, and which customer to talk to first.',
+ pins:[P(1,'You decide which cost drivers to test','Six come set up — all materials, by group, by item, labour, overhead, exchange rate — and any others you want are added the same way'),
+       P(2,'New margin right away','By item and by customer, plus the monthly impact for the whole company'),
+       P(3,'Suggested price that keeps your margin','A starting number for the customer negotiation'),
+       P(4,'Material break-even point','How much more prices can rise before the margin hits zero')],
+ foot:'Simulation never touches live data, and every set of assumptions is saved so you can compare scenarios.'},
+
+/* ─── plan & technical ─── */
+{k:'timeline',nm:'Project Timeline',cd:'PROJECT TIMELINE',type:'timeline',
+ tt:'Project <em>Timeline</em>',
+ lead:'11 weeks to go-live. Planning and costing are built at the same time because the screens and the calculations have already been reviewed with your users.',
+ weeks:11,
+ rows:[['Preparation and design',1,4,'#4F9DE6'],
+       ['Development — planning',2,8,'#1F6FC4'],
+       ['Development — costing',3,8,'#00B28F'],
+       ['ERP data integration',5,8,'#7A4FD3'],
+       ['Standard reports',6,9,'#0E8CA8'],
+       ['Internal testing &amp; QA',3,10,'#D9A400'],
+       ['User acceptance test (UAT)',9,10,'#C25F1E'],
+       ['Training, install and acceptance',10,11,'#A32311'],
+       ['Master data preparation (APEX)',1,8,'#FF8006']],
+ ms:[['W1','Kick-off'],['W4','Requirements signed'],['W5','Demo 1'],
+     ['W8','Demo 2 · ready for UAT'],['W11','Acceptance and go-live']],
+ foot:'After go-live a dedicated team stays with you for the first 30 days, then a 90-day warranty on the system.'},
+
+{k:'prereq',nm:'Pre-requisite',cd:'PRE-REQUISITE',type:'prereq',
+ tt:'Pre-<em>requisite</em>',
+ lead:'How ready the master data is decides when the project can start, and it has the biggest single effect on the schedule.',
+ /* Infrastructure และ People and Time ถอดออกจากสไลด์ตามที่ผู้นำเสนอจะพูดเอง
+    ถ้าจะเปิดกลับ ใส่กลุ่มเพิ่มใน groups ได้เลย เลย์เอาต์ปรับตามจำนวนกลุ่มเอง
+    ['Infrastructure','#00B28F',['Two environments — production and UAT','Windows Server licences','SQL Server Standard edition or higher','HTTPS certificates','System access for the vendor team (VPN)']],
+    ['People and Time','#FF8006',['Key users from planning, purchasing, warehouse and cost accounting','Production engineers to check the standard times','An IT contact for the ERP integration','Someone who can decide on requirements']] */
+ groups:[['Master Data','#1F6FC4',['BOM and scrap rate','Routing and standard time per process','Rate per hour by cost centre','Stock with lot and expiry date','Lead time and vendor conditions','Sale forecast — 4 months ahead','Salesperson in charge of each order','Approved substitute material pairs']]],
+ foot:'The two riskiest items are <b>standard time per process</b> and <b>lot expiry dates</b> — both have to be done by week 4.'},
+
+{k:'server',nm:'Server Spec',cd:'SERVER SPEC',type:'server',
+ tt:'Server <em>Specification</em>',
+ lead:'Sizing for the production environment. The UAT and training environment can use the minimum spec.',
+ app:[['Up to 25','4 vCPU','16 GB','120 GB SSD'],
+      ['Up to 75','8 vCPU','16 GB','150 GB SSD'],
+      ['Up to 150','8 vCPU','32 GB','200 GB SSD']],
+ db:[['Minimum','4 vCPU','16 GB','200 GB SSD'],
+     ['Recommended','8 vCPU','32 GB','250 GB SSD']]},
+
+{k:'tech',nm:'Technology Stack',cd:'TECHNOLOGY STACK',type:'tech',
+ tt:'Technology <em>Stack</em>',
+ lead:'Every layer uses a long-term support version that enterprises accept.',
+ rows:[['Frontend','Angular 22 · Nx · PrimeNG · Bootstrap 5.3 · TypeScript · SignalR · ngx-translate · Chart.js'],
+       ['Browser support','Chrome · Edge · Firefox · Safari — the latest two versions of each. Internet Explorer is not supported.'],
+       ['Backend','C# on ASP.NET Core Web API · .NET 10 (LTS) · Entity Framework Core 10 · Serilog · OpenAPI / Swagger'],
+       ['Database','Microsoft SQL Server Standard or higher · 2016 SP2 at the least · 2022 recommended · separate application and audit databases'],
+       ['Identity and access','Keycloak 26 · OAuth 2.0 / OpenID Connect · SSO supported · LDAP / Active Directory through User Federation'],
+       ['Reporting','In-house PDF engine as its own service with a job queue · EPPlus · ExcelJS · CsvHelper'],
+       ['Deployment','Windows Server 2019 / 2022 · IIS with URL Rewrite, ARR and WebSocket · Windows Service · HTTPS / TLS'],
+       ['Build toolchain','Git (GitLab) · GitLab CI · Node.js 22 LTS · .NET SDK 10']]},
+
+{k:'qa',nm:'Q&A',cd:'Q & A',type:'qa',
+ tt:'Thank <em>You</em>',
+ lead:'Happy to take questions — and to show any screen in more detail.',
+ pts:['Works with the ERP you already use. It does not replace it.',
+      'Every number on the screen points back to the document it came from.',
+      'A working version of every screen is ready for your users to try today.']}
+];
+
+/* ══════════════════════════════════════════════════════════ */
+const g=id=>document.getElementById(id);
+/* หัวสไลด์ = ชื่อเรื่อง + เส้นคาด — บรรทัดคำอธิบาย (lead) ถอดออกทั้งเด็คตามที่ผู้นำเสนอ
+   จะพูดเองบนเวที ข้อความยังเก็บไว้ใน SLIDES[].lead / TH[].lead เผื่อเปิดกลับ */
+function head(s){return `<h2 class="tt">${s.tt}</h2><div class="rule"></div>`;}
+function stats(a){return a?`<div class="stats">${a.map(([v,l])=>
+  `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('')}</div>`:'';}
+
+
+/* ══════════════════════════════════════════════════════════
+   คำไทยของแต่ละสไลด์ — ทับลงบนโครงอังกฤษด้วย S(i)
+   เขียนเป็นภาษาที่คนหน้างานพูดกันจริง ศัพท์ที่ทุกคนเรียกทับศัพท์อยู่แล้ว
+   (MPS · MRP · BOM · Forecast · Sale Order · Lead Time · Safety Stock ·
+    MOQ · FEFO · DOA · Cost Sheet · ERP) คงไว้เป็นอังกฤษ ไม่แปล
+   ══════════════════════════════════════════════════════════ */
+const TH={
+cover:{nm:'หน้าปก',cd:'APEX PLANNING & COSTING',
+ kick:'ข้อเสนอโครงการ · 2026',
+ lead:'วางแผนผลิต วางแผนวัตถุดิบ และคิดต้นทุนมาตรฐาน — ทำงานคู่กับ ERP',
+ meta:[['จัดทำให้','APEX Circuit (Thailand) Co., Ltd.']]},
+
+agenda:{nm:'หัวข้อวันนี้',cd:'หัวข้อวันนี้',tt:'หัวข้อวันนี้',
+ rows:[['1','คำถามที่เจอทุกวัน','คำถามที่ได้ยินทุกวัน แต่ไม่มีใครตอบได้ทันที'],
+       ['2','4 คำถามสำคัญของธุรกิจ','ระบบต้องตอบอะไรบ้าง และหน้าจอไหนเป็นคนตอบ'],
+       ['3','ภาพรวมการทำงาน — วางแผนและต้นทุน','สองสายงานตั้งแต่ต้นจนจบ แล้วดูหน้าจอจริง กดเล่นได้ทุกหน้า'],
+       ['4','แผนส่งมอบและสิ่งที่ต้องเตรียม','ส่งมอบอะไร เมื่อไหร่ และ APEX ต้องเตรียมอะไรบ้าง'],
+       ['5','เทคโนโลยีที่ใช้','โครงสร้างระบบ ความปลอดภัย และขนาดเครื่อง']]},
+
+daily:{nm:'คำถามที่เจอทุกวัน',cd:'คำถามที่เจอทุกวัน',
+ tt:'คำถาม<em>ที่เจอทุกวัน</em>',
+ lead:'คำถามพวกนี้ได้ยินทุกวัน และทุกข้อต้องเดินไปถามคนอื่นก่อนถึงจะตอบได้',
+ items:[['09:00 · ฝ่ายขาย','ออเดอร์ลูกค้าจะส่งได้เมื่อไหร่','ขึ้นอยู่กับของ ไม่มีใครยืนยันได้ตรงนั้น'],
+        ['11:00 · ฝ่ายผลิต','ลูกค้าเร่งตัวนี้ ทำยังไงดี','เช็ควัตถุดิบก่อน แล้วไล่คุยกับทุกคนที่โดนกระทบ'],
+        ['14:00 · คลังสินค้า','ของค้างสต๊อกเยอะ จะทำยังไง','เอาไปเทียบกับ Forecast ของฝ่ายขาย'],
+        ['16:00 · ฝ่ายบัญชี','ต้นทุนขึ้น ขึ้นจากตรงไหน','ต้องแยกว่าเป็นค่าวัตถุดิบ ค่าแรง หรือของเสีย']],
+ stats:[['4','แผนกที่ต้องถาม กว่าจะได้คำตอบเดียว'],['3','โรงงานที่ต้องดูพร้อมกัน'],
+        ['~4,000','รหัสสินค้าที่ผลิตตามสั่ง'],['1.5 : 3','เดือนที่วางแผนได้ เทียบกับเดือนที่ต้องรอของ']]},
+
+four:{nm:'4 คำถามสำคัญ',cd:'4 คำถามสำคัญ',
+ tt:'4 คำถามสำคัญ<em>ของธุรกิจ</em>',
+ lead:'ทุกคำถามมีหน้าจอที่ตอบให้ — ตอบลึกถึงตัวเอกสาร ไม่ใช่แค่ยอดรวม',
+ rows:[['ของล็อตนี้เป็นของใคร','Priority &amp; Freeze › MRP › Forecast'],
+       ['เงินเราไปจมอยู่ตรงไหน','Stock at Risk › Purchase Traceability'],
+       ['แผ่น PCB หนึ่งแผ่นต้นทุนเท่าไหร่','Standard Cost Book › Cost Sheet'],
+       ['ถ้าราคาวัตถุดิบขยับ ต้องทำยังไง','Cost Simulation']]},
+
+delivery:{nm:'สิ่งที่ส่งมอบ',cd:'สิ่งที่ส่งมอบ',
+ tt:'สิ่งที่<em>ส่งมอบ</em>',
+ lead:'ในโครงการนี้มีอะไรบ้าง — และที่สำคัญพอกัน คือไม่มีอะไรบ้าง',
+ cards:[['งานวางแผนการผลิต','8 หน้าจอ','#1F6FC4',
+   ['กระดาน MPS พร้อมเช็คกำลังผลิต','กระดาน MRP','จัดลำดับและล็อกแผน','วัตถุดิบทดแทน','สต๊อกที่ต้องเฝ้า — ของใกล้หมดอายุและเงินจม','วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง','ที่มาการสั่งซื้อ &amp; ผังเอกสาร','ค่าที่ใช้วางแผน']],
+  ['งานต้นทุน','3 หน้าจอ','#00B28F',
+   ['สมุดต้นทุนมาตรฐาน','Cost Sheet','จำลองผลกระทบราคา']],
+  ['ระบบกลาง','1 หน้าจอ + รายงาน','#FF8006',
+   ['สายอนุมัติ (DOA)','รายงานมาตรฐาน 10 ฉบับ — เลือกเองได้','เชื่อมข้อมูลกับ ERP']]],
+ excl:['PR กับ PO ยังออกใน ERP เหมือนเดิม ระบบนี้รวบรวมว่าต้องซื้ออะไร ส่งเข้าสายอนุมัติ แล้วส่งรายการที่อนุมัติแล้วให้ ERP',
+       'ไม่รวมการเก็บต้นทุนจริงรายใบสั่งผลิตและรายงานผลต่าง — โครงการนี้ทำต้นทุนมาตรฐานอย่างเดียว',
+       'ไม่รวมการเก็บข้อมูลหน้างานและการควบคุมเครื่องจักร']},
+
+flow:{nm:'ภาพรวม — งานวางแผน',cd:'ภาพรวมการทำงาน · 1 ใน 2',
+ tt:'ภาพรวม<em>งานวางแผน</em>',
+ lead:'จากออเดอร์ลูกค้า กลายเป็นใบขอซื้อได้ยังไง — ทุกขั้นที่อยู่ในขอบเขตนี้',
+ groups:['วางแผนการผลิต','วางแผนวัตถุดิบ'],
+ steps:[['INPUT','ความต้องการ','Forecast &amp; Sale Order','#245477'],
+        ['FR-1','MPS','แผนผลิตรายงวด','#1F6FC4'],
+        ['FR-1.4','MO','ฝ่ายวางแผนปรับ แล้วอนุมัติ','#0A96E8'],
+        ['FR-2.1','กระจาย BOM','วัตถุดิบที่ใช้ต่อใบสั่งผลิต','#00B28F'],
+        ['FR-2.3','MRP','ซื้ออะไร เท่าไหร่ เมื่อไหร่','#FF8006'],
+        ['FR-6','จองของ','จัดลำดับและล็อกแผน','#C25F1E'],
+        ['FR-2.6','ERP','ส่งข้อมูลกลับให้ ERP','#A32311']],
+ formulas:[['ความต้องการ','#245477','Forecast − Sale Order = Demand',
+            'เอา Forecast ลบยอดที่ลูกค้าสั่งมาแล้ว ของชิ้นเดียวกันจะได้ไม่ถูกนับซ้ำ'],
+           ['กระจาย BOM','#00B28F','BOM = MO + (MO × % scrap)',
+            'บวกของเสียเข้าไปทีละกระบวนการ ตัวเลขจะได้ตรงกับที่ไลน์ใช้จริง'],
+           ['ยอดที่ต้องซื้อจริง','#FF8006','Net requirement = (gross + safety stock) − available − scheduled receipts − allocated',
+            'แล้วปัดขึ้นตาม MOQ ของผู้ขาย ก่อนจะออกใบขอซื้อ']],
+ foot:'ทุกขั้นย้อนกลับไปหาเอกสารต้นทางได้ — จากบรรทัดสั่งซื้อ ย้อนไปถึงออเดอร์ลูกค้าและพนักงานขายที่ดูแล'},
+
+flowc:{nm:'ภาพรวม — งานต้นทุน',cd:'ภาพรวมการทำงาน · 2 ใน 2',
+ tt:'ภาพรวม<em>งานต้นทุน</em>',
+ lead:'ต้นทุนมาตรฐานของบอร์ดหนึ่งแผ่นประกอบขึ้นมายังไง — และถ้าราคาขยับจะเกิดอะไร',
+ steps:[['INPUT','ข้อมูลหลัก','BOM · Routing · เวลามาตรฐาน · อัตราค่าแรง','#245477'],
+        ['STEP 1','ค่าวัตถุดิบ','จำนวนตาม BOM × ราคาของงวดนั้น','#1E9E50'],
+        ['STEP 2','ค่าแรงทางตรง','นาทีมาตรฐาน × อัตราของหน่วยงาน','#0E8CA8'],
+        ['STEP 3','ค่าโสหุ้ย','ชั่วโมงเครื่องและชั่วโมงคน × อัตรา OH','#1F6FC4'],
+        ['','ของเสียและเศษขายคืน','ของเสียรายโรง หักมูลค่าเศษที่ขายกลับ','#C25F1E'],
+        ['STEP 4','สมุดต้นทุน','ต้นทุนมาตรฐานต่อแผ่น เก็บเป็นเวอร์ชันรายงวด','#FF8006'],
+        ['STEP 5','จำลอง','ลองปรับราคา ค่าแรง และอัตราแลกเปลี่ยน','#A32311']],
+ formulas:[['ต้นทุนมาตรฐาน','#FF8006','Standard cost = DM + DL + OH + Waste − Scrap Resale',
+            'คิดตาม BOM และ Routing จริงของแต่ละรหัสสินค้า ไม่ใช่ค่าเฉลี่ยทั้งโรง'],
+           ['ค่าแรงทางตรง','#0E8CA8','DL = Σ (standard minutes ÷ 60) × rate per hour × manpower',
+            'คิดทีละกระบวนการ แก้อัตราที่หน่วยงานเดียว จะขยับเฉพาะสินค้าที่ผ่านหน่วยงานนั้น'],
+           ['จุดคุ้มทุนวัตถุดิบ','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
+            'ราคาวัตถุดิบขึ้นได้อีกเท่าไหร่ กำไรของตัวนั้นถึงจะเหลือศูนย์']],
+ foot:'ทุกตัวเลขกดเข้าไปดูได้ถึงบรรทัด — วัตถุดิบตัวไหน กระบวนการไหน และมาจากสมุดต้นทุนงวดไหน'},
+
+mps:{nm:'MPS',cd:'หน้าจอ 01',
+ tt:'MPS — <em>แผนผลิตหลัก</em>',
+ lead:'บอกว่าเดือนหน้าต้องผลิตอะไร เท่าไหร่ เมื่อไหร่ — และโรงงานรับไหวไหม',
+ why:'ฝ่ายขาย ฝ่ายวางแผน ฝ่ายผลิต ดูแผนตัวเดียวกันทั้งเดือน วันส่งที่รับปากลูกค้าไป จึงเป็นวันที่โรงงานทำได้จริง',
+ pins:[P(1,'Forecast ลบ Sale Order','ของชิ้นเดียวกันไม่ถูกนับซ้ำ ก่อนคิดยอดคงเหลือ'),
+       P(2,'ยอดคงเหลือรายงวด','ช่องแดงคือช่วงที่ของจะขาด เห็นล่วงหน้าเป็นเดือน'),
+       P(3,'เปิดใบสั่งผลิตจากช่องได้เลย','ระบบเสนอจำนวนกับวันให้ ฝ่ายวางแผนปรับแล้วค่อยยืนยัน'),
+       P(4,'เช็คกำลังผลิตรายโรง','เตือนตอนที่แผนเกินกว่าที่โรงนั้นรับไหว')],
+ foot:'ทุกครั้งที่รันแผน ระบบเก็บไว้ ย้อนกลับไปดูได้ว่าแผนคำนวณมาจากอะไร'},
+
+mrp:{nm:'MRP',cd:'หน้าจอ 02',
+ tt:'MRP — <em>วางแผนวัตถุดิบ</em>',
+ lead:'วัตถุดิบทั้งรายการ ตัวมีปัญหาเด้งขึ้นบนสุด พร้อมวันที่ต้องออกใบขอซื้อ',
+ why:'จัดซื้อเห็นปัญหาของเดือนหน้าตั้งแต่วันนี้ ยังมีเวลาตามของ เร่งผู้ขาย หรือหาทางอื่น ก่อนที่จะกระทบไลน์ผลิต',
+ pins:[P(1,'ไม่มีตัวไหนหลุดสายตา','ให้คะแนนความเสี่ยงครบทั้งรายการ ตัวที่ต้องลงมือวันนี้ถูกดันขึ้นมาบนสุด'),
+       P(2,'ยอดที่ต้องซื้อคิดครบทุกตัวแปร','ยอดที่ต้องใช้ทั้งหมด หักสต๊อกกับของที่กำลังเข้า บวกของที่จองไว้ ของใกล้หมดอายุ และ Safety Stock'),
+       P(3,'ไทม์ไลน์เต็มรายตัว','ของเข้า · ของออก · ของใกล้หมดอายุ · แผนสั่ง · ยอดคงเหลือ · ของที่จอง'),
+       P(4,'บอกว่าต้องออกใบขอซื้อวันไหน','นับถอยหลังจากวันที่ต้องใช้ ตาม Lead Time ของผู้ขายแต่ละราย')],
+ foot:'ทุกรอบที่รันเก็บไว้หมด เอาแผนใหม่มาเทียบกับรอบก่อนได้ทีละบรรทัด'},
+
+freeze:{nm:'จัดลำดับและล็อกแผน',cd:'หน้าจอ 03',
+ tt:'จัดลำดับ<em>และล็อกแผน</em>',
+ lead:'ตอบคำถามว่า “ของล็อตนี้เป็นของใคร แล้วถ้าดึงไป ใครเดือดร้อน”',
+ why:'งานไหนควรได้ของก่อน มีคำตอบที่ทุกฝ่ายเห็นตรงกัน และคนที่ต้องรอ ก็รู้ตัวตั้งแต่วันที่ตัดสินใจ',
+ pins:[P(1,'รู้ว่าของล็อตนี้เป็นของใคร','ผูกกับใบสั่งผลิต ลูกค้า และพนักงานขาย เห็นได้ในตาเดียว'),
+       P(2,'ล็อกแผนที่ฝ่ายผลิตยืนยันแล้ว','ในช่วงที่ล็อกไว้ แผนจะไม่ขยับถ้าไม่ผ่านอนุมัติ'),
+       P(3,'ผูกล็อตตาม FEFO','ถ้าผูกข้ามลำดับ ระบบเตือนทันที'),
+       P(4,'ทางเลือกตอนของไม่พอ','เลื่อนงานที่ลำดับต่ำกว่า · ใช้ตัวทดแทน · เปิดใบขอซื้อด่วน')],
+ foot:'หลักที่ยึดตลอดทั้งระบบ — ของที่จองให้ใบสั่งผลิตไปแล้ว ระบบจะไม่ดึงไปให้ใครเองโดยอัตโนมัติ'},
+
+sub:{nm:'วัตถุดิบทดแทน',cd:'หน้าจอ 04',
+ tt:'วัตถุดิบ<em>ทดแทน</em>',
+ lead:'ใช้ของทดแทนที่อนุมัติไว้แล้วได้ โดยไม่ต้องไปแก้ BOM ตัวจริง',
+ why:'ของขาดแล้วไลน์ไม่ต้องหยุด ตัวทดแทนที่วิศวกรรมอนุมัติไว้ อยู่ในระบบให้หยิบมาใช้ได้ทันที',
+ pins:[P(1,'ขึ้นทะเบียนเป็นคู่ พร้อมลำดับ','กำหนดว่าใช้ตัวไหนก่อน และแลกกันในอัตราเท่าไหร่'),
+       P(2,'ระดับการอนุมัติของแต่ละคู่','ใช้ได้เลย · ต้องผ่าน QA · ต้องให้ลูกค้าอนุมัติ'),
+       P(3,'จับคู่กับของที่ขาดให้อัตโนมัติ','บอกว่าปิดช่องว่างได้เท่าไหร่ และต้นทุนต่างกันแค่ไหน'),
+       P(4,'เก็บประวัติการใช้','งวดไหนใช้ตัวทดแทนอะไร จำนวนเท่าไหร่')],
+ foot:'เคสจริงในระบบ — ทองแดง 1 Oz ใช้แทน 0.5 Oz ได้ แต่ต้องกัดลง เลยกินของเป็นสองเท่า ระบบคิดเผื่อตรงนี้ไว้แล้ว'},
+
+risk:{nm:'สต๊อกที่ต้องเฝ้า',cd:'หน้าจอ 05',
+ tt:'สต๊อก<em>ที่ต้องเฝ้า</em>',
+ lead:'หน้าจอเดียว ดูได้สองมุม — ของใกล้หมดอายุรายล็อต และเงินที่จมอยู่กับของที่ไม่มีใครวางแผนจะใช้',
+ why:'ของในคลังทุกตัวคือเงินที่จ่ายไปแล้ว หน้านี้บอกว่าเงินก้อนไหนกำลังจะสูญเปล่า ตอนที่ยังดึงกลับมาทัน',
+ pins:[P(1,'มุมวันหมดอายุ ดูรายล็อต','จ่ายของแบบ FEFO พร้อมเตือนล่วงหน้าตามระยะที่ตั้งไว้'),
+       P(2,'จับได้เวลาผูกล็อตข้ามลำดับ','ของเก่ายังค้างอยู่ แต่ดันไปจองล็อตใหม่ — ระบบเห็น'),
+       P(3,'มุมเงินจม','แยกสาเหตุให้ว่าเกินแผน ใกล้หมดอายุ หรือไม่เคยถูกจอง'),
+       P(4,'แต่ละบรรทัดมีทางออกให้','คืนผู้ขาย · เอาไปใช้แทนตัวอื่น · เร่งขาย · ตัดจำหน่าย')],
+ foot:'สองมุมนี้ใช้ข้อมูลชุดเดียวกันและตัวกรองเดียวกัน ตัวเลขสองฝั่งเลยขัดกันไม่ได้'},
+
+idle:{nm:'วัตถุดิบที่ไม่มีใครจอง',cd:'หน้าจอ 06',
+ tt:'วัตถุดิบ<em>ที่ไม่มีใครจอง</em>',
+ lead:'เงินที่จมอยู่กับวัตถุดิบซึ่งไม่มีใบสั่งผลิตและไม่มี Forecast ตัวไหนจองไว้',
+ why:'ลดสต๊อกได้โดยไม่กระทบไลน์ผลิต เพราะระบบแยกให้ชัดว่าของก้อนไหนปล่อยได้ ของก้อนไหนแผนยังต้องใช้',
+ pins:[P(1,'หักกับแผนจริง','เทียบของคงเหลือกับใบสั่งผลิตและ Sale Forecast ล่วงหน้า 3–4 เดือน'),
+       P(2,'แยกมูลค่าเงินจมตามสาเหตุ','ไม่มีใครจองเลย · เหลือค้างเกินแผน · จะหมดอายุก่อนได้ใช้'),
+       P(3,'ค้างมานานแค่ไหน','แยกมูลค่าตามวันเบิกครั้งล่าสุด ตั้งแต่ไม่เกิน 3 เดือน จนถึงเกิน 1 ปี'),
+       P(4,'บอกทางออกให้ทีละรายการ','คืนผู้ขาย · ใช้ทดแทนรุ่นอื่น · เร่งระบาย · ตัดจำหน่าย · ทบทวนกับ Sales')],
+ foot:'ส่งรายการให้จัดซื้อได้ทันที ตัดสินใจได้ก่อนที่จะออกใบสั่งซื้อรอบถัดไป'},
+
+trace:{nm:'ที่มาของการสั่งซื้อ',cd:'หน้าจอ 07',
+ tt:'ที่มา<em>ของการสั่งซื้อ</em>',
+ lead:'ตอบคำถามฝ่ายจัดซื้อว่า “ซื้อตัวนี้ทำไม แล้วทำไมต้องเท่านี้”',
+ why:'ของทุกตัวที่สั่งซื้อ บอกได้ว่าเป็นของลูกค้าเจ้าไหน ใครถามก็ตอบได้ทันที ลูกค้ายกเลิกงานก็ตัดได้ถูกตัว',
+ pins:[P(1,'ย้อนกลับได้ 4 ชั้น','บรรทัดสั่งซื้อ → ใบสั่งผลิต → แผนผลิต → ออเดอร์ลูกค้าหรือ Forecast'),
+       P(2,'อธิบายจำนวนให้ทีละบรรทัด','ยอดรวม − สต๊อก − ของกำลังเข้า + ของที่จอง + Safety Stock แล้วปัดตาม MOQ'),
+       P(3,'ไทม์ไลน์ย้อนกลับ','เตือนตอนที่วันซึ่งต้องออกเอกสารเลยไปแล้ว'),
+       P(4,'ผังความสัมพันธ์เอกสาร','สายเอกสารทั้งเส้นอยู่ในหน้าเดียว')],
+ foot:'ถ้าลูกค้ายกเลิกออเดอร์ ระบบบอกได้ทันทีว่าต้องไปตัดบรรทัดสั่งซื้อไหน ตัดเท่าไหร่'},
+
+doa:{nm:'สายอนุมัติ (DOA)',cd:'หน้าจอ 08',
+ tt:'สาย<em>อนุมัติ (DOA)</em>',
+ lead:'สายอนุมัติที่คนเซ็นเห็นบนตัวเอกสารเลย ครอบคลุมทุกอย่างที่ไปแตะแผนหรือแตะต้นทุน',
+ why:'งานอนุมัติเดินทันแผน ทุกใบวิ่งไปหาคนเซ็นเอง และผ่านไปเป็นปี ยังย้อนดูได้ว่าใครตัดสินใจอะไรไว้ ตอนไหน',
+ pins:[P(1,'เดิน 4 ขั้นเหมือนกันทุกใบ','บันทึก → ส่งอนุมัติ → ผู้มีอำนาจอนุมัติ → ดำเนินการปลายทาง ไม่ว่าเป็นเอกสารชนิดไหน'),
+       P(2,'ส่งขึ้นถึงคนอนุมัติที่ถูกชั้น','ตามวงเงิน อิงตารางอำนาจอนุมัติของบริษัทเอง'),
+       P(3,'ไม่อนุมัติต้องมีเหตุผล','บันทึกไว้ในประวัติทุกครั้ง ย้อนกลับมาตรวจได้'),
+       P(4,'อ่านเอกสารได้ครบในหน้าเดียว','ทั้งหัวเอกสารและรายการทุกบรรทัด อยู่บนหน้าจออนุมัติเลย')],
+ foot:'ต่อยอดจากระบบ DOA กลางที่มีอยู่แล้ว งานนี้จึงเป็นการเชื่อมต่อ ไม่ใช่พัฒนาขึ้นใหม่'},
+
+param:{nm:'ค่าที่ใช้วางแผน',cd:'หน้าจอ 09',
+ tt:'ค่า<em>ที่ใช้วางแผน</em>',
+ lead:'ค่าที่ทำให้ MRP คำนวณถูก — และตัวตรวจที่คอยจับค่าผิดก่อนจะทำแผนเพี้ยน',
+ why:'MRP จะแม่นแค่ไหน อยู่ที่ค่าที่ใส่เข้าไป หน้านี้ดูแลค่าพวกนั้นให้ตรง แผนที่ออกมาจึงใช้ได้ตั้งแต่รอบแรก',
+ pins:[P(1,'ค่าหลักดึงมาจาก ERP','MOQ · Lead Time · Safety Stock — ไม่ต้องพิมพ์ซ้ำ'),
+       P(2,'ตัวตรวจค่าแปลก 7 แบบ','เช่น สั่งครั้งเดียวใช้ได้เกินหกเดือน หรือ Lead Time ใส่ผิดหน่วย'),
+       P(3,'แก้ได้เฉพาะค่าที่ ERP ไม่มี','อย่างช่วงล็อกแผน ซึ่งเป็นเรื่องของงานวางแผนโดยเฉพาะ'),
+       P(4,'เก็บประวัติการแก้','ใครแก้ค่าไหน ตอนไหน')],
+ foot:'ค่าผิดตัวเดียวทำแผนเพี้ยนได้ทั้งเดือน ตัวตรวจเลยต้องมีตั้งแต่แรก'},
+
+cost:{nm:'สมุดต้นทุนมาตรฐาน',cd:'หน้าจอ 10',
+ tt:'สมุด<em>ต้นทุนมาตรฐาน</em>',
+ lead:'บอกว่าบอร์ดหนึ่งแผ่นต้นทุนเท่าไหร่ — และตัวเลขนั้นมาจากบรรทัดไหนบ้าง',
+ why:'เวลาคุยเรื่องราคา ต้นทุนเป็นตัวเลขที่ยืนยันได้ สินค้าตัวหนึ่งมีต้นทุนเดียวในงวดนั้น ขยับเมื่อไหร่ก็บอกได้ว่าเพราะอะไร',
+ pins:[P(1,'คิดจาก BOM และ Routing จริง','ไม่ใช่ค่าเฉลี่ย — คิดตามเส้นทางของแต่ละรหัสสินค้า'),
+       P(2,'แยกค่าวัตถุดิบ ค่าแรง ค่าโสหุ้ย','พร้อมต้นทุนของเสีย และเงินที่ได้คืนจากการขายเศษ'),
+       P(3,'Cost Sheet ลงลึกถึงบรรทัด','กดเข้าไปดูได้ว่าต้นทุนมาจากวัตถุดิบตัวไหน กระบวนการไหน'),
+       P(4,'ติดธงตัวที่ยังคิดต้นทุนไม่ได้','พร้อมเหตุผล ลงลึกถึงบรรทัดวัตถุดิบที่ยังไม่มีราคา')],
+ foot:'เก็บเป็นเวอร์ชันรายงวด เอามาเทียบข้ามงวดได้ และบอกได้ชัดว่าต้นทุนขยับเพราะอะไร'},
+
+sheet:{nm:'Cost Sheet',cd:'หน้าจอ 11',
+ tt:'Cost <em>Sheet</em>',
+ lead:'ต้นทุนของสินค้าตัวหนึ่ง แตกให้ดูทีละบรรทัด ทั้งวัตถุดิบและทุกกระบวนการ เรียงตามลำดับที่บอร์ดเดินจริง',
+ why:'ยอดรวมก้อนเดียว แตกออกมาให้เห็นทั้งเส้นทาง เงินหมดไปกับขั้นตอนไหน ดูออกทันที จะลดก็ลดได้ถูกจุด',
+ pins:[P(1,'ค่าวัตถุดิบ ค่าแรง ค่าเครื่อง อยู่บรรทัดเดียวกัน','ทุกกระบวนการมีตัวเลขของตัวเองครบ อ่านเทียบกันได้ในแถวเดียว'),
+       P(2,'ลงครบทุกขั้นใน Routing','ตัด · ฟิล์มแห้ง · AOI · Hot Press · เจาะ · Laser Via · ชุบ · Solder Mask · ผิวสำเร็จ · ทดสอบ · แพ็ก'),
+       P(3,'รวมของเสียและเงินที่ได้คืนจากเศษ','ต้นทุนของเสียกับรายได้จากการขายเศษ อยู่ในยอดรวมเดียวกัน'),
+       P(4,'กดเปิดดูที่มาของทุกตัวเลขได้','แต่ละกลุ่มต้นทุนกางออกเป็นจำนวน × ราคาต่อหน่วย และชั่วโมง × อัตรา ที่ใช้คำนวณจริง')],
+ foot:'สั่งพิมพ์หรือส่งออก Excel ได้ทันทีตามที่เห็น เอาไปแนบชุดคิดราคาหรือแฟ้มตรวจสอบได้เลย'},
+
+sim:{nm:'จำลองผลกระทบต้นทุน',cd:'หน้าจอ 12',
+ tt:'จำลอง<em>ผลกระทบต้นทุน</em>',
+ lead:'ถ้าราคาวัตถุดิบหรือค่าแรงขยับ ตัวไหนโดนบ้าง โดนเท่าไหร่ — แล้วควรเสนอราคาเท่าไหร่',
+ why:'ผู้ขายขึ้นราคามา ตอบกลับด้วยตัวเลขได้ทันที ว่ากระทบกำไรตรงไหน และต้องไปคุยกับลูกค้าเจ้าไหนก่อน',
+ pins:[P(1,'เลือกเองได้ว่าจะทดสอบตัวแปรอะไรบ้าง','ชุดเริ่มต้นให้มา 6 ตัว — วัตถุดิบทั้งหมด รายกลุ่ม รายตัว ค่าแรง ค่าโสหุ้ย อัตราแลกเปลี่ยน — อยากเพิ่มตัวอื่นก็เพิ่มได้ด้วยวิธีเดียวกัน'),
+       P(2,'เห็นกำไรใหม่ทันที','ทั้งรายสินค้าและรายลูกค้า พร้อมผลกระทบรายเดือนของทั้งบริษัท'),
+       P(3,'เสนอราคาที่รักษากำไรเดิมไว้','เป็นตัวเลขตั้งต้นสำหรับไปคุยกับลูกค้า'),
+       P(4,'จุดคุ้มทุนวัตถุดิบ','ราคาขึ้นได้อีกเท่าไหร่ กำไรถึงจะเหลือศูนย์')],
+ foot:'การจำลองไม่ไปแตะข้อมูลจริง และเก็บสมมติฐานทุกชุดไว้ เอามาเทียบกันได้'},
+
+timeline:{nm:'แผนงานโครงการ',cd:'แผนงานโครงการ',
+ tt:'แผนงาน<em>โครงการ</em>',
+ lead:'11 สัปดาห์ถึงวันใช้งานจริง งานวางแผนกับงานต้นทุนทำคู่กันไป เพราะหน้าจอและวิธีคำนวณผ่านการรีวิวกับผู้ใช้ของคุณมาแล้ว',
+ rows:[['เตรียมงานและออกแบบ',1,4,'#4F9DE6'],
+       ['พัฒนา — งานวางแผน',2,8,'#1F6FC4'],
+       ['พัฒนา — งานต้นทุน',3,8,'#00B28F'],
+       ['เชื่อมข้อมูลกับ ERP',5,8,'#7A4FD3'],
+       ['ชุดรายงานมาตรฐาน',6,9,'#0E8CA8'],
+       ['ทดสอบภายในและ QA',3,10,'#D9A400'],
+       ['ผู้ใช้ทดสอบ (UAT)',9,10,'#C25F1E'],
+       ['อบรม ติดตั้ง และตรวจรับ',10,11,'#A32311'],
+       ['เตรียมข้อมูลหลัก (APEX)',1,8,'#FF8006']],
+ ms:[['W1','เริ่มโครงการ'],['W4','เซ็นรับข้อกำหนด'],['W5','เดโมครั้งที่ 1'],
+     ['W8','เดโมครั้งที่ 2 · พร้อม UAT'],['W11','ตรวจรับและใช้งานจริง']],
+ foot:'หลังใช้งานจริง มีทีมดูแลใกล้ชิด 30 วันแรก ต่อด้วยการรับประกันระบบอีก 90 วัน'},
+
+prereq:{nm:'สิ่งที่ต้องเตรียม',cd:'สิ่งที่ต้องเตรียม',
+ tt:'สิ่งที่<em>ต้องเตรียม</em>',
+ lead:'ข้อมูลหลักพร้อมแค่ไหน เป็นตัวตัดสินว่าโครงการเริ่มได้เมื่อไหร่ และมีผลกับตารางงานมากที่สุด',
+ /* ระบบและเครื่อง / คนและเวลา ถอดออกจากสไลด์ — เก็บข้อความไว้เผื่อเปิดกลับ
+    ['ระบบและเครื่อง','#00B28F',['สองสภาพแวดล้อม — ใช้งานจริงและ UAT','ไลเซนส์ Windows Server','SQL Server รุ่น Standard ขึ้นไป','ใบรับรอง HTTPS','สิทธิ์เข้าระบบให้ทีมผู้พัฒนา (VPN)']],
+    ['คนและเวลา','#FF8006',['ผู้ใช้หลักจากฝ่ายวางแผน จัดซื้อ คลัง และบัญชีต้นทุน','วิศวกรฝ่ายผลิตมาช่วยตรวจเวลามาตรฐาน','ผู้ประสานงานฝ่าย IT สำหรับการเชื่อม ERP','คนที่ตัดสินใจเรื่องข้อกำหนดได้']] */
+ groups:[['ข้อมูลหลัก','#1F6FC4',['BOM และอัตราของเสีย','Routing และเวลามาตรฐานรายกระบวนการ','อัตราค่าแรงต่อชั่วโมงรายหน่วยงาน','สต๊อกพร้อมล็อตและวันหมดอายุ','Lead Time และเงื่อนไขผู้ขาย','Forecast ฝ่ายขาย ล่วงหน้า 4 เดือน','พนักงานขายที่ดูแลแต่ละออเดอร์','คู่วัตถุดิบทดแทนที่อนุมัติแล้ว']]],
+ foot:'สองอย่างที่เสี่ยงที่สุดคือ <b>เวลามาตรฐานรายกระบวนการ</b> กับ <b>วันหมดอายุรายล็อต</b> — ทั้งคู่ต้องเสร็จภายในสัปดาห์ที่ 4'},
+
+server:{nm:'สเปกเครื่อง',cd:'สเปกเครื่อง',
+ tt:'สเปก<em>เครื่องเซิร์ฟเวอร์</em>',
+ lead:'ขนาดเครื่องสำหรับใช้งานจริง ส่วนเครื่อง UAT และเครื่องอบรม ใช้สเปกขั้นต่ำได้',
+ app:[['ไม่เกิน 25','4 vCPU','16 GB','120 GB SSD'],
+      ['ไม่เกิน 75','8 vCPU','16 GB','150 GB SSD'],
+      ['ไม่เกิน 150','8 vCPU','32 GB','200 GB SSD']],
+ db:[['ขั้นต่ำ','4 vCPU','16 GB','200 GB SSD'],
+     ['แนะนำ','8 vCPU','32 GB','250 GB SSD']]},
+
+tech:{nm:'เทคโนโลยีที่ใช้',cd:'เทคโนโลยีที่ใช้',
+ tt:'เทคโนโลยี<em>ที่ใช้</em>',
+ lead:'ทุกชั้นใช้รุ่นที่มีการดูแลระยะยาว และเป็นรุ่นที่องค์กรใหญ่ยอมรับ',
+ rows:[['ส่วนหน้า','Angular 22 · Nx · PrimeNG · Bootstrap 5.3 · TypeScript · SignalR · ngx-translate · Chart.js'],
+       ['เบราว์เซอร์ที่รองรับ','Chrome · Edge · Firefox · Safari — สองเวอร์ชันล่าสุดของแต่ละตัว ไม่รองรับ Internet Explorer'],
+       ['ส่วนหลัง','C# บน ASP.NET Core Web API · .NET 10 (LTS) · Entity Framework Core 10 · Serilog · OpenAPI / Swagger'],
+       ['ฐานข้อมูล','Microsoft SQL Server รุ่น Standard ขึ้นไป · อย่างน้อย 2016 SP2 · แนะนำ 2022 · แยกฐานข้อมูลแอปกับฐานข้อมูลบันทึกการใช้งาน'],
+       ['ยืนยันตัวตนและสิทธิ์','Keycloak 26 · OAuth 2.0 / OpenID Connect · รองรับ SSO · ต่อ LDAP / Active Directory ผ่าน User Federation'],
+       ['ระบบรายงาน','เอนจิน PDF ที่พัฒนาเอง แยกเป็นบริการของตัวเองพร้อมคิวงาน · EPPlus · ExcelJS · CsvHelper'],
+       ['การติดตั้ง','Windows Server 2019 / 2022 · IIS พร้อม URL Rewrite, ARR และ WebSocket · Windows Service · HTTPS / TLS'],
+       ['เครื่องมือพัฒนา','Git (GitLab) · GitLab CI · Node.js 22 LTS · .NET SDK 10']]},
+
+qa:{nm:'ถาม-ตอบ',cd:'ถาม-ตอบ',
+ tt:'ขอบคุณ<em>ครับ</em>',
+ lead:'ยินดีตอบคำถาม และเปิดหน้าจอไหนดูละเอียดขึ้นก็ได้ครับ',
+ pts:['ทำงานคู่กับ ERP ที่ใช้อยู่ ไม่ได้เข้าไปแทนที่',
+      'ทุกตัวเลขบนหน้าจอ ย้อนกลับไปหาเอกสารต้นทางได้',
+      'ทุกหน้าจอมีตัวจริงให้ผู้ใช้ของคุณลองกดวันนี้ได้เลย']}
+};
+
+/* ข้อความประจำกรอบสไลด์ (ไม่ได้อยู่ในเนื้อสไลด์) */
+const UI={
+en:{sub:'APEX Planning &amp; Costing System · Presentation',slides:'SLIDES',
+    fitw:'Fit width',fitp:'Fit page',
+    n_daily:'<b>The data is already there</b> — it is just spread across systems, and nobody can see all of it at once.',
+    th_q:'Question',th_a:'Screens that answer it',
+    n_four:'You get the answer <b>down to the document</b> — not just a total, but which order and which customer.',
+    n_scope:'Not included in this scope',
+    v_why:'WHAT THIS MAKES POSSIBLE',v_get:'WHAT YOU GET',v_play:'▶ Play the live demo',
+    v_open:'Open full screen ↗',v_hint:'Scroll inside the screen ↕ &nbsp;·&nbsp; or press ↑ / ↓',
+    v_back:'◀ Back to the summary',
+    s_app:'APPLICATION SERVER',s_db:'DATABASE SERVER',s_cu:'Concurrent users',s_tier:'Tier',s_st:'Storage',
+    n_server:'Microsoft SQL Server <b>Standard edition or higher</b> is needed. The Express edition will not work.',
+    t_layer:'Layer',t_tech:'Technology',wks:'wks',mo:'Month',
+    f_out:'Handover',f_eq:'The numbers behind these steps'},
+th:{sub:'ระบบวางแผนและต้นทุน APEX · การนำเสนอ',slides:'สไลด์',
+    fitw:'พอดีกว้าง',fitp:'พอดีหน้า',
+    n_daily:'<b>ข้อมูลมีอยู่แล้ว</b> — แค่กระจายอยู่คนละระบบ เลยไม่มีใครเห็นภาพรวมพร้อมกันได้',
+    th_q:'คำถาม',th_a:'หน้าจอที่ตอบ',
+    n_four:'ทั้ง 4 ข้อตอบ<b>ลึกถึงตัวเอกสาร</b> — ไม่ใช่แค่ยอดรวม แต่บอกได้ว่าออเดอร์ไหน ลูกค้าเจ้าไหน',
+    n_scope:'ไม่รวมในขอบเขตนี้',
+    v_why:'หน้าจอนี้ทำให้ทำอะไรได้',v_get:'ได้อะไรบ้าง',v_play:'▶ เปิดหน้าจอจริง',
+    v_open:'เปิดเต็มจอ ↗',v_hint:'เลื่อนดูในจอ ↕ &nbsp;·&nbsp; หรือกด ↑ / ↓',
+    v_back:'◀ กลับไปคำอธิบาย',
+    s_app:'เครื่องแอปพลิเคชัน',s_db:'เครื่องฐานข้อมูล',s_cu:'ผู้ใช้พร้อมกัน',s_tier:'ระดับ',s_st:'พื้นที่',
+    n_server:'ต้องใช้ Microsoft SQL Server <b>รุ่น Standard ขึ้นไป</b> รุ่น Express ใช้ไม่ได้',
+    t_layer:'ชั้น',t_tech:'เทคโนโลยี',wks:'สัปดาห์',mo:'เดือนที่',
+    f_out:'ส่งต่อ',f_eq:'ตัวเลขที่อยู่เบื้องหลังแต่ละขั้น'}
+};
+const U=k=>UI[plang][k];
+const S=i=>plang==='th'&&TH[SLIDES[i].k]?Object.assign({},SLIDES[i],TH[SLIDES[i].k]):SLIDES[i];
+
+const R={
+cover:s=>`<div class="cover">
+  <img class="gwm" src="gable-g.png" alt="" />
+  <div class="obar"></div>
+  <img class="clogo" src="gable-logo.png" alt="G-Able" />
+  <img class="cmark" src="gable-mark.png" alt="" />
+  <div class="in">
+    <div class="kick">${s.kick}</div><h1>${s.h1}</h1><div class="bar"></div>
+    <div class="lead">${s.lead}</div>
+    <div class="meta">${s.meta.map(([a,b])=>`<div><b>${a}</b><span>${b}</span></div>`).join('')}</div></div></div>`,
+
+agenda:s=>head(s)+`<div class="grid" style="gap:13px">
+  ${s.rows.map(([n,t,d])=>`<div class="card" style="border-top:0;border-left:6px solid var(--org);display:flex;gap:22px;align-items:center;padding:14px 24px">
+    <div style="flex:0 0 62px;height:62px;border-radius:18px;background:var(--org);color:#fff;font-size:27px;
+      font-weight:800;display:flex;align-items:center;justify-content:center">${n}</div>
+    <div><h4 style="color:var(--ink);font-size:24px">${t}</h4>
+    <p style="margin-top:5px;font-size:17px">${d}</p></div></div>`).join('')}</div>`,
+
+daily:s=>head(s)+`<div class="grid g2">
+  ${s.items.map(([tm,q,a])=>`<div class="qa"><div class="tm">${tm}</div>
+    <div class="qb"><div class="q">${q}</div><div class="a">${a}</div></div></div>`).join('')}</div>`,
+
+four:s=>head(s)+`<table class="tb four">
+  <tr><th style="width:54%">${U('th_q')}</th><th>${U('th_a')}</th></tr>
+  ${s.rows.map(([q,a])=>`<tr><td class="q">${q}</td>
+    <td><span class="chip b">${a}</span></td></tr>`).join('')}</table>`,
+
+/* กล่อง "ไม่รวมในขอบเขต" ถอดออกจากสไลด์ตามที่ผู้นำเสนอจะพูดเอง
+   ข้อความยังเก็บไว้ใน SLIDES[].excl / TH[].excl เผื่อเปิดกลับ (เหมือน lead) */
+scope:s=>head(s)+`<div class="grid g3 scp">
+  ${s.cards.map(([t,n,c,items])=>`<div class="card" style="--c:${c}">
+    <h4>${t}</h4><div class="chip">${n}</div>
+    <ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>`,
+
+flowp:s=>{
+  const st=s.steps, G=s.groups||['',''], term=st[6];
+  const P=[[G[0],st.slice(0,3),st[1][3]],[G[1],st.slice(3,6),st[4][3]]];   /* ชื่อก้อน, 3 ขั้น, สีก้อน */
+  /* ลูกศรไล่สีจากก้อนก่อนหน้าไปหาก้อนถัดไป — ตาอ่านว่าเป็นของชิ้นเดียวกันที่ไหลต่อ ไม่ใช่เส้นคั่น */
+  /* gradientUnits ต้องเป็น userSpaceOnUse — เส้นแนวนอนมี bounding box สูงศูนย์
+     ถ้าใช้ objectBoundingBox (ค่าตั้งต้น) Chrome จะไม่วาดเส้นให้เลย */
+  const arr=(id,a,b)=>`<div class="garr"><svg viewBox="0 0 56 26" width="56" height="26">
+    <defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="2" y1="13" x2="53" y2="13">
+      <stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs>
+    <path d="M2,13 H39" fill="none" stroke="url(#${id})" stroke-width="3.6" stroke-linecap="round"/>
+    <path d="M37,5.5 L53,13 L37,20.5 z" fill="${b}"/></svg></div>`;
+  const row=(d,n)=>`<div class="gr" style="--c:${d[3]}"><i class="gn">${n}</i>
+    <div class="gt"><div class="gl"><span class="gnm">${d[1]}</span><span class="gcd">${d[0]}</span></div>
+      <span class="gds">${d[2]}</span></div></div>`;
+  const pan=([t,items,col],gi)=>`<div class="pan" style="--c:${col}"><div class="ph"><b></b>${t}</div>
+    <div class="ps">${items.map((d,i)=>row(d,gi*3+i+1)).join('')}</div></div>`;
+  const wm=`<svg class="wm" viewBox="0 0 100 100" fill="none" stroke="#fff" stroke-width="4">
+    <ellipse cx="50" cy="24" rx="30" ry="11"/><path d="M20,24 V76 a30,11 0 0 0 60,0 V24"/>
+    <path d="M20,50 a30,11 0 0 0 60,0"/></svg>`;
+  return head(s)+`<div class="fill gwrap">
+    <div class="gflow">${pan(P[0],0)}${arr('fa',P[0][2],P[1][2])}${pan(P[1],1)}${arr('fb',P[1][2],term[3])}
+      <div class="term" style="--c:${term[3]}">${wm}<div class="eb">${U('f_out')}</div>
+        <div class="gl"><span class="gnm">${term[1]}</span><span class="gcd">${term[0]}</span></div>
+        <span class="gds">${term[2]}</span></div></div>
+    </div>`;   /* บล็อกสูตร 3 ใบ + บรรทัดท้าย ถูกเอาออกตามที่เจ้าของงานสั่ง
+                  CSS .eqh/.eqs/.gfoot ยังอยู่ ใส่กลับได้ด้วยการคืนสองบรรทัดนี้ */
+},
+
+flowc:s=>{
+  /* st[4] = Waste & Scrap Resale ไม่แสดงบนภาพ — มันเป็นส่วนหนึ่งของ DM ไม่ใช่ขั้นตอนของตัวเอง
+     (ข้อมูลยังอยู่ใน steps[] เผื่ออยากเอากลับ) จึงเหลือ 3 สายเข้า Cost Book */
+  const st=s.steps, hub=st[0], comp=st.slice(1,4), book=st[5], sim=st[6];
+  /* ── เรขาคณิตของเส้น ────────────────────────────────────────────────
+     HX,HY = จุดศูนย์กลางวงกลมต้นทาง · HR = รัศมี
+     เส้นแต่ละเส้น "ออกจากขอบวงกลมตรงมุมที่เล็งไปหากล่องของตัวเอง" ไม่ได้ออก
+     จุดเดียวกันหมด — โคนเส้นจึงไม่บีบกัน และระยะไต่ขึ้นลงสั้นลงมาก
+     คุมความโค้งด้วย control point ที่ยื่นตามแนวนอนเท่ากันทุกเส้น (BOW)
+     เส้นจึงมีสำนวนโค้งชุดเดียวกัน ไม่ใช่ต่างคนต่างโค้ง                  */
+  const CH=[158,158,158];                    /* ค่าที่วัดจากของจริง ปลายเส้นจึงชนกึ่งกลางการ์ดพอดี */
+  const GAP=36, TOP=350-(CH.reduce((a,b)=>a+b,0)+GAP*(CH.length-1))/2;
+  const TY=CH.map((h,i)=>TOP+CH.slice(0,i).reduce((a,b)=>a+b+GAP,0));
+  const CY=TY.map((t,i)=>t+CH[i]/2);
+  const HX=140, HY=350, HR=140, CL=385, CR=775, JX=905, BOW=56;
+  const ex=CY.map(y=>{const a=Math.atan2(y-HY,CL-HX);
+    return [HX+HR*Math.cos(a), HY+HR*Math.sin(a)];});
+  const f=n=>n.toFixed(1);
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6"
+      markerHeight="6" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="${c}"/></marker>`;
+  const dot=(x,y,r,c)=>`<circle cx="${f(x)}" cy="${f(y)}" r="${r}" fill="${c}" stroke="#fff" stroke-width="3"/>`;
+  const wire=`<svg class="cwire" viewBox="0 0 1470 700" width="1470" height="700"><defs>
+      ${comp.map((c,i)=>mk('ar'+i,c[3])).join('')}${mk('arb',book[3])}${mk('ars',sim[3])}</defs>
+    ${comp.map((c,i)=>`
+      <path d="M${f(ex[i][0])},${f(ex[i][1])} C${f(ex[i][0]+BOW)},${f(ex[i][1])} ${CL-BOW},${CY[i]} ${CL-7},${CY[i]}"
+            stroke="${c[3]}" marker-end="url(#ar${i})"/>
+      <path d="M${CR},${CY[i]} C${CR+BOW},${CY[i]} ${JX-BOW},${HY} ${JX},${HY}" stroke="${c[3]}"/>`).join('')}
+    ${comp.map((c,i)=>dot(ex[i][0],ex[i][1],7,c[3])).join('')}
+    ${dot(JX,HY,9,book[3])}
+    <path d="M${JX},${HY} H919" stroke="${book[3]}" marker-end="url(#arb)"/>
+    <path d="M1225,${HY} H1249" stroke="${sim[3]}" marker-end="url(#ars)"/></svg>`;
+  const bx=(cls,d,extra='')=>`<div class="box ${cls}" style="--c:${d[3]}${extra}">
+    <span class="cd">${d[0]}</span><span class="nm">${d[1]}</span><span class="ds">${d[2]}</span></div>`;
+  return head(s)+`<div class="fill"><div class="cflow">${wire}
+    ${bx('hub',hub)}
+    ${comp.map((c,i)=>`<div class="box comp" style="--c:${c[3]};top:${TY[i]}px;min-height:${CH[i]}px">
+      <span class="cd">${c[0]}</span><span class="nm">${c[1]}</span><span class="ds">${c[2]}</span>
+      </div>`).join('')}
+    ${bx('book',book)}${bx('sim',sim)}
+    <!-- บรรทัดสมการ "Standard cost = DM + DL + OH + Waste − Scrap Resale" ถอดออกตามคำสั่งเจ้าของงาน
+         สูตรยังเก็บไว้ใน SLIDES[].formulas / TH[].formulas เผื่อเปิดกลับ (เหมือน lead กับ foot) -->
+    </div></div>`;
+},
+
+flow:s=>head(s)+`<div class="fill">
+  <div class="fw" style="--rail:linear-gradient(90deg,${s.steps.map(x=>x[3]).join(',')})">
+    ${s.steps.map(([code,t,d,c],i)=>`<div class="stw" style="--c:${c}">
+      <i class="node">${i+1}</i>
+      <div class="st"><span class="cd">${code}</span><span class="nm">${t}</span>
+        <span class="ds">${d}</span><span class="no">${i+1}</span></div></div>`).join('')}
+  </div></div>`,
+
+demo:s=>`<div class="demo-head"><h2>${s.tt}</h2></div>
+  <div class="demo-wrap">
+  <div class="screen"><div class="bar">
+    <span class="dots"><i></i><i></i><i></i></span>
+    <span class="url">${s.url||s.file}</span>
+    <span class="hint">${U('v_hint')}</span>
+    <span class="tag">● LIVE</span>
+    <button class="back">${U('v_back')}</button>
+    <a href="${s.file}" target="_blank" rel="noopener">${U('v_open')}</a></div>
+    <div class="frame" data-src="${s.file}" data-vw="${s.vw||0}">
+      <iframe loading="lazy" src="about:blank"></iframe>
+      <div class="veil"><div class="vin">
+        <!-- บรรทัดสรุปเล็ก (lead) กับบรรทัดปิดท้าย (foot) ถอดออกจากทุกหน้าจอเดโม
+             ผู้นำเสนอพูดเอง ข้อความยังเก็บไว้ใน SLIDES[]/TH[] เผื่อเปิดกลับ -->
+        <!-- แผงซ้ายเป็นภาพหน้าจอย่อส่วนแทนย่อหน้าอธิบาย — เห็นของจริงก่อนกดเปิด
+             ประโยค why ยังเก็บไว้ใน SLIDES[]/TH[] เผื่อเปิดกลับ (เหมือน lead กับ foot) -->
+        <div class="vl"><span class="vh">${U('v_why')}</span>
+          <div class="vp"><div class="vshot"><iframe class="pv" loading="lazy" src="about:blank"
+                data-src="${s.file}" scrolling="no" tabindex="-1" aria-hidden="true"></iframe></div>
+            <div class="vgo"><button class="play">${U('v_play')}</button></div></div></div>
+        <div class="vr"><span class="vh">${U('v_get')}</span>
+          <ul>${s.pins.map(p=>`<li><i>${p.n}</i><span class="tx"><b>${p.t}</b><span>${p.d}</span></span></li>`).join('')}</ul></div>
+      </div></div></div></div>
+  <div class="pins">${s.pins.map(p=>`<div class="pin"><span class="n">${p.n}</span>
+    <b>${p.t}</b></div>`).join('')}</div></div>`,
+
+/* ตำแหน่งหมุดหมาย = กึ่งกลางสัปดาห์นั้น คิดเป็น % ใน JS เพื่อเลี่ยง calc() ที่หารด้วย var()
+   ซึ่งเบราว์เซอร์รุ่นเก่ารองรับไม่ครบ */
+timeline:s=>head(s)+`<div class="tl" style="--w:${s.weeks}">
+  <div class="tlhd"><div class="lb"></div><div>
+    <div class="mo">${Array.from({length:Math.ceil(s.weeks/4)},(_,i)=>{
+      const a=i*4+1,b=Math.min(a+3,s.weeks);
+      return `<span style="grid-column:${a}/${b+1}">${U('mo')} ${i+1}</span>`;}).join('')}</div>
+    <div class="wk">${Array.from({length:s.weeks},(_,i)=>`<span>W${i+1}</span>`).join('')}</div>
+  </div></div>
+  <div class="tlbd">
+    <div class="lines">${Array.from({length:s.weeks},(_,i)=>
+      `<i class="${i>0&&i%4===0?'mb':''}${i===s.weeks-1?' gl':''}"></i>`).join('')}</div>
+    <div class="mk">${s.ms.map(([w])=>
+      `<u style="left:${((+String(w).replace(/\D/g,'')-.5)/s.weeks*100).toFixed(3)}%"></u>`).join('')}</div>
+    <div class="rows">
+      ${s.rows.map(([l,a,b])=>`<div class="r">
+        <div class="lb">${l}</div>
+        <div class="trk"><span class="bar" style="grid-column:${a}/${b+1}">${b-a+1} ${U('wks')}</span></div>
+      </div>`).join('')}
+    </div>
+  </div></div>
+  <div class="ms">${s.ms.map(([w,t])=>`<div class="m"><b>${w}</b><span>${t}</span></div>`).join('')}</div>`,
+
+/* จำนวนคอลัมน์วิ่งตามจำนวนกลุ่ม — ถ้าเหลือกลุ่มเดียวการ์ดกินเต็มความกว้าง
+   แล้วแตกรายการเป็นสองคอลัมน์ (คลาส solo) ไล่จากซ้ายลงล่างก่อนขึ้นคอลัมน์ขวา */
+prereq:s=>{const solo=s.groups.length===1;
+  return head(s)+`<div class="grid" style="grid-template-columns:repeat(${s.groups.length},1fr)">
+  ${s.groups.map(([t,c,items])=>{const rw=Math.ceil(items.length/2);
+    return `<div class="card prqc${solo?' solo':''}" style="--c:${c}"><h4>${t}</h4>
+    <ul${solo?` style="grid-template-rows:repeat(${rw},1fr)"`:''}>${
+      items.map((x,i)=>`<li${solo&&(i+1)%rw===0?' class="lr"':''}>${x}</li>`).join('')}</ul></div>`;
+  }).join('')}</div>`;},
+
+server:s=>head(s)+`<div class="grid g2 srv">
+  <div><h4 style="font-size:16px;letter-spacing:.1em;color:var(--org);margin-bottom:10px">${U('s_app')}</h4>
+  <table class="tb"><tr><th>${U('s_cu')}</th><th>CPU</th><th>RAM</th><th>${U('s_st')}</th></tr>
+  ${s.app.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:700"':''}>${c}</td>`).join('')}</tr>`).join('')}</table></div>
+  <div><h4 style="font-size:16px;letter-spacing:.1em;color:var(--org);margin-bottom:10px">${U('s_db')}</h4>
+  <table class="tb"><tr><th>${U('s_tier')}</th><th>CPU</th><th>RAM</th><th>${U('s_st')}</th></tr>
+  ${s.db.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:700"':''}>${c}</td>`).join('')}</tr>`).join('')}</table></div></div>`,
+
+tech:s=>head(s)+`<table class="tb tech">
+  <tr><th style="width:19%">${U('t_layer')}</th><th>${U('t_tech')}</th></tr>
+  ${s.rows.map(([a,b])=>`<tr><td style="font-weight:700">${a}</td><td>${b}</td></tr>`).join('')}</table>`,
+
+/* การ์ดสรุป 3 ใบถูกเอาออกตามที่เจ้าของงานสั่ง — ข้อมูล pts[] ยังอยู่ในเด็คทั้งสองภาษา ใส่กลับได้ทันที */
+qa:s=>`<div class="fill" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
+  <h2 class="tt" style="font-size:104px;line-height:1.1">${s.tt}</h2>
+  <div class="rule" style="margin:30px auto 0;width:190px;height:7px"></div></div>`
+};
+
+function buildNav(){
+  g('navlist').innerHTML=SLIDES.map((_,i)=>{const s=S(i);return `<a href="#${s.k}" data-i="${i}">
+  <span class="idx">${i+1}</span><span class="txt"><span class="nm">${s.nm}</span>
+  <span class="cd">${s.cd}${s.type==='demo'?'<span class="bd">LIVE</span>':''}</span></span></a>`;}).join('');
+  document.querySelectorAll('#navlist a').forEach((a,i)=>a.classList.toggle('on',i===cur));
+}
+g('count').textContent='1 / '+SLIDES.length;
+
+let cur=0, zoom='page';        /* นำเสนอแบบเต็มหน้าเป็นค่าตั้งต้น */
+const AUTOLIVE=/(\?|&)live=1(&|$)/.test(location.search);
+
+/* ── ภาษาของหน้าจอที่ฝังอยู่ในสไลด์ ───────────────────────────────
+   หน้าจอเดโมอ่านภาษาจาก localStorage['apex_lang'] (apex-i18n.js)
+   เด็คนี้ตั้งต้นเป็น EN เพราะใช้นำเสนอภาษาอังกฤษ สลับได้จากปุ่มบนหัว */
+let plang='en';
+try{plang=localStorage.getItem('apexPresLang')||'en';}catch(e){}
+function setLang(l){
+  plang=l;
+  try{localStorage.setItem('apex_lang',l);localStorage.setItem('apexPresLang',l);}catch(e){}
+  document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  document.documentElement.lang=l;
+  document.querySelector('header .sub').innerHTML=U('sub');
+  document.querySelector('nav .head .t').textContent=U('slides');
+  document.querySelector('#zoom button[data-m="width"]').textContent=U('fitw');
+  document.querySelector('#zoom button[data-m="page"]').textContent=U('fitp');
+  document.querySelectorAll('.frame.live iframe').forEach(f=>{      /* จอที่เปิดอยู่สลับทันที */
+    try{f.contentWindow.postMessage({apexLang:l},'*');}catch(e){}
+  });
+  if(g('sheet')){buildNav();render();}   /* สลับตัวสไลด์ด้วย ไม่ใช่แค่จอที่ฝัง */
+}
+setLang(plang);
+document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+
+/* ── ซูมหน้าจอในกรอบเดโม ─────────────────────────────────────────
+   1480 = ความกว้างกรอบจริง · render แคบกว่านั้นแล้วขยายกลับ = ตัวหนังสือใหญ่ขึ้น
+   ปรับสดตอนซ้อมด้วย [ และ ] ค่าจำไว้ในเครื่อง */
+const FRAME_W=1480, VW_DEF=1220;
+/* ความสูง viewport ของภาพพรีวิวในหน้ากาก — ต้องตรงกับ aspect-ratio ของ .vshot */
+const SHOT_H=940;
+let vwAdj=0, autoVw=0;
+try{vwAdj=parseInt(localStorage.getItem('apexPresVwAdj'),10)||0;}catch(e){}
+function applyDemoZoom(){
+  const f=document.querySelector('.frame'); if(!f) return;
+  const ifr=f.querySelector(':scope>iframe');
+  const base=+(f.dataset.vw||0)||VW_DEF;
+  const w=Math.max(1000,Math.min(FRAME_W,base+vwAdj+autoVw));
+  const sc=FRAME_W/w;
+  ifr.style.width=w+'px';
+  /* ความสูงต้องเท่ากับกรอบหารด้วยอัตราซูม — หน้าจอข้างในจึงมี viewport จริง
+     แล้วเลื่อนดูเนื้อหาส่วนล่างได้เอง (ถ้าปล่อยสูง 1400px จะไม่มีอะไรให้เลื่อน
+     เพราะเนื้อหาพอดี viewport แล้วถูกกรอบครอบตัดทิ้ง) */
+  ifr.style.height=Math.round(f.clientHeight/sc)+'px';
+  ifr.style.transform='scale('+sc.toFixed(4)+')';
+}
+/* ปิดหน้าจอจริงกลับไปแผงคำอธิบาย — คืนค่าเท่าที่ start() ทำไว้ ไม่แตะ src ของ iframe */
+function unlive(){
+  const f=document.querySelector('.frame.live'); if(!f) return false;
+  f.classList.remove('live');f.closest('.screen').classList.remove('live');
+  autoVw=0;applyDemoZoom();      /* ป๊อปอัพในหน้าลูกอาจถ่างกรอบไว้ — คืนความกว้างเดิม */
+  /* ต้องวัดใหม่หลังแผงกลับมาเห็น: ถ้าเข้าด้วย ?live=1 ตอน render() แผงยัง display:none
+     อยู่ mountShot() เลยวัดความกว้างได้ 0 แล้วข้ามการย่อภาพไปเลย */
+  mountShot();
+  return true;
+}
+/* เลื่อนหน้าจอในกรอบจากปุ่มคีย์บอร์ด — ตอนนำเสนอมือไม่ต้องอยู่บนจอ */
+function scrollDemo(dy){
+  const f=document.querySelector('.frame.live'); if(!f) return false;
+  const w=f.querySelector(':scope>iframe').contentWindow;
+  try{w.scrollBy({top:dy,behavior:'smooth'});}catch(e){return false;}
+  return true;
+}
+function stepZoom(d){
+  vwAdj=Math.max(-220,Math.min(260,vwAdj+d));
+  try{localStorage.setItem('apexPresVwAdj',vwAdj);}catch(e){}
+  applyDemoZoom();
+}
+/* ── ป๊อปอัพในหน้าจอเดโมกว้างเกินกรอบ → ขยาย viewport ของกรอบให้เอง ──────
+   apex-fit ในหน้าลูกขยายกล่องป๊อปอัพจนเต็มพื้นที่ที่มีก่อนแล้ว ถ้ายังไม่พออีก
+   (ตารางกว้างกว่าจอจริง ๆ) ค่อยขยายจอในกรอบต่อ ได้ถึง 1480 = ขนาดกรอบจริง
+   ปิดป๊อปอัพแล้วกลับขนาดเดิม ตัวหนังสือบนหน้าจอหลักจึงใหญ่เท่าเดิม
+   ⚠ ห้ามใส่ CSS transition ให้ .frame iframe — หน้าลูกจะอ่าน viewport ได้ค่าเก่า */
+function autoWidenDemo(){
+  const f=document.querySelector('.frame.live'); if(!f) return;
+  let cw,st;
+  try{ cw=f.querySelector(':scope>iframe').contentWindow;
+       st=cw.ApexFit&&cw.ApexFit.dlgFit&&cw.ApexFit.dlgFit(); }catch(e){ return; }
+  if(!st) return;
+  /* กรอบเปลี่ยนขนาดแล้วต้องสั่งหน้าลูกจัดใหม่ทันที ไม่รอ event resize ของมันเอง */
+  const apply=()=>{applyDemoZoom();try{cw.ApexFit.refresh();}catch(e){}};
+  if(!st.open){ if(autoVw){autoVw=0;apply();} return; }           /* ปิดป๊อปอัพแล้ว */
+  if(st.need<=2) return;
+  const base=+(f.dataset.vw||0)||VW_DEF;
+  const room=FRAME_W-Math.max(1000,Math.min(FRAME_W,base+vwAdj+autoVw));
+  if(room<=0) return;                                            /* กว้างสุดแล้ว */
+  autoVw+=Math.min(st.need+12,room);
+  apply();
+}
+setInterval(autoWidenDemo,450);
+function render(){
+  const s=S(cur), isCover=s.type==='cover', isDemo=s.type==='demo';
+  g('stage').innerHTML=`<div class="sheet${isCover?' dark':''}" id="sheet">
+    ${isCover?'':'<div class="gh"><img src="gable-logo-dark.png" alt="G-Able" /></div>'}
+    <div class="gb${isDemo?' dm':''}">${R[s.type](s)}</div>
+    ${isCover?'':`<div class="gf"><img src="gable-bar.png" alt="" />
+      <span class="pg">${cur+1} / ${SLIDES.length}</span>
+      <span class="cf">Copyright @ G-ABLE Public Company Limited</span></div>`}</div>`;
+  document.querySelectorAll('#navlist a').forEach((a,i)=>a.classList.toggle('on',i===cur));
+  g('count').textContent=(cur+1)+' / '+SLIDES.length;
+  /* ในกรอบ srcdoc (พรีวิวในแชท) เอกสารไม่มี URL จริง replaceState จะโยน SecurityError */
+  try{history.replaceState(null,'','#'+s.k);}catch(e){}
+  autoVw=0;                      /* สไลด์ใหม่ = เริ่มนับความกว้างที่ต้องเพิ่มใหม่ */
+  applyDemoZoom();
+  const f=document.querySelector('.frame');
+  if(f){
+    const start=()=>{const ifr=f.querySelector(':scope>iframe');
+      if(ifr.src.indexOf('about:blank')>=0) ifr.src=f.dataset.src;
+      f.classList.add('live');f.closest('.screen').classList.add('live');};
+    f.querySelector('.play').onclick=start;
+    f.querySelector('.veil').onclick=start;
+    /* กลับไปแผงคำอธิบาย — ไม่ล้าง src ของ iframe หน้าจอจริงจึงยังค้างอยู่
+       กด "เปิดหน้าจอจริง" อีกทีก็กลับมาทันที ไม่ต้องโหลดใหม่ */
+    document.querySelector('.screen .back').onclick=e=>{e.stopPropagation();unlive();};
+    if(AUTOLIVE) start();          /* ?live=1 → เปิดสไลด์มาแล้วเล่นเลย */
+  }
+  mountShot();
+  fit();
+}
+
+/* ── ภาพหน้าจอย่อส่วนในแผงซ้ายของหน้ากาก ──
+   เรนเดอร์หน้าจอจริงที่ความกว้าง 1480 (เท่ากรอบใหญ่) แล้วย่อด้วย transform ให้พอดีแผง
+   ความสูงตั้งเป็น "ความสูงแผง ÷ อัตราย่อ" หน้าลูกจึงได้ viewport จริง สัดส่วนไม่เพี้ยน
+   มีสไลด์ละตัวเดียวเพราะเด็คเรนเดอร์ทีละสไลด์ · โหลดไฟล์เดียวกับตอนกดเปิดหน้าจอจริง
+   กดเปิดทีหลังจึงมาจากแคช ไม่ได้โหลดซ้ำจริง */
+function mountShot(){
+  const b=document.querySelector('.veil .vshot'); if(!b) return;
+  const f=b.querySelector('iframe'); if(!f) return;
+  const sc=b.clientWidth/FRAME_W;
+  if(!(sc>0)) return;
+  f.style.width=FRAME_W+'px';
+  f.style.height=SHOT_H+'px';
+  f.style.transform='scale('+sc.toFixed(4)+')';
+  if(f.src.indexOf('about:blank')>=0) f.src=f.dataset.src;
+}
+function fit(){
+  const sh=g('sheet'); if(!sh) return;
+  const fs=document.body.classList.contains('fs'), pad=fs?0:40;
+  sh.style.transform='scale(1)';
+  const availW=g('stage').clientWidth-pad, availH=g('stage').clientHeight-pad;
+  const natH=sh.offsetHeight;
+  let sc=Math.min(1,availW/1600);
+  if(zoom==='page'||fs) sc=Math.min(availW/1600, availH/natH);
+  sh.style.transform='scale('+sc+')';
+  sh.style.marginBottom=(natH*(sc-1))+'px';
+}
+g('full').onclick=()=>{
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen();
+};
+document.addEventListener('fullscreenchange',()=>{
+  document.body.classList.toggle('fs',!!document.fullscreenElement);
+  fit();
+});
+function go(i){cur=Math.max(0,Math.min(SLIDES.length-1,i));render();}
+
+g('prev').onclick=()=>go(cur-1);
+g('next').onclick=()=>go(cur+1);
+g('navlist').onclick=e=>{const a=e.target.closest('a'); if(a){e.preventDefault();go(+a.dataset.i);closeNav();}};
+document.querySelectorAll('#zoom button').forEach(b=>b.onclick=()=>{
+  zoom=b.dataset.m;
+  document.querySelectorAll('#zoom button').forEach(x=>x.classList.toggle('on',x===b));
+  fit();});
+
+const nv=g('nv'), scrim=document.querySelector('.scrim');
+function openNav(){nv.classList.add('on');scrim.classList.add('on');}
+function closeNav(){nv.classList.remove('on');scrim.classList.remove('on');}
+g('menu').onclick=()=>nv.classList.contains('on')?closeNav():openNav();
+document.querySelector('.edge').onmouseenter=openNav;
+scrim.onclick=closeNav;
+g('pin').onclick=()=>{document.body.classList.toggle('pinned');
+  g('pin').classList.toggle('on',document.body.classList.contains('pinned'));
+  try{localStorage.setItem('apexPresPin',document.body.classList.contains('pinned')?'1':'0');}catch(e){}
+  closeNav();fit();};
+try{if(localStorage.getItem('apexPresPin')==='1'){document.body.classList.add('pinned');g('pin').classList.add('on');}}catch(e){}
+
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(cur+1);}
+  else if(e.key==='ArrowLeft') go(cur-1);
+  else if(e.key==='ArrowDown'){if(scrollDemo(420)) e.preventDefault();}   /* เลื่อนหน้าจอเดโมลงล่าง */
+  else if(e.key==='ArrowUp'){if(scrollDemo(-420)) e.preventDefault();}
+  else if(e.key==='Home') go(0);
+  else if(e.key==='End') go(SLIDES.length-1);
+  /* Esc — เมนูเปิดอยู่ปิดเมนูก่อน ถ้าไม่มีเมนูก็ถอยจากหน้าจอจริงกลับแผงคำอธิบาย */
+  else if(e.key==='Escape'){ if(nv.classList.contains('on')) closeNav(); else unlive(); }
+  else if(e.key==='m'||e.key==='M') g('menu').click();
+  else if(e.key==='p'||e.key==='P') g('pin').click();
+  else if(e.key==='l'||e.key==='L') setLang(plang==='en'?'th':'en');
+  else if(e.key==='f'||e.key==='F') g('full').click();
+  else if(e.key===']') stepZoom(-40);      /* จอในสไลด์ใหญ่ขึ้น */
+  else if(e.key==='[') stepZoom(40);       /* เห็นเนื้อหากว้างขึ้น */
+  else if(e.key==='1'){zoom='width';document.querySelectorAll('#zoom button').forEach(x=>x.classList.toggle('on',x.dataset.m==='width'));fit();}
+  else if(e.key==='2'){zoom='page';document.querySelectorAll('#zoom button').forEach(x=>x.classList.toggle('on',x.dataset.m==='page'));fit();}
+});
+window.addEventListener('resize',fit);
+buildNav();
+const h=location.hash.replace('#','');
+const hi=SLIDES.findIndex(s=>s.k===h);
+go(hi>=0?hi:0);
+/* เปิดครั้งแรกแบบแคชว่าง ฟอนต์ยังมาไม่ถึงตอน render แรก ความสูงแผงจึงยังไม่นิ่ง
+   พอฟอนต์พร้อมค่อยวัดกรอบใหม่อีกรอบ */
+try{document.fonts.ready.then(()=>{mountShot();fit();});}catch(e){}
+</script>
+</body>
+</html>

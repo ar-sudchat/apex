@@ -74,17 +74,40 @@ function buildDict(){
   RX=keys.length?new RegExp(keys.map(escRe).join('|'),'g'):null;
 }
 
-/* แปลสตริง: จับคู่ทั้งก้อนก่อน ไม่เจอค่อยแทนที่รายวลี */
+/* หน่วยนับที่ JS ประกอบตอนรัน เช่น "แสดง 1–30 จาก 30 รายการ" · "ทุก 7 วัน"
+   คำพวกนี้สั้นกว่า 4 ตัวอักษร จึงไม่เข้ารอบ substring ด้านบน
+   จับเฉพาะเมื่ออยู่ติดตัวเลขเท่านั้น กันแทนที่ผิดที่ในประโยคทั่วไป */
+var NUMFIX=[
+  [/([\d?])\s*วัน(?![฀-๿])/g,'$1 days'],
+  [/([\d,])\s*รายการ(?![฀-๿])/g,'$1 items'],
+  [/([\d,])\s*แถว(?![฀-๿])/g,'$1 rows'],
+  [/(\d)\s*ใบ(?![฀-๿])/g,'$1 docs'],
+  [/(\d)\s*ตัว(?![฀-๿])/g,'$1 items'],
+  [/(\d)\s*คู่(?![฀-๿])/g,'$1 pairs'],
+  [/(\d)\s*จุด(?![฀-๿])/g,'$1 pts'],
+  [/(\d)\s*ล\./g,'$1M'],
+  [/ทุก(?=\s*[\d?])/g,'every'],
+  [/จาก(?=\s*[\d?])/g,'of'],
+  /* "รวม 5 รายการ" ในแถวท้ายตาราง — buildDict() ตัดช่องว่างท้าย key ทิ้ง คีย์ "รวม "
+     จึงเหลือ 3 ตัวอักษร ไม่เข้ารอบ substring (ต้อง ≥4) ต้องมาจับตรงนี้แทน
+     บังคับว่าห้ามมีอักษรไทยนำหน้า กัน "วางแผนรวม 120" กลายเป็น "วางแผนTotal 120" */
+  [/(^|[^฀-๿])รวม(?=\s*[\d,])/g,'$1Total ']
+];
+function numFix(s){
+  for(var i=0;i<NUMFIX.length;i++)s=s.replace(NUMFIX[i][0],NUMFIX[i][1]);
+  return s;
+}
+
+/* แปลสตริง: จับคู่ทั้งก้อนก่อน ไม่เจอค่อยแทนที่รายวลี แล้วปิดท้ายด้วยหน่วยนับ */
 function trStr(s){
   if(!s||!TH_RE.test(s))return null;
   var t=s.trim(),lead=s.slice(0,s.indexOf(t.charAt(0))),tail='';
   if(t.length)tail=s.slice(lead.length+t.length);
   if(DICT.hasOwnProperty(t))return lead+DICT[t]+tail;
-  if(RX){
-    var out=s.replace(RX,function(m){return DICT[m];});
-    if(out!==s)return out;
-  }
-  return null;
+  var out=s;
+  if(RX)out=out.replace(RX,function(m){return DICT[m];});
+  out=numFix(out);
+  return out!==s?out:null;
 }
 
 function trNode(nd){
@@ -99,6 +122,25 @@ function trNode(nd){
   nd.__apexSet=res;nd.data=res;
 }
 
+/* ช่องแสดงผลอย่างเดียว (readonly/disabled) เช่น "5 รายการ" ในช่อง Item
+   บางหน้าเซ็ตค่าด้วย JS เป็น property จึงต้องอ่านจาก .value ไม่ใช่ attribute */
+function trInputValue(el){
+  if(!el||el.tagName!=='INPUT')return;
+  if(!(el.readOnly||el.disabled))return;
+  if(el.closest&&el.closest('[data-no-i18n]'))return;
+  var v=el.value;
+  if(!v||!TH_RE.test(v))return;
+  var res=trStr(v);
+  if(res==null||res===v)return;
+  if(!el.__apexA){el.__apexA={};AREG.push(el);}
+  if(!('value' in el.__apexA))el.__apexA.value=v;
+  el.value=res;
+}
+function sweepReadonly(){
+  var el=document.querySelectorAll('input[readonly],input[disabled]');
+  for(var i=0;i<el.length;i++)trInputValue(el[i]);
+}
+
 function trAttrs(el){
   if(!el.getAttribute)return;
   if(el.closest&&el.closest('[data-no-i18n]'))return;
@@ -111,7 +153,7 @@ function trAttrs(el){
     if(!(a in el.__apexA))el.__apexA[a]=v;
     el.setAttribute(a,res);
   }
-  /* ปุ่ม input value */
+  trInputValue(el);
   if(el.tagName==='INPUT'&&/^(button|submit|reset)$/i.test(el.type||'')&&TH_RE.test(el.value||'')){
     var rv=trStr(el.value);
     if(rv!=null){
@@ -156,6 +198,7 @@ function revert(){
 /* ─── MutationObserver: แปลเนื้อหาที่ JS สร้างทีหลัง (modal, toast, ตาราง re-render) ─── */
 var mo=new MutationObserver(function(muts){
   if(lang!=='en')return;
+  sweepReadonly();       /* ค่าที่ JS เซ็ตเป็น property ไม่เข้า mutation — กวาดซ้ำทุกรอบ */
   for(var i=0;i<muts.length;i++){
     var m=muts[i];
     if(m.type==='childList'){

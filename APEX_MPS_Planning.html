@@ -161,6 +161,27 @@ tr.row-net td{background:var(--p-green)}
 tr.row-net .fz{background:var(--p-green)}
 tr.row-net .lbl{color:#22684a;font-weight:600}
 
+/* ── แถบเช็คกำลังผลิตรายโรง (ท้ายตาราง) ── */
+tfoot td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;
+  white-space:nowrap;border-right:1px solid var(--line);background:#fff}
+tfoot td:last-child{border-right:none}
+tfoot tr:last-child td{border-bottom:none}
+tr.cap-hd td{background:#eef4fb;border-top:2px solid var(--line-d);color:#3a5773;
+  font-weight:600;font-size:12.5px}
+tr.cap-hd .fz{background:#eef4fb}
+tr.cap-hd .lbl{text-align:left;font-size:13px}
+tr.cap-hd .lbl small,tr.cap-row .lbl small{display:block;font-weight:400;color:var(--mut);
+  font-size:11px;margin-top:2px}
+tr.cap-hd .cap-days{color:var(--mut);font-weight:400;font-size:12px}
+tr.cap-row .lbl{text-align:left;padding-left:24px;color:#2b3a4a;font-weight:600}
+tr.cap-row .cap-cap{color:#5a6b7d;background:#f2f5f8!important;font-size:12.5px}
+.cap-ok{color:var(--green);font-weight:600;background:var(--p-green)!important}
+.cap-tight{color:#a06a00;font-weight:600;background:#fdf7e2!important}
+.cap-over{color:var(--red);font-weight:700;background:var(--p-red)!important}
+.cap-off{color:#c3d0dd}
+/* ดาวเล็ก = วันที่กำลังผลิตไม่เต็ม (หยุดซ่อมบำรุง / วันหยุด) เอาเมาส์ชี้เพื่อดูสาเหตุ */
+td.cap-cut i{font-style:normal;color:var(--orange);font-weight:700;margin-left:3px}
+
 .tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-left:8px;vertical-align:1px}
 .tag-sh{background:#fdeceb;color:#b32b2b}
 .tag-ok{background:#e9f8f0;color:#1a7a42}
@@ -437,7 +458,7 @@ html.embed .content{padding-top:14px}
         <div class="f"><label>Customer</label>
           <div class="ctrl-2">
             <div class="ctrl"><input value="" placeholder="รหัส" /></div>
-            <div class="ctrl"><input value="ทั้งหมด" />
+            <div class="ctrl"><input value="ทั้งหมด" readonly />
               <span class="ico"><button><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button></span>
             </div>
           </div>
@@ -490,6 +511,7 @@ html.embed .content{padding-top:14px}
         <table>
           <thead><tr id="thead"></tr></thead>
           <tbody id="tbody"></tbody>
+          <tfoot id="tfoot"></tfoot>
         </table>
       </div>
 
@@ -499,6 +521,13 @@ html.embed .content{padding-top:14px}
         <span><i style="background:var(--p-green);border:1px solid #c3e8d3"></i> Net Balance ≥ Min</span>
         <span><i style="background:#fdf7e2;border:1px solid #ecdba6"></i> ต่ำกว่า Min</span>
         <span><i style="background:#c62828;border:1px solid #a02121"></i> ติดลบ / Stock-out</span>
+      </div>
+      <div class="legend">
+        <span style="font-weight:600;color:#3a5773">เช็คกำลังผลิตรายโรง</span>
+        <span><i style="background:var(--p-green);border:1px solid #c3e8d3"></i> ใช้กำลังผลิตไม่เกิน 85% — รับไหวสบาย</span>
+        <span><i style="background:#fdf7e2;border:1px solid #ecdba6"></i> 85–100% — ตึง ไม่เหลือที่รับงานแทรก</span>
+        <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> เกิน 100% — แผนเกินกว่าที่โรงนั้นรับไหว</span>
+        <span><b style="color:var(--orange)">*</b> วันที่กำลังผลิตไม่เต็ม — ชี้ที่ช่องเพื่อดูสาเหตุ</span>
       </div>
 
     </div>
@@ -580,6 +609,51 @@ ITEMS.forEach(it => { const s = series(it); it.inb = s.inb; it.outb = s.outb;
   for(let i=0;i<HORIZON;i++){ r += it.inb[i] + it.outb[i]; it.net.push(r); }
 });
 
+/* ── กำลังผลิตรายโรง (FR-10) ──────────────────────────────────
+   ตรวจที่ระดับ "โรงงาน × ช่วงเวลา" พอเตือนได้ว่าแผนเกินกำลัง
+   การตรวจถึงระดับศูนย์งาน (work centre) เป็นงานเฟสถัดไป
+   หน่วยเป็นแผ่นแพเนล (PNL) ซึ่งเป็นหน่วยกำลังผลิตของโรงงาน PCB
+   แปลงจาก PCS ด้วยจำนวนชิ้นต่อแพเนลของสินค้าตัวนั้น (1 BRD : pnl PNL : pcs PCS) */
+const PLANTS = [{c:'A1',cap:850},{c:'A2',cap:400},{c:'A3',cap:78}];   // PNL ต่อวันทำงาน
+const isWorkday = i => addDays(ORIGIN,i).getDay() !== 0;             // อาทิตย์หยุด — ตรงกับตัวสร้างยอดส่งมอบ
+
+/* ปฏิทินกำลังผลิต — วันที่โรงเดินไม่เต็มกำลัง
+   สาเหตุที่ทำให้แผนเกินกำลังส่วนใหญ่มาจากฝั่งกำลังผลิตหด ไม่ใช่ยอดสั่งเพิ่ม
+   จึงต้องเทียบกับกำลังผลิตของวันนั้นจริง ๆ ไม่ใช่ค่าเต็มตลอดทั้งปี */
+const CAPCUT = [
+  {p:'A1', from:'12-08-2026', to:'13-08-2026', pct:.55, why:'หยุดซ่อมบำรุงไลน์ Hot Press'},
+  {p:'A2', from:'19-08-2026', to:'20-08-2026', pct:.60, why:'เปลี่ยนอ่างชุบทองแดง'},
+  {p:'A3', from:'26-08-2026', to:'27-08-2026', pct:.50, why:'สอบเทียบเครื่องเจาะเลเซอร์'}
+];
+const pIdx = s => { const [d,m,y]=s.split('-').map(Number); return dIdx(new Date(y,m-1,d)); };
+const CUT = {};
+CAPCUT.forEach(c=>{ const a=pIdx(c.from), b=pIdx(c.to);
+  for(let i=a;i<=b;i++) (CUT[c.p] || (CUT[c.p]={}))[i] = c; });
+const dayCut = (p,i) => CUT[p] && CUT[p][i];
+const dayCap = (p,i) => { if(!isWorkday(i)) return 0;
+  const c = dayCut(p.c,i); return p.cap * (c ? c.pct : 1); };
+
+/* งานของแต่ละล็อตถูกเกลี่ยย้อนหลังตามรอบผลิต เพราะโรงทยอยผลิตจนครบแล้วจึงรับเข้าคลังทีเดียว
+   ถ้าเอา "วันรับเข้า" มาชนกำลังผลิตตรง ๆ วันนั้นจะเกินเสมอ ทั้งที่งานจริงกระจายอยู่หลายวัน
+   · เกลี่ยตามรอบที่วางแผนไว้ ไม่ใช่วันรับเข้าที่ถูกเลื่อนหนีวันอาทิตย์ หน้าต่างของแต่ละล็อตจึงต่อกันสนิท ไม่มีวันที่หลุดเป็นศูนย์
+   · ไล่ล็อตย้อนไปก่อนวันเริ่มช่วงด้วย เพราะงานที่ค้างข้ามมาจากรอบก่อนก็กินกำลังผลิตของวันแรก ๆ เหมือนกัน */
+ITEMS.forEach(it => {
+  const load = new Array(HORIZON).fill(0);
+  const pnlPerLot = it.lotQty / it.pcs;                 // PCS → PNL
+  for(let i = it.lotOffset - it.lotEvery*2; i < HORIZON; i += it.lotEvery){
+    const days=[]; let n=0;
+    for(let k=0;k<it.lotEvery;k++){
+      const d=i-k;
+      if(addDays(ORIGIN,d).getDay()===0) continue;      // อาทิตย์ไม่ผลิต
+      n++; if(d>=0) days.push(d);                       // นับวันก่อนต้นช่วงด้วย แต่ลงตัวเลขเฉพาะที่อยู่ในช่วง
+    }
+    if(!n) continue;
+    const per = pnlPerLot / n;
+    days.forEach(d => load[d] += per);
+  }
+  it.load = load;
+});
+
 /* ── zoom / buckets ───────────────────────────────────────── */
 const VIEW = { day:{cols:14, cls:'dy'}, week:{cols:12, cls:'wk'}, month:{cols:6, cls:'mo'} };
 let mode = 'day';
@@ -616,11 +690,14 @@ function buckets(){
 /* ── render ───────────────────────────────────────────────── */
 const sum  = (arr,b) => { let t=0; for(let i=b.from;i<=b.to;i++) t += arr[i]; return t; };
 const nf   = n => n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const nf0  = n => Math.round(n).toLocaleString('en-US');
 const nz   = n => n===0 ? '' : nf(n);
 const tIdx = dIdx(TODAY);
 
 /* ── column engine (frozen columns + collapsible group) ────── */
-let gOpen = true;                        // เปิด/ปิดกลุ่ม Unit · Min · Max
+/* ค่าเริ่มต้น = ย่อกลุ่ม Unit · Min · Max ไว้ คืนความกว้าง 180px ให้คอลัมน์วัน
+   ทั้งสามค่าเป็นข้อมูลอ้างอิงที่ดูเป็นครั้งคราว กดปุ่ม + ที่หัวตารางเพื่อกางออก */
+let gOpen = false;                       // เปิด/ปิดกลุ่ม Unit · Min · Max
 function COLS(){
   const a=[{k:'sel',w:44},{k:'code',w:146},{k:'name',w:250}];
   const g= gOpen ? [{k:'unit',w:58},{k:'min',w:80},{k:'max',w:80}] : [{k:'gcol',w:38}];
@@ -722,7 +799,47 @@ function render(){
     <tr class="sub row-net s${idx}">${subHead('Net Inventory Balance')}${TD(C.open, nf(openBal), 'v-net')}${netRow}</tr>`;
   }).join('');
 
+  renderCap(B, C);
   collapsed.forEach(i => applyToggle(i,true));
+}
+
+/* ── แถบเช็คกำลังผลิตรายโรง ────────────────────────────────────
+   เทียบ "แผนผลิตในงวด" กับ "กำลังผลิตของโรงในงวดเดียวกัน"
+   กำลังผลิตของงวด = กำลังผลิตต่อวันทำงาน × จำนวนวันทำงานในงวดนั้น
+   ตัวเลขในช่องคือ % การใช้กำลังผลิต — เกิน 100% คือโรงนั้นรับไม่ไหว */
+function renderCap(B, C){
+  const workDays = b => { let n=0; for(let i=b.from;i<=b.to;i++) if(isWorkday(i)) n++; return n; };
+  const gEmpty = gOpen ? TD(C.unit)+TD(C.min)+TD(C.max) : TD(C.gcol);
+  const lbl = (html,cls='lbl') => TD(C.sel) + TD2(C.code, C.name, html, cls) + gEmpty;
+
+  const head = `<tr class="cap-hd">${lbl(
+      'เช็คกำลังผลิตรายโรง<small>แผนผลิตในงวด เทียบกำลังผลิตของโรง · หน่วยแผ่นแพเนล (PNL)</small>','lbl')}
+    ${TD(C.open,'วันทำงาน')}
+    ${B.map(b=>`<td class="cap-days${b.wkend?' wkend-c':''}">${workDays(b)}</td>`).join('')}</tr>`;
+
+  const rows = PLANTS.map(p=>{
+    const list = ITEMS.filter(x=>x.plant===p.c);
+    const cells = B.map(b=>{
+      let cap=0; const why=[];
+      for(let i=b.from;i<=b.to;i++){
+        cap += dayCap(p,i);
+        const c = isWorkday(i) && dayCut(p.c,i);
+        if(c && why.indexOf(c.why)<0) why.push(c.why);
+      }
+      if(!cap) return `<td class="cap-off${b.wkend?' wkend-c':''}">—</td>`;
+      const ld = list.reduce((a,x)=>a+sum(x.load,b),0);
+      const u  = ld/cap*100;
+      const k  = u>100 ? 'cap-over' : (u>=85 ? 'cap-tight' : 'cap-ok');
+      return `<td class="${k}${why.length?' cap-cut':''}${b.wkend?' wkend-c':''}"
+        title="แผนผลิต ${nf0(ld)} PNL · กำลังผลิต ${nf0(cap)} PNL${why.length?' · '+why.join(' · '):''}"
+        >${Math.round(u)}%${why.length?'<i>*</i>':''}</td>`;
+    }).join('');
+    return `<tr class="cap-row">${lbl(
+      `โรง ${p.c}<small>กำลังผลิต ${nf0(p.cap)} PNL/วันทำงาน · ${list.length} รายการ</small>`)}
+      ${TD(C.open, nf0(p.cap), 'cap-cap')}${cells}</tr>`;
+  }).join('');
+
+  document.getElementById('tfoot').innerHTML = head + rows;
 }
 
 /* ── interactions ─────────────────────────────────────────── */
@@ -1398,6 +1515,7 @@ function openMpsReport(){
 "เริ่มงานไม่ย้อนหลังกว่าวันนี้":"start not earlier than today",
 "สินค้าอื่นของลูกค้าเดียวกัน (ถ้ามี)":"another item of the same customer (if any)"
 };</script>
+<script src="apex-fit.js"></script>
 <script src="apex-i18n.js"></script>
 </body>
 </html>

@@ -429,14 +429,30 @@ table.ft{width:100%;border-collapse:collapse;font-size:12.5px}
 /* ── ส่วนกลางของหน้า: กล่องโต้ตอบร่วม (dlgRoot เดียว) + สลับมุมมอง ── */
 function closeDlg(){document.getElementById('dlgRoot').innerHTML='';}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDlg();});
-function showView(v){
+function showView(v,keepHash){
   var fe=(v!=='idle');
   document.getElementById('viewFefo').style.display=fe?'':'none';
   document.getElementById('viewIdle').style.display=fe?'none':'';
   document.getElementById('vtFe').classList.toggle('on',fe);
   document.getElementById('vtId').classList.toggle('on',!fe);
   closeDlg();
+  /* จำมุมมองไว้ใน hash เพื่อให้ลิงก์ตรงเข้ามุมมองนั้นได้ และกดรีเฟรชแล้วไม่เด้งกลับ */
+  if(!keepHash){
+    try{history.replaceState(null,'','#'+(fe?'fefo':'idle'));}catch(e){}
+  }
 }
+/* เปิดตรงเข้ามุมมองใดมุมมองหนึ่งจากลิงก์ได้
+   รองรับทั้ง  …_Stock_Risk_Mockup.html#idle  และ  …?view=idle          */
+(function openFromLink(){
+  var v=(location.hash||'').replace('#','').toLowerCase();
+  if(!v){var m=/[?&]view=([a-z]+)/i.exec(location.search); if(m)v=m[1].toLowerCase();}
+  if(v==='idle'||v==='fefo')showView(v,true);
+})();
+/* เปลี่ยน hash ทีหลัง (เช่นหน้าแม่สั่งเปิดอีกมุมมองใน iframe เดิม) ก็ตามไปด้วย */
+window.addEventListener('hashchange',function(){
+  var v=(location.hash||'').replace('#','').toLowerCase();
+  if(v==='idle'||v==='fefo')showView(v,true);
+});
 </script>
 
 <script>
@@ -1164,6 +1180,7 @@ function openIdleReport(){
 "เรียงตามมูลค่าเงินจม · คำแนะนำการจัดการ (คืนผู้ขาย / ระบาย / ตัดจำหน่าย) ประเมินจากอายุการเบิกใช้และอายุจัดเก็บ":"Sorted by tied-up value · recommended actions (return / liquidate / write off) assessed from last-issue age and storage age",
 "ผู้จัดการคลัง":"Warehouse Manager"
 };</script>
+<script src="apex-fit.js"></script>
 <script src="apex-i18n.js"></script>
 </body>
 </html>

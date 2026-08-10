@@ -187,6 +187,31 @@ td.r{text-align:right} td.c{text-align:center}
 
 /* ── Cost Sheet Report — popup ที่ 2 เปิดซ้อนกับ Cost Card ได้ ── */
 .mask2{z-index:220;background:rgba(14,32,58,.45);padding-top:60px}
+
+/* ── โหมดเปิดเฉพาะ Cost Sheet (เปิดหน้าด้วย #sheet=<รหัส>) ──
+   ใช้กับสไลด์นำเสนอ : เอาหน้าจอด้านหลังกับกรอบทั้งหมดออก ให้รายงานกางเต็มพื้นที่
+   หัวกับท้ายรายงานตรึงอยู่กับที่ เลื่อนเฉพาะตัวตาราง จึงเห็นบรรทัดได้มากที่สุด */
+html.sheetonly,html.sheetonly body{height:100%;overflow:hidden}
+html.sheetonly #app{display:none}
+html.sheetonly .mask2{padding:0;background:#fff;overflow:hidden}
+html.sheetonly .mask2 .dlg{width:100%;max-width:none!important;height:100%;
+  border-radius:0;box-shadow:none;display:flex;flex-direction:column}
+html.sheetonly .mask2 .dlg-hd{flex:none}
+html.sheetonly .mask2 .dlg-ft{flex:none}
+html.sheetonly .mask2 .dlg-bd{flex:1;min-height:0;max-height:none;
+  display:flex;flex-direction:column;overflow:hidden}
+html.sheetonly .mask2 .cs-tw{flex:1;min-height:0;max-height:none}
+/* ปล่อยให้ตารางกว้างตามธรรมชาติ (max-content) ความกว้างที่ตั้งไว้รายคอลัมน์จึงมีผลจริง
+   ⚠ ห้ามใส่ width:100% — table-layout:fixed จะไปไล่ความกว้างจากหัวตารางแถวแรกที่เป็น colspan
+     แล้วหารทุกคอลัมน์เท่ากันหมด Description จะโดนหั่นจนข้อความขาด
+   ความกว้างรวมยังเกินอยู่ราว 30px และแก้รายคอลัมน์ไม่ได้ผล เพราะ table-layout:fixed
+   ไล่ความกว้างจากหัวตารางแถวแรกที่เป็น colspan ไม่ใช่แถวชื่อคอลัมน์
+   จึงย่อทั้งตารางด้วย zoom แทน ได้สัดส่วนเดิมครบทุกคอลัมน์ ไม่มีข้อความขาด */
+html.sheetonly .mask2 .cs-tw table{zoom:.95}
+html.sheetonly .mask2 .dlg-bd{padding-left:10px;padding-right:10px}
+html.sheetonly .mask2 .cs-cards{flex:none}
+html.sheetonly .mask2 .dlg-x{display:none}   /* ไม่มีหน้าจอให้กลับไป จึงไม่ต้องมีปุ่มปิด */
+html.sheetonly .mask2 .dlg-ft .btn:first-child{display:none}
 .dlg-hd.lt{background:#fff;color:var(--ink);border-bottom:1px solid var(--line-d)}
 .dlg-hd.lt h3 .mcode{color:var(--mut);font-weight:500;font-size:13px;margin-left:9px}
 .dlg-hd.lt small{color:var(--mut)}
@@ -1276,6 +1301,15 @@ document.getElementById('tabs').onclick=e=>{
   ['items','cmp','whatif','ready'].forEach(t=>document.getElementById('p-'+t).style.display=t===b.dataset.t?'':'none');
 };
 renderAll();
+
+/* เปิดหน้านี้ด้วย #sheet=<รหัสสินค้า> แล้วให้ Cost Sheet Report เด้งขึ้นมาเลย
+   และกางเต็มพื้นที่แบบไม่มีหน้าจอด้านหลัง (คลาส sheetonly) — ใช้กับสไลด์นำเสนอ */
+(function(){
+  const m=/^#sheet=(.+)$/.exec(decodeURIComponent(location.hash||''));
+  if(!m) return;
+  document.documentElement.classList.add('sheetonly');
+  setTimeout(()=>openSheet(m[1].trim()),0);
+})();
 </script>
 <script>
 /* หน้ารวมเปิดไฟล์นี้ใน iframe → ซ่อนหัวโปรแกรมไม่ให้ซ้อนกัน */
@@ -1572,6 +1606,7 @@ function openCostCardPdf(code){
 "เปลี่ยนเป็น Cost Book":"Switched to Cost Book",
 "— ตัวเลขทั้งหมดคำนวณใหม่ตามราคา ณ ช่วงเวลาของเล่มนี้":"— all figures recalculated at this book's period prices"
 };</script>
+<script src="apex-fit.js"></script>
 <script src="apex-i18n.js"></script>
 </body>
 </html>
