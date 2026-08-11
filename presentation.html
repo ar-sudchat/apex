@@ -137,21 +137,23 @@ p.lead{font-size:19.5px;color:var(--mut);line-height:1.5;max-width:1300px;margin
 .cnn-io .io{background:#fff;border:1px solid var(--line);border-top:4px solid var(--c);
   border-radius:12px;padding:16px 22px 18px}
 .cnn-io .io h5{font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
-.cnn-io .io p{font-size:18px;line-height:1.5;color:var(--ink);margin-top:8px}
+.cnn-io .io p{font-size:23px;line-height:1.5;color:var(--ink);margin-top:10px}
 .cnn-io .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
 .cnn-io .mid .apex{font-size:17px;font-weight:800;letter-spacing:.1em;color:var(--org)}
 .cnn-io .mid svg{width:52px;height:31px;fill:none;stroke:var(--org);stroke-width:2.2;
   stroke-linecap:round;stroke-linejoin:round}
-.cnn-g{flex:1;min-height:0}
+/* การ์ดสูงตามเนื้อหา แล้วลอยกึ่งกลางพื้นที่ที่เหลือ — ไม่ยืดเต็มจนเนื้อหาลอยอยู่กลางกล่องว่าง */
+.cnn-g{flex:1;min-height:0;grid-auto-rows:auto;align-content:center}
 .card.cnw .ch{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.card.cnw .ch h4{font-size:27px}
-.card.cnw .chip{background:var(--c);color:#fff;border-radius:20px;padding:4px 13px;
-  font-size:13px;font-weight:700;white-space:nowrap}
-.card.cnw .cd{font-size:18px;color:var(--ink);line-height:1.5;margin-top:12px;font-weight:600}
-.card.cnw ul{margin-top:14px;font-size:17.5px;line-height:1.55}
-.card.cnw li{margin-bottom:12px;color:var(--mut)}
+.card.cnw{padding:52px 34px}
+.card.cnw .ch h4{font-size:38px}
+.card.cnw .chip{background:var(--c);color:#fff;border-radius:20px;padding:6px 17px;
+  font-size:16px;font-weight:700;white-space:nowrap}
+/* เหลือหัวข้อกับบรรทัดเดียว จึงจัดกลางแนวตั้งและขยายตัวอักษรให้อ่านออกจากท้ายห้อง */
+.card.cnw{display:flex;flex-direction:column;justify-content:center}
+.card.cnw .cd{font-size:31px;color:var(--ink);line-height:1.4;margin-top:22px;font-weight:600}
 .cnn-note{flex:none;background:#fff;border:1px solid var(--line);border-left:5px solid var(--org);
-  border-radius:0 12px 12px 0;padding:14px 22px;font-size:17px;line-height:1.55;color:var(--ink)}
+  border-radius:0 12px 12px 0;padding:16px 24px;font-size:20px;line-height:1.5;color:var(--ink)}
 
 .card.prqc{padding:24px 26px}
 .card.prqc h4{font-size:25px}
@@ -622,25 +624,27 @@ const SLIDES=[
  tt:'Connecting to <em>your ERP</em>',
  lead:'APEX never becomes the system of record — it reads what the ERP already holds, plans on top of it, and hands the result back.',
  io:[['What APEX reads from the ERP','#1F6FC4',
-      'Item master · BOM · routing · stock with lot and expiry · customer orders · open purchase orders · vendors · material prices'],
+      'Item master · BOM · routing · stock · orders · prices'],
      ['What APEX hands back','#00B28F',
-      'Work orders, and approved purchase requisitions grouped by vendor']],
+      'Work orders · approved requisitions by vendor']],
+ /* บรรทัดย่อยของแต่ละช่องทางถูกตัดออกจากสไลด์ตามคำสั่ง (ผู้นำเสนอพูดเอง)
+    ข้อความยังอยู่ในช่องที่ 5 ของ ways[] ใส่กลับได้ทันทีถ้าอยากให้ขึ้นจอ */
  ways:[['DB View','#1F6FC4','Read-only',
-        'Your IT opens a set of views on the ERP database and APEX reads them directly.',
+        'Reads straight from the ERP database. Nothing is written back.',
         ['Nothing is written back through this channel — read-only by design',
          'Fastest to set up when the ERP database sits on the same network',
          'Your DBA stays in control: the view decides exactly which columns APEX can see']],
        ['Excel file','#00B28F','No ERP change',
-        'Files exchanged in an agreed layout, dropped on a schedule.',
+        'Files exchanged on a schedule. Nothing to change in the ERP.',
         ['Works while a direct database connection is not yet allowed',
          'Fixed layout every time, so every import is validated before it lands',
          'A sound fallback for the first weeks, then move to view or API']],
        ['API','#FF8006','Two-way',
-        'Web service calls, both the read side and the write-back side.',
+        'The only channel that writes back to the ERP in real time.',
         ['The only channel that can push work orders and requisitions back in real time',
          'Best when the ERP sits on another network or is hosted by its vendor',
          'Needs an endpoint and a service account from your IT team']]],
- note:'At least one full sync a day, plus an on-demand pull whenever a planner needs the latest numbers. Which channel carries which data set is agreed during design.',
+ note:'Sync at least once a day, on-demand pull any time · which channel carries which data set is agreed during design.',
  foot:'You do not have to pick one — most sites start on Excel or a view, then move the write-back side to the API once it is open.'},
 
 {k:'flow',nm:'Workflow — Planning',cd:'SYSTEM WORKFLOW · 1 OF 2',type:'flowp',
@@ -924,25 +928,25 @@ conn:{nm:'การเชื่อมต่อ ERP',cd:'การเชื่อ
  tt:'การเชื่อมต่อ<em>กับ ERP</em>',
  lead:'APEX ไม่ได้มาเป็นระบบต้นทางแทน ERP — อ่านข้อมูลที่ ERP มีอยู่แล้ว วางแผนต่อจากนั้น แล้วส่งผลลัพธ์กลับเข้า ERP',
  io:[['ข้อมูลที่ APEX อ่านจาก ERP','#1F6FC4',
-      'ข้อมูลสินค้า · BOM · Routing · สต๊อกพร้อมล็อตและวันหมดอายุ · คำสั่งซื้อลูกค้า · ใบสั่งซื้อค้างรับ · ข้อมูลผู้ขาย · ราคาวัตถุดิบ'],
+      'ข้อมูลสินค้า · BOM · Routing · สต๊อก · คำสั่งซื้อ · ราคา'],
      ['ผลลัพธ์ที่ส่งกลับเข้า ERP','#00B28F',
-      'ใบสั่งผลิต และรายการขอซื้อที่อนุมัติแล้ว แยกตามผู้ขาย']],
+      'ใบสั่งผลิต · รายการขอซื้อที่อนุมัติแล้ว แยกตามผู้ขาย']],
  ways:[['DB View','#1F6FC4','อ่านอย่างเดียว',
-        'ทีม IT เปิด View บนฐานข้อมูล ERP ให้ APEX อ่านตรง',
+        'อ่านตรงจากฐานข้อมูล ERP เขียนกลับไม่ได้',
         ['เขียนกลับไม่ได้ตามการออกแบบ ข้อมูลต้นทางจึงไม่มีทางถูกแก้',
          'ตั้งได้เร็วที่สุดถ้าฐานข้อมูล ERP อยู่ในวงเน็ตเวิร์กเดียวกัน',
          'DBA ยังคุมได้เต็มที่ — View เป็นตัวกำหนดว่าให้เห็นคอลัมน์ไหนบ้าง']],
        ['ไฟล์ Excel','#00B28F','ไม่ต้องแก้ ERP',
-        'แลกไฟล์ตามรูปแบบที่ตกลงกัน วางตามรอบเวลา',
+        'แลกไฟล์ตามรอบเวลา ไม่ต้องแก้อะไรใน ERP',
         ['ใช้ได้ระหว่างที่ยังต่อฐานข้อมูลตรงไม่ได้ หรือรออนุมัติสิทธิ์',
          'รูปแบบไฟล์ตายตัว ระบบตรวจความถูกต้องทุกครั้งก่อนนำเข้า',
          'เหมาะเป็นทางตั้งต้นช่วงแรก แล้วค่อยย้ายไป View หรือ API']],
        ['API','#FF8006','สองทาง',
-        'เรียกผ่าน Web Service ได้ทั้งขาอ่านและขาส่งกลับ',
+        'ทางเดียวที่ส่งผลลัพธ์กลับเข้า ERP ได้ทันที',
         ['ทางเดียวที่ส่งใบสั่งผลิตและรายการขอซื้อกลับเข้า ERP ได้ทันที',
          'เหมาะเมื่อ ERP อยู่คนละวงเน็ตเวิร์ก หรือผู้ขายเป็นคนดูแลให้',
          'ต้องขอ endpoint และ service account จากทีม IT']]],
- note:'ซิงก์เต็มอย่างน้อยวันละครั้ง และสั่งดึงทันทีได้เมื่อผู้วางแผนต้องการตัวเลขล่าสุด · จะใช้ทางไหนกับข้อมูลชุดไหน ตกลงกันตอนออกแบบ',
+ note:'ซิงก์อย่างน้อยวันละครั้ง สั่งดึงทันทีได้ · จะใช้ทางไหนกับข้อมูลชุดไหน ตกลงกันตอนออกแบบ',
  foot:'ไม่ต้องเลือกทางเดียว — ส่วนใหญ่เริ่มจาก Excel หรือ View ก่อน แล้วค่อยย้ายขาส่งกลับไปใช้ API เมื่อเปิดให้แล้ว'},
 
 flow:{nm:'ภาพรวม — งานวางแผน',cd:'ภาพรวมการทำงาน · 1 ใน 2',
@@ -1364,10 +1368,9 @@ conn:s=>head(s)+`<div class="fill cnn">
     <div class="io" style="--c:${s.io[1][1]}"><h5>${s.io[1][0]}</h5><p>${s.io[1][2]}</p></div>
   </div>
   <div class="grid g3 cnn-g">
-    ${s.ways.map(([t,c,tag,desc,items])=>`<div class="card prqc cnw" style="--c:${c}">
+    ${s.ways.map(([t,c,tag,desc])=>`<div class="card prqc cnw" style="--c:${c}">
       <div class="ch"><h4>${t}</h4><span class="chip">${tag}</span></div>
-      <p class="cd">${desc}</p>
-      <ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}
+      <p class="cd">${desc}</p></div>`).join('')}
   </div>
   <div class="cnn-note">${s.note}</div>
 </div>`,
