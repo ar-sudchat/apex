@@ -131,6 +131,28 @@ p.lead{font-size:19.5px;color:var(--mut);line-height:1.5;max-width:1300px;margin
   border-radius:50%;background:var(--c)}
 /* Pre-requisite — รายการสั้นแต่การ์ดสูงเต็มหน้า ขยายตัวหนังสือให้อ่านออกจากท้ายห้อง
    21px คือขนาดใหญ่สุดที่บรรทัดยาวสุด (Inventory stock with lots and expiry dates) ยังไม่ตกบรรทัด */
+/* ── การเชื่อมต่อ ERP ── */
+.cnn{gap:16px}
+.cnn-io{display:grid;grid-template-columns:1fr 132px 1fr;align-items:stretch;flex:none}
+.cnn-io .io{background:#fff;border:1px solid var(--line);border-top:4px solid var(--c);
+  border-radius:12px;padding:16px 22px 18px}
+.cnn-io .io h5{font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.cnn-io .io p{font-size:18px;line-height:1.5;color:var(--ink);margin-top:8px}
+.cnn-io .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.cnn-io .mid .apex{font-size:17px;font-weight:800;letter-spacing:.1em;color:var(--org)}
+.cnn-io .mid svg{width:52px;height:31px;fill:none;stroke:var(--org);stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.cnn-g{flex:1;min-height:0}
+.card.cnw .ch{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.card.cnw .ch h4{font-size:27px}
+.card.cnw .chip{background:var(--c);color:#fff;border-radius:20px;padding:4px 13px;
+  font-size:13px;font-weight:700;white-space:nowrap}
+.card.cnw .cd{font-size:18px;color:var(--ink);line-height:1.5;margin-top:12px;font-weight:600}
+.card.cnw ul{margin-top:14px;font-size:17.5px;line-height:1.55}
+.card.cnw li{margin-bottom:12px;color:var(--mut)}
+.cnn-note{flex:none;background:#fff;border:1px solid var(--line);border-left:5px solid var(--org);
+  border-radius:0 12px 12px 0;padding:14px 22px;font-size:17px;line-height:1.55;color:var(--ink)}
+
 .card.prqc{padding:24px 26px}
 .card.prqc h4{font-size:25px}
 .card.prqc ul{margin:16px 0 0 22px;font-size:21px;line-height:1.6}
@@ -596,6 +618,31 @@ const SLIDES=[
        'Actual cost per work order and variance reports are not included. This project is standard cost only.',
        'Shop-floor data capture and machine control are not included.']},
 
+{k:'conn',nm:'ERP Connection',cd:'ERP CONNECTION',type:'conn',
+ tt:'Connecting to <em>your ERP</em>',
+ lead:'APEX never becomes the system of record — it reads what the ERP already holds, plans on top of it, and hands the result back.',
+ io:[['What APEX reads from the ERP','#1F6FC4',
+      'Item master · BOM · routing · stock with lot and expiry · customer orders · open purchase orders · vendors · material prices'],
+     ['What APEX hands back','#00B28F',
+      'Work orders, and approved purchase requisitions grouped by vendor']],
+ ways:[['DB View','#1F6FC4','Read-only',
+        'Your IT opens a set of views on the ERP database and APEX reads them directly.',
+        ['Nothing is written back through this channel — read-only by design',
+         'Fastest to set up when the ERP database sits on the same network',
+         'Your DBA stays in control: the view decides exactly which columns APEX can see']],
+       ['Excel file','#00B28F','No ERP change',
+        'Files exchanged in an agreed layout, dropped on a schedule.',
+        ['Works while a direct database connection is not yet allowed',
+         'Fixed layout every time, so every import is validated before it lands',
+         'A sound fallback for the first weeks, then move to view or API']],
+       ['API','#FF8006','Two-way',
+        'Web service calls, both the read side and the write-back side.',
+        ['The only channel that can push work orders and requisitions back in real time',
+         'Best when the ERP sits on another network or is hosted by its vendor',
+         'Needs an endpoint and a service account from your IT team']]],
+ note:'At least one full sync a day, plus an on-demand pull whenever a planner needs the latest numbers. Which channel carries which data set is agreed during design.',
+ foot:'You do not have to pick one — most sites start on Excel or a view, then move the write-back side to the API once it is open.'},
+
 {k:'flow',nm:'Workflow — Planning',cd:'SYSTEM WORKFLOW · 1 OF 2',type:'flowp',
  tt:'Planning <em>Workflow</em>',
  lead:'How a customer order turns into a purchase requisition — every step inside this scope.',
@@ -872,6 +919,31 @@ delivery:{nm:'สิ่งที่ส่งมอบ',cd:'สิ่งที่
  excl:['PR กับ PO ยังออกใน ERP เหมือนเดิม ระบบนี้รวบรวมว่าต้องซื้ออะไร ส่งเข้าสายอนุมัติ แล้วส่งรายการที่อนุมัติแล้วให้ ERP',
        'ไม่รวมการเก็บต้นทุนจริงรายใบสั่งผลิตและรายงานผลต่าง — โครงการนี้ทำต้นทุนมาตรฐานอย่างเดียว',
        'ไม่รวมการเก็บข้อมูลหน้างานและการควบคุมเครื่องจักร']},
+
+conn:{nm:'การเชื่อมต่อ ERP',cd:'การเชื่อมต่อ ERP',
+ tt:'การเชื่อมต่อ<em>กับ ERP</em>',
+ lead:'APEX ไม่ได้มาเป็นระบบต้นทางแทน ERP — อ่านข้อมูลที่ ERP มีอยู่แล้ว วางแผนต่อจากนั้น แล้วส่งผลลัพธ์กลับเข้า ERP',
+ io:[['ข้อมูลที่ APEX อ่านจาก ERP','#1F6FC4',
+      'ข้อมูลสินค้า · BOM · Routing · สต๊อกพร้อมล็อตและวันหมดอายุ · คำสั่งซื้อลูกค้า · ใบสั่งซื้อค้างรับ · ข้อมูลผู้ขาย · ราคาวัตถุดิบ'],
+     ['ผลลัพธ์ที่ส่งกลับเข้า ERP','#00B28F',
+      'ใบสั่งผลิต และรายการขอซื้อที่อนุมัติแล้ว แยกตามผู้ขาย']],
+ ways:[['DB View','#1F6FC4','อ่านอย่างเดียว',
+        'ทีม IT เปิด View บนฐานข้อมูล ERP ให้ APEX อ่านตรง',
+        ['เขียนกลับไม่ได้ตามการออกแบบ ข้อมูลต้นทางจึงไม่มีทางถูกแก้',
+         'ตั้งได้เร็วที่สุดถ้าฐานข้อมูล ERP อยู่ในวงเน็ตเวิร์กเดียวกัน',
+         'DBA ยังคุมได้เต็มที่ — View เป็นตัวกำหนดว่าให้เห็นคอลัมน์ไหนบ้าง']],
+       ['ไฟล์ Excel','#00B28F','ไม่ต้องแก้ ERP',
+        'แลกไฟล์ตามรูปแบบที่ตกลงกัน วางตามรอบเวลา',
+        ['ใช้ได้ระหว่างที่ยังต่อฐานข้อมูลตรงไม่ได้ หรือรออนุมัติสิทธิ์',
+         'รูปแบบไฟล์ตายตัว ระบบตรวจความถูกต้องทุกครั้งก่อนนำเข้า',
+         'เหมาะเป็นทางตั้งต้นช่วงแรก แล้วค่อยย้ายไป View หรือ API']],
+       ['API','#FF8006','สองทาง',
+        'เรียกผ่าน Web Service ได้ทั้งขาอ่านและขาส่งกลับ',
+        ['ทางเดียวที่ส่งใบสั่งผลิตและรายการขอซื้อกลับเข้า ERP ได้ทันที',
+         'เหมาะเมื่อ ERP อยู่คนละวงเน็ตเวิร์ก หรือผู้ขายเป็นคนดูแลให้',
+         'ต้องขอ endpoint และ service account จากทีม IT']]],
+ note:'ซิงก์เต็มอย่างน้อยวันละครั้ง และสั่งดึงทันทีได้เมื่อผู้วางแผนต้องการตัวเลขล่าสุด · จะใช้ทางไหนกับข้อมูลชุดไหน ตกลงกันตอนออกแบบ',
+ foot:'ไม่ต้องเลือกทางเดียว — ส่วนใหญ่เริ่มจาก Excel หรือ View ก่อน แล้วค่อยย้ายขาส่งกลับไปใช้ API เมื่อเปิดให้แล้ว'},
 
 flow:{nm:'ภาพรวม — งานวางแผน',cd:'ภาพรวมการทำงาน · 1 ใน 2',
  tt:'ภาพรวม<em>งานวางแผน</em>',
@@ -1283,6 +1355,23 @@ timeline:s=>head(s)+`<div class="tl" style="--w:${s.weeks}">
 
 /* จำนวนคอลัมน์วิ่งตามจำนวนกลุ่ม — ถ้าเหลือกลุ่มเดียวการ์ดกินเต็มความกว้าง
    แล้วแตกรายการเป็นสองคอลัมน์ (คลาส solo) ไล่จากซ้ายลงล่างก่อนขึ้นคอลัมน์ขวา */
+/* การเชื่อมต่อ ERP — แถบขาเข้า/ขาออกด้านบน แล้วการ์ด 3 ช่องทางด้านล่าง */
+conn:s=>head(s)+`<div class="fill cnn">
+  <div class="cnn-io">
+    <div class="io" style="--c:${s.io[0][1]}"><h5>${s.io[0][0]}</h5><p>${s.io[0][2]}</p></div>
+    <div class="mid"><span class="apex">APEX</span>
+      <svg viewBox="0 0 44 26" aria-hidden="true"><path d="M2 8h34M30 2l7 6-7 6"/><path d="M42 20H8M14 14l-7 6 7 6"/></svg></div>
+    <div class="io" style="--c:${s.io[1][1]}"><h5>${s.io[1][0]}</h5><p>${s.io[1][2]}</p></div>
+  </div>
+  <div class="grid g3 cnn-g">
+    ${s.ways.map(([t,c,tag,desc,items])=>`<div class="card prqc cnw" style="--c:${c}">
+      <div class="ch"><h4>${t}</h4><span class="chip">${tag}</span></div>
+      <p class="cd">${desc}</p>
+      <ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}
+  </div>
+  <div class="cnn-note">${s.note}</div>
+</div>`,
+
 /* เอกสารส่งมอบ — การ์ดกลุ่มเอกสาร 3 คอลัมน์ 2 แถว ใช้สไตล์การ์ดชุดเดียวกับ Pre-requisite */
 deliv:s=>head(s)+`<div class="grid dlv" style="grid-template-columns:repeat(4,1fr)">
   ${s.groups.map(([t,c,items])=>`<div class="card prqc" style="--c:${c}"><h4>${t}</h4>
