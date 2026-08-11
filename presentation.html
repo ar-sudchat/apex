@@ -588,12 +588,10 @@ const SLIDES=[
 {k:'delivery',nm:'Project Delivery',cd:'PROJECT DELIVERY',type:'scope',
  tt:'Project <em>Delivery</em>',
  lead:'What is in this project — and, just as important, what is not.',
- cards:[['Production Planning','7 SCREENS','#1F6FC4',
-   ['MPS board with capacity check','MRP board','Priority &amp; freeze','Substitute materials','Stock at risk — expiry and idle money','Purchase traceability &amp; document map','Planning parameters']],
-  ['Costing','3 SCREENS','#00B28F',
-   ['Standard Cost Book','Cost Sheet','Cost simulation — price shock']],
-  ['Shared Platform','1 SCREEN + REPORTS','#FF8006',
-   ['Approval chain (DOA)','10 standard reports — you pick which ones','ERP data integration']]],
+ cards:[['Production Planning','7 SCREENS + 5 REPORTS','#1F6FC4',
+   ['MPS board with capacity check','MRP board','Priority &amp; freeze','Substitute materials','Stock at risk','Purchase traceability &amp; document map','Planning parameters','ERP data integration','5 standard reports']],
+  ['Costing','3 SCREENS + 5 REPORTS','#00B28F',
+   ['Standard Cost Book','Cost Sheet','Cost simulation','5 standard reports']]],
  excl:['PR and PO are still issued in the ERP. This system collects what to buy, sends it through approval, then hands the approved lines to the ERP.',
        'Actual cost per work order and variance reports are not included. This project is standard cost only.',
        'Shop-floor data capture and machine control are not included.']},
@@ -767,6 +765,18 @@ const SLIDES=[
      ['W10','Demo 2 · ready for UAT'],['W12','Acceptance and go-live']],
  foot:'After go-live a dedicated team stays with you for the first 30 days, then a 90-day warranty on the system.'},
 
+{k:'docs',nm:'Deliverable Documents',cd:'DELIVERABLE DOCUMENTS',type:'deliv',
+ tt:'Deliverable <em>Documents</em>',
+ lead:'What you receive alongside the working system — enough to run it, test it, hand it over and maintain it yourselves.',
+ groups:[['SRS document','#1F6FC4',['Business requirement','Flow charts','Database design and data dictionary']],
+         ['Design document','#00B28F',['UI design slides']],
+         ['Test document','#0E8CA8',['UAT test script','Load test report']],
+         ['Deployment document','#FF8006',['Source code','Deployment script']],
+         ['Training document','#7A4FD3',['UAT slides']],
+         ['User manual document','#A32311',['User manual']],
+         ['Go-live document','#245477',['Go-live sign-off']]],
+ foot:'Every document is handed over at acceptance, in a form your own team can keep working from.'},
+
 {k:'prereq',nm:'Pre-requisite',cd:'PRE-REQUISITE',type:'prereq',
  tt:'Pre-<em>requisite</em>',
  lead:'How ready the master data is decides when the project can start, and it has the biggest single effect on the schedule.',
@@ -855,12 +865,10 @@ four:{nm:'4 คำถามสำคัญ',cd:'4 คำถามสำคัญ
 delivery:{nm:'สิ่งที่ส่งมอบ',cd:'สิ่งที่ส่งมอบ',
  tt:'สิ่งที่<em>ส่งมอบ</em>',
  lead:'ในโครงการนี้มีอะไรบ้าง — และที่สำคัญพอกัน คือไม่มีอะไรบ้าง',
- cards:[['งานวางแผนการผลิต','7 หน้าจอ','#1F6FC4',
-   ['กระดาน MPS พร้อมเช็คกำลังผลิต','กระดาน MRP','จัดลำดับและล็อกแผน','วัตถุดิบทดแทน','สต๊อกที่ต้องเฝ้า — ของใกล้หมดอายุและเงินจม','ที่มาการสั่งซื้อ &amp; ผังเอกสาร','ค่าที่ใช้วางแผน']],
-  ['งานต้นทุน','3 หน้าจอ','#00B28F',
-   ['สมุดต้นทุนมาตรฐาน','Cost Sheet','จำลองผลกระทบราคา']],
-  ['ระบบกลาง','1 หน้าจอ + รายงาน','#FF8006',
-   ['สายอนุมัติ (DOA)','รายงานมาตรฐาน 10 ฉบับ — เลือกเองได้','เชื่อมข้อมูลกับ ERP']]],
+ cards:[['งานวางแผนการผลิต','7 หน้าจอ + 5 รายงาน','#1F6FC4',
+   ['กระดาน MPS พร้อมเช็คกำลังผลิต','กระดาน MRP','จัดลำดับและล็อกแผน','วัตถุดิบทดแทน','สต๊อกที่ต้องเฝ้า','ที่มาการสั่งซื้อ &amp; ผังเอกสาร','ค่าที่ใช้วางแผน','เชื่อมข้อมูลกับ ERP','รายงานมาตรฐาน 5 ฉบับ']],
+  ['งานต้นทุน','3 หน้าจอ + 5 รายงาน','#00B28F',
+   ['สมุดต้นทุนมาตรฐาน','Cost Sheet','จำลองผลกระทบราคา','รายงานมาตรฐาน 5 ฉบับ']]],
  excl:['PR กับ PO ยังออกใน ERP เหมือนเดิม ระบบนี้รวบรวมว่าต้องซื้ออะไร ส่งเข้าสายอนุมัติ แล้วส่งรายการที่อนุมัติแล้วให้ ERP',
        'ไม่รวมการเก็บต้นทุนจริงรายใบสั่งผลิตและรายงานผลต่าง — โครงการนี้ทำต้นทุนมาตรฐานอย่างเดียว',
        'ไม่รวมการเก็บข้อมูลหน้างานและการควบคุมเครื่องจักร']},
@@ -1028,6 +1036,18 @@ timeline:{nm:'แผนงานโครงการ',cd:'แผนงานโ
      ['W10','เดโมครั้งที่ 2 · พร้อม UAT'],['W12','ตรวจรับและใช้งานจริง']],
  foot:'หลังใช้งานจริง มีทีมดูแลใกล้ชิด 30 วันแรก ต่อด้วยการรับประกันระบบอีก 90 วัน'},
 
+docs:{nm:'เอกสารส่งมอบ',cd:'เอกสารส่งมอบ',
+ tt:'เอกสาร<em>ส่งมอบ</em>',
+ lead:'ของที่ได้พร้อมกับตัวระบบ — ครบพอให้ทีมคุณใช้งาน ทดสอบ รับมอบ และดูแลต่อเองได้',
+ groups:[['เอกสารข้อกำหนดระบบ (SRS)','#1F6FC4',['ความต้องการทางธุรกิจ','ผังการทำงาน','การออกแบบฐานข้อมูลและพจนานุกรมข้อมูล']],
+         ['เอกสารออกแบบ','#00B28F',['สไลด์ออกแบบหน้าจอ']],
+         ['เอกสารทดสอบ','#0E8CA8',['สคริปต์ทดสอบ UAT','รายงานผลทดสอบโหลด']],
+         ['เอกสารติดตั้ง','#FF8006',['ซอร์สโค้ด','สคริปต์ติดตั้ง']],
+         ['เอกสารอบรม','#7A4FD3',['สไลด์อบรม UAT']],
+         ['คู่มือผู้ใช้งาน','#A32311',['คู่มือผู้ใช้งาน']],
+         ['เอกสารเริ่มใช้งานจริง','#245477',['ใบลงนามตรวจรับเริ่มใช้งานจริง (Go-live Sign-off)']]],
+ foot:'ส่งมอบเอกสารทุกฉบับตอนตรวจรับ ในรูปแบบที่ทีมของคุณเอาไปทำงานต่อเองได้'},
+
 prereq:{nm:'สิ่งที่ต้องเตรียม',cd:'สิ่งที่ต้องเตรียม',
  tt:'สิ่งที่<em>ต้องเตรียม</em>',
  lead:'ข้อมูลหลักพร้อมแค่ไหน เป็นตัวตัดสินว่าโครงการเริ่มได้เมื่อไหร่ และมีผลกับตารางงานมากที่สุด',
@@ -1127,7 +1147,8 @@ four:s=>head(s)+`<table class="tb four">
 
 /* กล่อง "ไม่รวมในขอบเขต" ถอดออกจากสไลด์ตามที่ผู้นำเสนอจะพูดเอง
    ข้อความยังเก็บไว้ใน SLIDES[].excl / TH[].excl เผื่อเปิดกลับ (เหมือน lead) */
-scope:s=>head(s)+`<div class="grid g3 scp">
+/* จำนวนคอลัมน์ตามจำนวนการ์ดจริง — ตัดการ์ดออกแล้วช่องที่เหลือต้องไม่ค้างเป็นที่ว่าง */
+scope:s=>head(s)+`<div class="grid g${s.cards.length} scp">
   ${s.cards.map(([t,n,c,items])=>`<div class="card" style="--c:${c}">
     <h4>${t}</h4><div class="chip">${n}</div>
     <ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>`,
@@ -1262,6 +1283,11 @@ timeline:s=>head(s)+`<div class="tl" style="--w:${s.weeks}">
 
 /* จำนวนคอลัมน์วิ่งตามจำนวนกลุ่ม — ถ้าเหลือกลุ่มเดียวการ์ดกินเต็มความกว้าง
    แล้วแตกรายการเป็นสองคอลัมน์ (คลาส solo) ไล่จากซ้ายลงล่างก่อนขึ้นคอลัมน์ขวา */
+/* เอกสารส่งมอบ — การ์ดกลุ่มเอกสาร 3 คอลัมน์ 2 แถว ใช้สไตล์การ์ดชุดเดียวกับ Pre-requisite */
+deliv:s=>head(s)+`<div class="grid dlv" style="grid-template-columns:repeat(4,1fr)">
+  ${s.groups.map(([t,c,items])=>`<div class="card prqc" style="--c:${c}"><h4>${t}</h4>
+    <ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>`,
+
 prereq:s=>{const solo=s.groups.length===1;
   return head(s)+`<div class="grid" style="grid-template-columns:repeat(${s.groups.length},1fr)">
   ${s.groups.map(([t,c,items])=>{const rw=Math.ceil(items.length/2);
