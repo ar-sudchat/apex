@@ -212,13 +212,15 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
   color:var(--ink);display:flex;flex-direction:column;padding:30px 38px 28px}
 .frame.live .veil{display:none}
 /* คอลัมน์ซ้ายกว้างขึ้นจากเดิม 31% — แผงนี้เป็นภาพหน้าจอแล้ว ไม่ใช่ย่อหน้า ยิ่งกว้างยิ่งดูออก */
-.veil .vin{flex:1;min-height:0;display:grid;grid-template-columns:41% 1fr;gap:30px}
+/* หน้ากากเหลือคอลัมน์เดียว — การ์ด 4 ข้อถอดออกจากหน้าปกแล้ว ภาพหน้าจอกินเต็มกรอบ
+   ชื่อหัวข้อ 4 ข้อยังอยู่ในแถบล่างใต้กรอบ · กฎ .vr ด้านล่างเก็บไว้เผื่อเปิดกลับ */
+.veil .vin{flex:1;min-height:0;display:flex}
 /* --vhh = ความสูงบรรทัดหัวข้อคอลัมน์ ตรึงไว้เป็นตัวเลขเดียว เพราะคอลัมน์ซ้ายไม่มีหัวข้อแล้ว
    แต่ต้องกันที่สูงเท่ากันไว้ ยอดแผงภาพจึงจะตรงกับการ์ดใบแรกฝั่งขวาพอดี */
 .veil{--vhh:17px}
 .veil .vh{display:block;font-size:12.5px;line-height:var(--vhh);font-weight:800;letter-spacing:.16em;color:var(--org-d)}
 .veil .vl,.veil .vr{display:flex;flex-direction:column;min-height:0}
-.veil .vl{padding-top:var(--vhh)}
+.veil .vl{flex:1;min-width:0}
 /* คอลัมน์ซ้าย — เหตุผลของหน้าจอ วางเป็นแผงเต็มความสูงให้เท่ากับการ์ดฝั่งขวา
    เดิมย่อหน้าถูก margin-top:auto ดันลงไปติดปุ่มล่าง (เพราะถอดบรรทัดสรุปเล็ก p.sm ออกแล้ว)
    หัวข้อจึงลอยเดี่ยวอยู่บน เหลือรูโหว่ใต้หัวข้อ 335–436px ทุกหน้า
@@ -239,7 +241,9 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
 .veil .vl .vp:has(.vshot){padding:16px 16px 20px}
 /* กล่องพรีวิวเป็นสัดส่วนจอแนวนอนคงที่ แล้วลอยกึ่งกลางแผง (margin auto บน-ล่าง)
    ถ้าปล่อยให้ยืดเต็มแผงที่เป็นทรงสูง หน้าจอข้างในจะถูกยืดจนดูไม่ออกว่าเป็นหน้าจออะไร */
-.veil .vshot{width:100%;aspect-ratio:1480/940;margin:auto 0;flex:none;
+/* เต็มกรอบแล้วความสูงเป็นตัวจำกัด ไม่ใช่ความกว้าง — จึงให้ flex คิดความสูงก่อน
+   แล้วปล่อยความกว้างไหลตาม aspect-ratio ภาพจึงไม่ถูกครอบตัดด้านล่าง */
+.veil .vshot{flex:1;min-height:0;aspect-ratio:1480/940;width:auto;max-width:100%;margin:0 auto;
   position:relative;overflow:hidden;border-radius:9px;
   border:1px solid var(--line);background:#eef4fb;box-shadow:0 2px 10px rgba(30,40,55,.08)}
 .veil .vshot iframe{position:absolute;top:0;left:0;border:0;transform-origin:top left;
@@ -1229,8 +1233,6 @@ demo:s=>`<div class="demo-head"><h2>${s.tt}</h2></div>
           <div class="vp"><div class="vshot"><iframe class="pv" loading="lazy" src="about:blank"
                 data-src="${s.file}" scrolling="no" tabindex="-1" aria-hidden="true"></iframe></div>
             <div class="vgo"><button class="play">${U('v_play')}</button></div></div></div>
-        <div class="vr"><span class="vh">${U('v_get')}</span>
-          <ul>${s.pins.map(p=>`<li><i>${p.n}</i><span class="tx"><b>${p.t}</b><span>${p.d}</span></span></li>`).join('')}</ul></div>
       </div></div></div></div>
   <div class="pins">${s.pins.map(p=>`<div class="pin"><span class="n">${p.n}</span>
     <b>${p.t}</b></div>`).join('')}</div></div>`,
