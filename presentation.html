@@ -93,16 +93,27 @@ nav a .bd{display:inline-block;font-size:9.5px;font-weight:700;border-radius:5px
 .gb{flex:1;min-height:0;padding:44px 59px 50px 59px;overflow:hidden;
   display:flex;flex-direction:column}
 .gb>*{flex:0 0 auto}
-.gb>.grid,.gb>table.tb,.gb>.tl,.gb>.fill,.gb>.demo-wrap{flex:1 1 auto;min-height:0}
+.gb>.grid,.gb>table.tb,.gb>.tl,.gb>.fill,.gb>.demo-wrap,
+.gb>.srvw,.gb>.stkw{flex:1 1 auto;min-height:0}
 /* Server spec — ตารางมีไม่กี่แถว ถ้ายืดเต็มความสูงแถวจะสูงผิดสัดส่วนและหัวตารางบวม
-   จึงให้ตารางสูงตามเนื้อหา แล้วจัดทั้งบล็อกกึ่งกลางแนวตั้งแทน */
+   จึงให้ตารางสูงตามเนื้อหา แล้วจัดทั้งบล็อกกึ่งกลางแนวตั้งแทน
+   ชั้นล่างเป็นไลเซนส์ระบบปฏิบัติการกับฐานข้อมูล กว้างเต็มหน้า */
+.srvw{display:flex;flex-direction:column;justify-content:center;gap:24px}
+.srvw>*{flex:0 0 auto}
 .srv>div{display:flex;flex-direction:column;min-height:0}
 .srv>div>table.tb{flex:0 0 auto}
 .grid.srv{grid-auto-rows:auto;align-content:center;gap:16px 34px}
 .srv table.tb{font-size:22px}
 .srv table.tb th{font-size:16px;padding:18px 20px}
 .srv table.tb td{padding:22px 20px}
-.srv>div>h4{font-size:18px!important}
+.srvw h4.sph{font-size:18px;letter-spacing:.1em;color:var(--org);margin-bottom:10px;
+  font-weight:800;text-transform:uppercase}
+.lic table.tb{font-size:22px}
+.lic table.tb td{padding:18px 20px}
+.lic table.tb td.k{font-weight:700;width:300px;background:var(--bg2)}
+.lic table.tb tr:nth-child(even) td.k{background:var(--bg2)}
+.lic table.tb tr:first-child td{border-top:3px solid var(--ink)}
+.srvw .note{margin-top:0;font-size:17px}
 
 h2.tt{font-size:46px;font-weight:800;letter-spacing:.01em;line-height:1.08;color:var(--ink);
   text-transform:uppercase}
@@ -145,13 +156,16 @@ p.lead{font-size:19.5px;color:var(--mut);line-height:1.5;max-width:1300px;margin
 /* การ์ดสูงตามเนื้อหา แล้วลอยกึ่งกลางพื้นที่ที่เหลือ — ไม่ยืดเต็มจนเนื้อหาลอยอยู่กลางกล่องว่าง */
 .cnn-g{flex:1;min-height:0;grid-auto-rows:auto;align-content:center}
 .card.cnw .ch{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.card.cnw{padding:52px 34px}
-.card.cnw .ch h4{font-size:38px}
+.card.cnw{padding:42px 32px}
+.card.cnw .ch h4{font-size:34px}
 .card.cnw .chip{background:var(--c);color:#fff;border-radius:20px;padding:6px 17px;
   font-size:16px;font-weight:700;white-space:nowrap}
-/* เหลือหัวข้อกับบรรทัดเดียว จึงจัดกลางแนวตั้งและขยายตัวอักษรให้อ่านออกจากท้ายห้อง */
+/* เหลือหัวข้อกับบรรทัดเดียว จึงจัดกลางแนวตั้ง
+   คำอธิบายเคยตั้งไว้ 31px ซึ่งใหญ่กว่าบรรทัดบนของหน้าเดียวกัน (23px) ตาจึงตกลงมาอ่านการ์ดก่อน
+   ลดเหลือ 25px — ยังใหญ่กว่าบรรทัดบนเล็กน้อยตามลำดับความสำคัญ แต่ไม่แย่งสายตา
+   และแต่ละใบจบใน 2–3 บรรทัดใกล้เคียงกัน ไม่ยาวลดหลั่นจนดูไม่เป็นชุด */
 .card.cnw{display:flex;flex-direction:column;justify-content:center}
-.card.cnw .cd{font-size:31px;color:var(--ink);line-height:1.4;margin-top:22px;font-weight:600}
+.card.cnw .cd{font-size:25px;color:var(--ink);line-height:1.45;margin-top:18px;font-weight:600}
 .cnn-note{flex:none;background:#fff;border:1px solid var(--line);border-left:5px solid var(--org);
   border-radius:0 12px 12px 0;padding:16px 24px;font-size:20px;line-height:1.5;color:var(--ink)}
 
@@ -194,12 +208,35 @@ table.tb th{background:var(--ink);color:#fff;text-align:left;padding:12px 15px;f
   font-size:14px;letter-spacing:.05em;text-transform:uppercase}
 table.tb td{padding:11px 15px;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.45}
 table.tb tr:nth-child(even) td{background:var(--bg2)}
-/* Technology stack — 8 แถวยืดเต็มความสูง แถวสูง ~80px แต่ตัวหนังสือเดิมสูงแค่ 23px
-   ขยายเป็น 21px แล้วบีบคอลัมน์ซ้ายจาก 22% เหลือ 19% เพื่อให้แถว Database
-   ('Microsoft SQL Server Standard or higher · …') ยังจบในบรรทัดเดียว          */
-table.tb.tech{font-size:21px}
-table.tb.tech th{font-size:17px;padding:15px 18px}
-table.tb.tech td{padding:14px 18px}
+/* Technology stack — แผงหนึ่งใบต่อหนึ่งด้านของระบบ หัวแผงเป็นแถบสีประจำด้าน
+   ข้างในเป็นคู่ "รายการ → เทคโนโลยี" ไม่ใช้หัวตารางดำซ้ำทุกใบ เพราะแถบสีบอกอยู่แล้ว
+   หน้าแรก 2 แผง (ส่วนหน้า / ส่วนหลัง) แถวเยอะ ตัวหนังสือ 17px
+   หน้าสอง 6 แผง 3 คอลัมน์ แถวน้อยกว่า ตัวหนังสือ 15.5px                        */
+.stkw{display:flex;flex-direction:column;gap:14px}
+.stkw>.grid{flex:1 1 auto;min-height:0}
+.stkp{display:flex;flex-direction:column;min-height:0;overflow:hidden;
+  border:1px solid var(--line);border-radius:12px;background:#fff}
+.stkp .sph{flex:0 0 auto;background:var(--c,var(--ink));color:#fff;padding:11px 18px;
+  font-size:17px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;line-height:1.2}
+.stkp table{flex:1 1 auto;width:100%;border-collapse:collapse;font-size:16px}
+.stkp td{padding:8px 14px;border-bottom:1px solid var(--line);line-height:1.4;vertical-align:middle}
+.stkp tr:nth-child(even) td{background:var(--bg2)}
+.stkp tr:last-child td{border-bottom:0}
+.stkp td.k{width:34%;font-weight:700;color:var(--ink)}
+.stkp td.v{color:var(--mut);overflow-wrap:break-word}
+.stkp td.v b{color:var(--ink);font-weight:700}
+/* แผงที่มีบรรทัดเดียว — จัดกลางและขยายตัวหนังสือ ไม่ให้ดูเหมือนแผงว่าง */
+.stkp .solo{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;
+  gap:8px;padding:20px 18px}
+.stkp .solo .k{font-size:14px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--mut)}
+.stkp .solo .v{font-size:23px;font-weight:700;color:var(--ink);line-height:1.35}
+.grid.s3{grid-template-columns:repeat(3,1fr);gap:15px}
+.s3 .stkp .sph{font-size:15px;padding:10px 15px}
+.s3 .stkp table{font-size:15.5px}
+.s3 .stkp td{padding:7px 14px}
+.s3 .stkp td.k{width:39%}
+.stkw .note{margin-top:0;font-size:16.5px;padding:12px 20px}
 /* 4 คำถามสำคัญ — มีแค่ 4 แถวยืดเต็มความสูง แถวสูง 148px ต่อข้อความบรรทัดเดียว
    ขยายคำถามได้ถึง 28px เพราะข้อ EN ที่ยาวที่สุด ('WHAT SHOULD WE DO IF RAW
    MATERIAL PRICES CHANGE?') เริ่มตัดสองบรรทัดที่ 30px บนคอลัมน์ 54% (800px)   */
@@ -396,6 +433,63 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
   line-height:1.5;color:var(--org-d);background:var(--org-l);border-radius:9px;padding:12px 14px}
 .cflow .sim .nm{font-size:29px;margin-top:10px}
 .cflow .sim .ds{font-size:20px;margin-top:7px}
+
+
+/* ─── จุดเชื่อมกับงานเดิม (bridge) ────────────────────────────────────────
+   สองแถวคือใจความทั้งสไลด์ — แถวบนสีกลาง ๆ คืองานที่ลูกค้าเดินอยู่แล้ว ไม่มีอะไรไปแตะ
+   แถวล่างมีสีคือชั้นที่เพิ่มเข้ามา แยกเป็นสายวางแผน (น้ำเงิน) กับสายต้นทุน (เขียว)
+   ใช้คู่สีเดียวกับสไลด์ Project Delivery จงใจ — คนดูจำได้ว่าสองสายนี้คือสองก้อนเดิม
+   ผืนพิกัดตายตัว 1470×700 เท่าสไลด์งานต้นทุน คอลัมน์ล่างจึงตรงกับกล่องบนแบบเป๊ะ
+   (กว้างกล่อง 214 · ช่องไฟ 37.2 → 6 กล่อง = 1470 พอดี แผงล่าง = 3 กล่อง + 2 ช่องไฟ) */
+.brg{position:relative;width:1470px;height:700px;margin:auto;flex:0 0 auto}
+.brg .bwire{position:absolute;inset:0;overflow:visible}
+.brg .bwire>path{fill:none;stroke-width:3.4;stroke-linecap:round}
+.brg .bwire>path.chv{stroke:var(--line-d);stroke-width:3.2;stroke-linejoin:round}
+/* หัวแถว + คำอธิบายหัวลูกศร */
+.brg .lane{position:absolute;left:0;top:0;height:26px;display:flex;align-items:center;
+  font-size:16.5px;font-weight:800;letter-spacing:.02em;color:var(--grey)}
+.brg .lgd{position:absolute;right:0;top:0;height:26px;display:flex;gap:28px;align-items:center;
+  font-size:15.5px;color:var(--mut)}
+.brg .lgd i{font-style:normal;font-weight:800;font-size:18px;margin-right:7px;color:var(--ink)}
+/* แถวบน — งานเดิม ใช้พื้นเทาอ่อนกับเส้นบนสีเทา ให้ตาอ่านว่า "ของเดิม ไม่ได้แตะ" */
+.brg .nd{position:absolute;top:40px;height:210px;background:var(--bg2);
+  border:1px solid var(--line);border-top:4px solid var(--line-d);border-radius:13px;
+  padding:20px;display:flex;flex-direction:column}
+.brg .nd svg.ic{width:32px;height:32px;color:var(--grey);flex:0 0 auto}
+/* text-wrap:balance — หัวข้อสั้น ๆ ที่ตกบรรทัดจะได้ไม่เหลือคำเดียวห้อยอยู่บรรทัดล่าง
+   (ไทยตัดคำตามพจนานุกรม "ต้นทุนมาตรฐานรายงวด" เคยตกเป็น "…ราย / งวด") */
+.brg .nd .nm{font-size:23px;font-weight:800;color:var(--ink);line-height:1.14;margin-top:12px;
+  text-wrap:balance}
+.brg .nd .ds{font-size:16px;color:var(--mut);line-height:1.4;margin-top:8px}
+/* รางกลาง = ชั้น APEX ไล่สีจากสายวางแผนไปสายต้นทุน ป้ายชื่อคร่อมรางตรงรอยต่อพอดี */
+.brg .rail{position:absolute;left:0;right:0;top:348px;height:5px;border-radius:3px;
+  background:linear-gradient(90deg,var(--c1) 0 46%,var(--c2) 54% 100%)}
+.brg .apx{position:absolute;left:50%;top:325px;transform:translateX(-50%);height:52px;
+  display:flex;align-items:center;padding:0 36px;border-radius:999px;color:#fff;
+  font-size:25px;font-weight:800;letter-spacing:.14em;
+  background:linear-gradient(90deg,var(--c1),var(--c2));
+  box-shadow:0 0 0 9px #fff,0 6px 18px -6px rgba(30,40,55,.45)}
+/* แถวล่าง — หัวแผงสาย + การ์ดจุดเชื่อมที่ตรงกับกล่องบน */
+.brg .bhd{position:absolute;top:402px;height:60px;border-radius:12px;background:var(--c);
+  display:flex;align-items:center;padding:0 26px;color:#fff}
+.brg .bhd b{font-size:26px;font-weight:800;letter-spacing:.02em}
+.brg .bhd span{margin-left:auto;font-size:15px;font-weight:700;letter-spacing:.07em;
+  background:rgba(255,255,255,.22);border-radius:20px;padding:6px 16px}
+.brg .hk{position:absolute;top:478px;height:212px;background:#fff;
+  border:1px solid var(--line);border-top:4px solid var(--c);border-radius:13px;
+  padding:20px;display:flex;flex-direction:column;justify-content:center;
+  box-shadow:0 2px 10px rgba(30,40,55,.06)}
+/* 21px = ใหญ่สุดที่ "Standard cost → cost simulation" (EN บรรทัดยาวสุด) ยังลงได้ 2 บรรทัด
+   ถ้าดันเป็น 23px จะตกเป็น 3 บรรทัด แล้วลูกศร → ไปห้อยอยู่บรรทัดกลางเดี่ยว ๆ */
+.brg .hk .nm{font-size:21px;font-weight:800;color:var(--ink);line-height:1.22;text-wrap:balance}
+.brg .hk .ds{font-size:16px;color:var(--mut);line-height:1.42;margin-top:10px}
+/* ใบปลายทางของสายต้นทุน — ถมสีอ่อน ไม่มีเส้นขึ้นไปหาแถวบน เพราะผลจบอยู่ในระบบเรา */
+.brg .hk.end{background:var(--tint);border-color:var(--c)}
+/* แถบผลลัพธ์ท้ายแผง ถอดออกจากจอตามคำสั่งเจ้าของงาน — ข้อความยังอยู่ใน branches[][5]
+   ทั้ง EN และไทย คืน div.out ในตัวเรนเดอร์ bridge ได้ทันทีถ้าอยากให้ขึ้นจอ (ต้องลดความสูง .hk ด้วย) */
+.brg .out{position:absolute;top:592px;height:98px;border-radius:12px;background:var(--bgc);
+  display:flex;align-items:center;padding:0 26px;font-size:19.5px;font-weight:700;
+  line-height:1.38;color:var(--dc)}
 
 
 /* ─── Planning flow: 2 ก้อนใหญ่ + ปลายทาง + แถบสูตร ──────────────────────
@@ -621,7 +715,7 @@ const SLIDES=[
        'Shop-floor data capture and machine control are not included.']},
 
 {k:'conn',nm:'ERP Connection',cd:'ERP CONNECTION',type:'conn',
- tt:'Connecting to <em>your ERP</em>',
+ tt:'Connecting to <em>ERP</em>',
  lead:'APEX never becomes the system of record — it reads what the ERP already holds, plans on top of it, and hands the result back.',
  io:[['What APEX reads from the ERP','#1F6FC4',
       'Item master · BOM · routing · stock · orders · prices'],
@@ -640,10 +734,12 @@ const SLIDES=[
          'Fixed layout every time, so every import is validated before it lands',
          'A sound fallback for the first weeks, then move to view or API']],
        ['API','#FF8006','Two-way',
-        'The only channel that writes back to the ERP in real time.',
-        ['The only channel that can push work orders and requisitions back in real time',
+        'Exchanges data the moment a record changes, with no waiting for a schedule.',
+        ['Pushes work orders and requisitions back the moment they are approved',
          'Best when the ERP sits on another network or is hosted by its vendor',
          'Needs an endpoint and a service account from your IT team']]],
+ /* บรรทัดสรุปท้ายสไลด์ (note) ถอดออกจากจอตามคำสั่ง — ผู้นำเสนอพูดเอง
+    ข้อความยังอยู่ทั้งสองภาษา ใส่ <div class="cnn-note"> กลับในตัวเรนเดอร์ conn ได้ทันที */
  note:'Sync at least once a day, on-demand pull any time · which channel carries which data set is agreed during design.',
  foot:'You do not have to pick one — most sites start on Excel or a view, then move the write-back side to the API once it is open.'},
 
@@ -683,6 +779,34 @@ const SLIDES=[
            ['Break-even on material','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
             'How much more material price can rise before profit on that item hits zero.']],
  foot:'Every number opens down to the line — which material, which process, and which cost book period it came from.'},
+
+/* จุดเชื่อมกับงานเดิม — วางต่อจากภาพรวมงานต้นทุน เพื่อปิดท้ายว่าสองสายที่เล่ามาทั้งสไลด์
+   ไปต่อกับงานที่ลูกค้าทำอยู่ตรงไหน  แถวบน = งานเดิม (สีกลาง ๆ ไม่แตะ) · แถวล่าง = ชั้นที่เพิ่มเข้ามา
+   ลำดับใน nodes[] hooks[] ตรงกันช่องต่อช่อง — hook ใบที่ i อยู่ใต้ node ใบที่ i พอดี */
+{k:'bridge',nm:'Where APEX Plugs In',cd:'WHERE APEX PLUGS IN',type:'bridge',
+ tt:'Where APEX <em>plugs in</em>',
+ lead:'The plant keeps running the way it runs today. APEX sits on top and joins at the points where it helps.',
+ lane:'How the plant runs today — every step stays exactly as it is',
+ legend:['APEX reads from what you already run','APEX hands the result back'],
+ nodes:[['Customer order','Forecast · sales order'],
+        ['Production plan','Monthly plan · work order'],
+        ['Materials','PR · PO in the ERP'],
+        ['On the line','A1 · A2 · A3 · Sub-Con'],
+        ['Test &amp; pack','F-Test · FQC · packing'],
+        ['Delivery &amp; close','Shipment · period close']],
+ hooks:[['One demand picture','Forecast minus orders in hand'],
+        ['A plan capacity can keep','MPS · work order · freeze'],
+        ['What to buy, how much, when','MRP · substitutes · stock at risk'],
+        ['Cost on the real routing','Routing · standard time per process'],
+        ['Loss and scrap resale','Waste per plant · gold credit'],
+        ['Standard cost → cost simulation','Nothing is written back']],
+ /* branches[3][4][5] = สีพื้นอ่อน · สีตัวหนังสือ · บรรทัดผลลัพธ์ ของแถบ .out ที่ถอดออกจากจอแล้ว
+    ยังใช้ [3] เป็นสีพื้นการ์ดปลายทาง (.hk.end) อยู่ — ลบไม่ได้ */
+ branches:[['APEX · Production Planning','7 SCREENS · 5 REPORTS','#1F6FC4','#F1F8FE','#175FA8',
+            'A plan the plant can keep — and material that lands before the line starts.'],
+           ['APEX · Costing','3 SCREENS · 5 REPORTS','#00B28F','#EBFAF6','#00806A',
+            'A cost per board you can trace, and an answer the moment a price moves.']],
+ foot:'Nothing is taken out — the ERP stays the system of record, and the costing side only reads from it.'},
 
 /* ─── live demo screens ─── */
 {k:'mps',nm:'MPS',cd:'SCREEN 01',type:'demo',file:'APEX_MPS_Planning.html',
@@ -845,19 +969,80 @@ const SLIDES=[
       ['Up to 75','8 vCPU','16 GB','150 GB SSD'],
       ['Up to 150','8 vCPU','32 GB','200 GB SSD']],
  db:[['Minimum','4 vCPU','16 GB','200 GB SSD'],
-     ['Recommended','8 vCPU','32 GB','250 GB SSD']]},
+     ['Recommended','8 vCPU','32 GB','250 GB SSD']],
+ lic:[['Operating system','Windows Server 2019 or 2022'],
+      ['Database','SQL Server 2016 SP2 or 2022 Standard']]},
 
+/* Technology stack — หน้าแรกส่วนหน้ากับส่วนหลัง หน้าสองที่เหลือทั้งหมด
+   เรียงตามสไลด์ต้นฉบับของ G-Able ทีละรายการ ไม่ยุบรวมเป็นบรรทัดเดียว */
 {k:'tech',nm:'Technology Stack',cd:'TECHNOLOGY STACK',type:'tech',
  tt:'Technology <em>Stack</em>',
  lead:'Every layer uses a long-term support version that enterprises accept.',
- rows:[['Frontend','Angular 22 · Nx · PrimeNG · Bootstrap 5.3 · TypeScript · SignalR · ngx-translate · Chart.js'],
-       ['Browser support','Chrome · Edge · Firefox · Safari — the latest two versions of each. Internet Explorer is not supported.'],
-       ['Backend','C# on ASP.NET Core Web API · .NET 10 (LTS) · Entity Framework Core 10 · Serilog · OpenAPI / Swagger'],
-       ['Database','Microsoft SQL Server Standard or higher · 2016 SP2 at the least · 2022 recommended · separate application and audit databases'],
-       ['Identity and access','Keycloak 26 · OAuth 2.0 / OpenID Connect · SSO supported · LDAP / Active Directory through User Federation'],
-       ['Reporting','In-house PDF engine as its own service with a job queue · EPPlus · ExcelJS · CsvHelper'],
-       ['Deployment','Windows Server 2019 / 2022 · IIS with URL Rewrite, ARR and WebSocket · Windows Service · HTTPS / TLS'],
-       ['Build toolchain','Git (GitLab) · GitLab CI · Node.js 22 LTS · .NET SDK 10']]},
+ panels:[['Frontend','#1F6FC4',
+   [['Framework','Angular 22'],
+    ['Monorepo / Build','Nx, esbuild (@angular-devkit/build-angular:application)'],
+    ['UI Components','PrimeNG (version compatible with Angular 22)'],
+    ['CSS','Bootstrap 5.3, PrimeFlex 3.3'],
+    ['Language','TypeScript'],
+    ['Realtime','@microsoft/signalr'],
+    ['Authentication','angular-oauth2-oidc (OpenID Connect)'],
+    ['Localisation','@ngx-translate/core'],
+    ['Charts','Chart.js'],
+    ['Calendar','FullCalendar'],
+    ['Excel (client-side)','ExcelJS'],
+    ['PDF (client-side)','jsPDF, jsPDF-AutoTable'],
+    ['Printing','print-js'],
+    ['USB label printing','WebUSB API (Chromium-based browsers only)']]],
+  ['Backend','#00B28F',
+   [['Language','C#'],
+    ['Framework','ASP.NET Core Web API'],
+    ['Runtime','.NET 10 (LTS)'],
+    ['ORM','Entity Framework Core 10'],
+    ['Data access','ADO.NET through IDbConnectionFactory and ISqlDialect'],
+    ['Authentication','Microsoft.AspNetCore.Authentication.JwtBearer (version aligned with runtime)'],
+    ['Logging','Serilog'],
+    ['API documentation','OpenAPI / Swagger'],
+    ['Realtime','SignalR'],
+    ['HTTP client','Refit'],
+    ['Excel','EPPlus 4.5.3.3 <b>(version pinned — must not be upgraded)</b>'],
+    ['CSV','CsvHelper'],
+    ['QR code','QRCoder']]]],
+ foot:'<b>Browser support</b> — the latest two versions of Chrome, Edge, Firefox and Safari. Internet Explorer is not supported.'},
+
+{k:'tech2',nm:'Technology Stack (Cont.)',cd:'TECHNOLOGY STACK (CONT.)',type:'tech2',
+ tt:'Technology <em>Stack</em> (Cont.)',
+ lead:'The rest of the platform — reporting, database, identity, licensing, deployment and the build chain.',
+ panels:[['Reporting and document generation','#0E8CA8',
+   [['PDF reports','In-house engine, HTML rendered to PDF'],
+    ['Architecture','Standalone service with a worker pool and job queue'],
+    ['Excel export','EPPlus (server), ExcelJS (browser)'],
+    ['CSV export','CsvHelper']]],
+  ['Databases','#1F6FC4',
+   [['Database engine','Microsoft SQL Server'],
+    ['Edition','Standard or higher (Express is not supported)'],
+    ['Minimum version','SQL Server 2016 SP2'],
+    ['Recommended version','SQL Server 2022 Standard'],
+    ['Databases','One application database and one audit / log database']]],
+  ['Identity and access management','#7A4FD3',
+   [['Identity Provider','Keycloak 26'],
+    ['Standards','OAuth 2.0, OpenID Connect'],
+    ['Single Sign-On','Supported'],
+    ['LDAP / Active Directory','Keycloak User Federation']]],
+  ['Deployment environment','#FF8006',
+   [['Operating system','Windows Server 2019 or 2022'],
+    ['Web server','Internet Information Services (IIS)'],
+    ['IIS modules','URL Rewrite 2.1, Application Request Routing, WebSocket Protocol'],
+    ['Runtime','.NET Hosting Bundle matching the application runtime'],
+    ['Service hosting','Windows Service'],
+    ['Transport security','HTTPS / TLS']]],
+  ['Development and build toolchain','#245477',
+   [['Node.js','22 LTS'],['.NET SDK','10'],
+    ['Version control','Git (GitLab)'],
+    ['Continuous integration','GitLab CI'],
+    ['Scripting','PowerShell'],
+    ['Package management','NuGet, npm']]],
+  ['Licensing and update system (in-house)','#A32311',
+   [['License format','.lic — JSON signed with RSA-2048 (PSS, SHA-256)']]]]},
 
 {k:'qa',nm:'Q&A',cd:'Q & A',type:'qa',
  tt:'Thank <em>You</em>',
@@ -874,6 +1059,16 @@ const g=id=>document.getElementById(id);
 function head(s){return `<h2 class="tt">${s.tt}</h2><div class="rule"></div>`;}
 function stats(a){return a?`<div class="stats">${a.map(([v,l])=>
   `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('')}</div>`:'';}
+/* แผงเทคโนโลยี — หัวแถบสีประจำด้าน + คู่ "รายการ → เทคโนโลยี"
+   cols=2 สำหรับหน้าส่วนหน้า/ส่วนหลัง · cols=3 สำหรับหน้าที่เหลือ
+   แผงที่มีบรรทัดเดียวใส่คลาส one ตัวหนังสือจะใหญ่ขึ้นและจัดกลางแทนที่จะเป็นแถวตาราง */
+function stkGrid(panels,cols){return `<div class="grid ${cols===3?'s3':'g2'} stkg">
+  ${panels.map(([t,c,rows])=>`<div class="stkp${rows.length===1?' one':''}" style="--c:${c}">
+    <div class="sph">${t}</div>
+    ${rows.length===1
+      ? `<div class="solo"><div class="k">${rows[0][0]}</div><div class="v">${rows[0][1]}</div></div>`
+      : `<table>${rows.map(([a,b])=>`<tr><td class="k">${a}</td><td class="v">${b}</td></tr>`).join('')}</table>`}
+  </div>`).join('')}</div>`;}
 
 
 /* ══════════════════════════════════════════════════════════
@@ -942,8 +1137,8 @@ conn:{nm:'การเชื่อมต่อ ERP',cd:'การเชื่อ
          'รูปแบบไฟล์ตายตัว ระบบตรวจความถูกต้องทุกครั้งก่อนนำเข้า',
          'เหมาะเป็นทางตั้งต้นช่วงแรก แล้วค่อยย้ายไป View หรือ API']],
        ['API','#FF8006','สองทาง',
-        'ทางเดียวที่ส่งผลลัพธ์กลับเข้า ERP ได้ทันที',
-        ['ทางเดียวที่ส่งใบสั่งผลิตและรายการขอซื้อกลับเข้า ERP ได้ทันที',
+        'รับและส่งข้อมูลได้ทันทีที่เกิดรายการ ไม่ต้องรอรอบเวลา',
+        ['ส่งใบสั่งผลิตและรายการขอซื้อกลับเข้า ERP ได้ทันทีที่อนุมัติ',
          'เหมาะเมื่อ ERP อยู่คนละวงเน็ตเวิร์ก หรือผู้ขายเป็นคนดูแลให้',
          'ต้องขอ endpoint และ service account จากทีม IT']]],
  note:'ซิงก์อย่างน้อยวันละครั้ง สั่งดึงทันทีได้ · จะใช้ทางไหนกับข้อมูลชุดไหน ตกลงกันตอนออกแบบ',
@@ -985,6 +1180,31 @@ flowc:{nm:'ภาพรวม — งานต้นทุน',cd:'ภาพร�
            ['จุดคุ้มทุนวัตถุดิบ','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
             'ราคาวัตถุดิบขึ้นได้อีกเท่าไหร่ กำไรของตัวนั้นถึงจะเหลือศูนย์']],
  foot:'ทุกตัวเลขกดเข้าไปดูได้ถึงบรรทัด — วัตถุดิบตัวไหน กระบวนการไหน และมาจากสมุดต้นทุนงวดไหน'},
+
+bridge:{nm:'จุดที่ APEX เข้าไปช่วย',cd:'จุดที่ APEX เข้าไปช่วย',
+ tt:'จุดที่ APEX <em>เข้าไปช่วย</em>',
+ lead:'งานเดิมยังเดินเหมือนเดิมทุกขั้น APEX เข้าไปต่อเป็นชั้นบน แล้วเชื่อมเฉพาะจุดที่ช่วยให้ทำงานง่ายขึ้น',
+ lane:'งานที่โรงงานเดินอยู่ทุกวันนี้ — ทุกขั้นยังเป็นแบบเดิม',
+ legend:['APEX ขอข้อมูลจากงานเดิม','APEX ส่งผลลัพธ์กลับเข้างานเดิม'],
+ nodes:[['รับคำสั่งซื้อ','ประมาณการขาย · ออเด&#8288;อร์ลูกค้า'],
+        ['วางแผนผลิต','แผนรายเดือน · ใบสั่งผลิต'],
+        ['จัดหาวัตถุดิบ','ใบขอซื้อ · ใบสั่งซื้อ ใน ERP'],
+        ['ผลิตในสายงาน','A1 · A2 · A3 · Sub-Con'],
+        ['ตรวจและบรรจุ','F-Test · FQC · บรรจุ&#8288;ภัณฑ์'],
+        ['ส่งมอบและปิดงวด','ส่งของ · ปิดบัญชีรายงวด']],
+ /* &#8288; = word joiner กันเบราว์เซอร์ตัดกลางคำ — Chrome ตัดไทยตามพจนานุกรม
+    เคยได้ "เท่า / ไหร่" กับ "เส้น / ทาง" ตอน text-wrap:balance จับคู่บรรทัด */
+ hooks:[['ความต้องการรวมอยู่ที่เดียว','Forecast ลบออเดอร์ที่รับมาแล้ว'],
+        ['แผนที่กำลังผลิตรับไหว','MPS · ใบสั่งผลิต · ล็อกแผน'],
+        ['ซื้ออะไร เท่า&#8288;ไหร่ เมื่อ&#8288;ไหร่','MRP · ของทดแทน · ของใกล้ขาด'],
+        ['ต้นทุนตามเส้น&#8288;ทางผลิตจริง','Routing · เวลามาตรฐานรายกระบวนการ'],
+        ['ของเสียและเศษขายคืน','ของเสียรายโรง · เครดิตเศษทอง'],
+        ['ต้นทุนมาตรฐาน → จำลองต้นทุน','ไม่ได้เขียนกลับเข้างานเดิม']],
+ branches:[['APEX · งานวางแผน','7 หน้าจอ · 5 รายงาน','#1F6FC4','#F1F8FE','#175FA8',
+            'แผนที่โรงงานทำได้จริง และของถึงก่อนไลน์เดิน'],
+           ['APEX · งานต้นทุน','3 หน้าจอ · 5 รายงาน','#00B28F','#EBFAF6','#00806A',
+            'ต้นทุนต่อแผ่นที่ย้อนดูได้ทุกตัวเลข และรู้ผลทันทีเมื่อราคาขยับ']],
+ foot:'ระบบเดิมอยู่ครบเหมือนเดิม — ERP ยังเป็นระบบต้นทาง ส่วนงานต้นทุนอ่านข้อมูลอย่างเดียว'},
 
 mps:{nm:'MPS',cd:'หน้าจอ 01',
  tt:'MPS — <em>แผนผลิตหลัก</em>',
@@ -1140,19 +1360,78 @@ server:{nm:'สเปกเครื่อง',cd:'สเปกเครื่�
       ['ไม่เกิน 75','8 vCPU','16 GB','150 GB SSD'],
       ['ไม่เกิน 150','8 vCPU','32 GB','200 GB SSD']],
  db:[['ขั้นต่ำ','4 vCPU','16 GB','200 GB SSD'],
-     ['แนะนำ','8 vCPU','32 GB','250 GB SSD']]},
+     ['แนะนำ','8 vCPU','32 GB','250 GB SSD']],
+ lic:[['ระบบปฏิบัติการ','Windows Server 2019 หรือ 2022'],
+      ['ฐานข้อมูล','SQL Server 2016 SP2 หรือ 2022 Standard']]},
 
 tech:{nm:'เทคโนโลยีที่ใช้',cd:'เทคโนโลยีที่ใช้',
  tt:'เทคโนโลยี<em>ที่ใช้</em>',
  lead:'ทุกชั้นใช้รุ่นที่มีการดูแลระยะยาว และเป็นรุ่นที่องค์กรใหญ่ยอมรับ',
- rows:[['ส่วนหน้า','Angular 22 · Nx · PrimeNG · Bootstrap 5.3 · TypeScript · SignalR · ngx-translate · Chart.js'],
-       ['เบราว์เซอร์ที่รองรับ','Chrome · Edge · Firefox · Safari — สองเวอร์ชันล่าสุดของแต่ละตัว ไม่รองรับ Internet Explorer'],
-       ['ส่วนหลัง','C# บน ASP.NET Core Web API · .NET 10 (LTS) · Entity Framework Core 10 · Serilog · OpenAPI / Swagger'],
-       ['ฐานข้อมูล','Microsoft SQL Server รุ่น Standard ขึ้นไป · อย่างน้อย 2016 SP2 · แนะนำ 2022 · แยกฐานข้อมูลแอปกับฐานข้อมูลบันทึกการใช้งาน'],
-       ['ยืนยันตัวตนและสิทธิ์','Keycloak 26 · OAuth 2.0 / OpenID Connect · รองรับ SSO · ต่อ LDAP / Active Directory ผ่าน User Federation'],
-       ['ระบบรายงาน','เอนจิน PDF ที่พัฒนาเอง แยกเป็นบริการของตัวเองพร้อมคิวงาน · EPPlus · ExcelJS · CsvHelper'],
-       ['การติดตั้ง','Windows Server 2019 / 2022 · IIS พร้อม URL Rewrite, ARR และ WebSocket · Windows Service · HTTPS / TLS'],
-       ['เครื่องมือพัฒนา','Git (GitLab) · GitLab CI · Node.js 22 LTS · .NET SDK 10']]},
+ panels:[['ส่วนหน้า (Frontend)','#1F6FC4',
+   [['เฟรมเวิร์ก','Angular 22'],
+    ['Monorepo / การ Build','Nx, esbuild (@angular-devkit/build-angular:application)'],
+    ['คอมโพเนนต์ UI','PrimeNG (รุ่นที่เข้ากับ Angular 22)'],
+    ['CSS','Bootstrap 5.3, PrimeFlex 3.3'],
+    ['ภาษา','TypeScript'],
+    ['เรียลไทม์','@microsoft/signalr'],
+    ['ยืนยันตัวตน','angular-oauth2-oidc (OpenID Connect)'],
+    ['รองรับหลายภาษา','@ngx-translate/core'],
+    ['กราฟ','Chart.js'],
+    ['ปฏิทิน','FullCalendar'],
+    ['Excel (ฝั่งเบราว์เซอร์)','ExcelJS'],
+    ['PDF (ฝั่งเบราว์เซอร์)','jsPDF, jsPDF-AutoTable'],
+    ['สั่งพิมพ์','print-js'],
+    ['พิมพ์ฉลากผ่าน USB','WebUSB API (ใช้กับเบราว์เซอร์ตระกูล Chromium)']]],
+  ['ส่วนหลัง (Backend)','#00B28F',
+   [['ภาษา','C#'],
+    ['เฟรมเวิร์ก','ASP.NET Core Web API'],
+    ['รันไทม์','.NET 10 (LTS)'],
+    ['ORM','Entity Framework Core 10'],
+    ['การเข้าถึงข้อมูล','ADO.NET ผ่าน IDbConnectionFactory และ ISqlDialect'],
+    ['ยืนยันตัวตน','Microsoft.AspNetCore.Authentication.JwtBearer (รุ่นตรงกับรันไทม์)'],
+    ['บันทึกการทำงาน','Serilog'],
+    ['เอกสาร API','OpenAPI / Swagger'],
+    ['เรียลไทม์','SignalR'],
+    ['HTTP Client','Refit'],
+    ['Excel','EPPlus 4.5.3.3 <b>(ตรึงรุ่นไว้ ห้ามอัปเกรด)</b>'],
+    ['CSV','CsvHelper'],
+    ['QR Code','QRCoder']]]],
+ foot:'<b>เบราว์เซอร์ที่รองรับ</b> — Chrome, Edge, Firefox และ Safari สองเวอร์ชันล่าสุดของแต่ละตัว ไม่รองรับ Internet Explorer'},
+
+tech2:{nm:'เทคโนโลยีที่ใช้ (ต่อ)',cd:'เทคโนโลยีที่ใช้ (ต่อ)',
+ tt:'เทคโนโลยี<em>ที่ใช้</em> (ต่อ)',
+ lead:'ส่วนที่เหลือของระบบ — งานรายงาน ฐานข้อมูล การยืนยันตัวตน ไลเซนส์ การติดตั้ง และเครื่องมือพัฒนา',
+ panels:[['งานรายงานและเอกสาร','#0E8CA8',
+   [['รายงาน PDF','เอนจินที่พัฒนาเอง เรนเดอร์จาก HTML เป็น PDF'],
+    ['สถาปัตยกรรม','แยกเป็นบริการของตัวเอง มี Worker Pool และคิวงาน'],
+    ['ส่งออก Excel','EPPlus (ฝั่งเซิร์ฟเวอร์), ExcelJS (ฝั่งเบราว์เซอร์)'],
+    ['ส่งออก CSV','CsvHelper']]],
+  ['ฐานข้อมูล','#1F6FC4',
+   [['เอนจินฐานข้อมูล','Microsoft SQL Server'],
+    ['รุ่นที่ใช้','Standard ขึ้นไป (รุ่น Express ใช้ไม่ได้)'],
+    ['เวอร์ชันขั้นต่ำ','SQL Server 2016 SP2'],
+    ['เวอร์ชันที่แนะนำ','SQL Server 2022 Standard'],
+    ['จำนวนฐานข้อมูล','ฐานข้อมูลแอป 1 ชุด และฐานข้อมูลบันทึกการใช้งาน 1 ชุด']]],
+  ['ยืนยันตัวตนและสิทธิ์','#7A4FD3',
+   [['Identity Provider','Keycloak 26'],
+    ['มาตรฐานที่ใช้','OAuth 2.0, OpenID Connect'],
+    ['Single Sign-On','รองรับ'],
+    ['LDAP / Active Directory','ต่อผ่าน Keycloak User Federation']]],
+  ['สภาพแวดล้อมการติดตั้ง','#FF8006',
+   [['ระบบปฏิบัติการ','Windows Server 2019 หรือ 2022'],
+    ['เว็บเซิร์ฟเวอร์','Internet Information Services (IIS)'],
+    ['โมดูล IIS','URL Rewrite 2.1, Application Request Routing, WebSocket Protocol'],
+    ['รันไทม์','.NET Hosting Bundle รุ่นเดียวกับที่แอปใช้'],
+    ['การรันบริการ','Windows Service'],
+    ['ความปลอดภัยการรับส่ง','HTTPS / TLS']]],
+  ['เครื่องมือพัฒนาและ Build','#245477',
+   [['Node.js','22 LTS'],['.NET SDK','10'],
+    ['ควบคุมเวอร์ชันโค้ด','Git (GitLab)'],
+    ['Continuous Integration','GitLab CI'],
+    ['สคริปต์','PowerShell'],
+    ['จัดการแพ็กเกจ','NuGet, npm']]],
+  ['ไลเซนส์และการอัปเดต (พัฒนาเอง)','#A32311',
+   [['รูปแบบไฟล์ไลเซนส์','.lic — JSON ลงลายเซ็นด้วย RSA-2048 (PSS, SHA-256)']]]]},
 
 qa:{nm:'ถาม-ตอบ',cd:'ถาม-ตอบ',
  tt:'ขอบคุณ<em>ครับ</em>',
@@ -1174,8 +1453,9 @@ en:{sub:'APEX Planning &amp; Costing System · Presentation',slides:'SLIDES',
     v_open:'Open full screen ↗',v_hint:'Scroll inside the screen ↕ &nbsp;·&nbsp; or press ↑ / ↓',
     v_back:'◀ Back to the summary',
     s_app:'APPLICATION SERVER',s_db:'DATABASE SERVER',s_cu:'Concurrent users',s_tier:'Tier',s_st:'Storage',
+    s_lic:'LICENSE FOR SERVER AND DATABASE',
     n_server:'Microsoft SQL Server <b>Standard edition or higher</b> is needed. The Express edition will not work.',
-    t_layer:'Layer',t_tech:'Technology',wks:'wks',mo:'Month',
+    wks:'wks',mo:'Month',
     f_out:'Handover',f_eq:'The numbers behind these steps'},
 th:{sub:'ระบบวางแผนและต้นทุน APEX · การนำเสนอ',slides:'สไลด์',
     fitw:'พอดีกว้าง',fitp:'พอดีหน้า',
@@ -1187,8 +1467,9 @@ th:{sub:'ระบบวางแผนและต้นทุน APEX · ก�
     v_open:'เปิดเต็มจอ ↗',v_hint:'เลื่อนดูในจอ ↕ &nbsp;·&nbsp; หรือกด ↑ / ↓',
     v_back:'◀ กลับไปคำอธิบาย',
     s_app:'เครื่องแอปพลิเคชัน',s_db:'เครื่องฐานข้อมูล',s_cu:'ผู้ใช้พร้อมกัน',s_tier:'ระดับ',s_st:'พื้นที่',
+    s_lic:'ไลเซนส์เครื่องและฐานข้อมูล',
     n_server:'ต้องใช้ Microsoft SQL Server <b>รุ่น Standard ขึ้นไป</b> รุ่น Express ใช้ไม่ได้',
-    t_layer:'ชั้น',t_tech:'เทคโนโลยี',wks:'สัปดาห์',mo:'เดือนที่',
+    wks:'สัปดาห์',mo:'เดือนที่',
     f_out:'ส่งต่อ',f_eq:'ตัวเลขที่อยู่เบื้องหลังแต่ละขั้น'}
 };
 const U=k=>UI[plang][k];
@@ -1301,6 +1582,54 @@ flowc:s=>{
     </div></div>`;
 },
 
+/* ─── จุดเชื่อมกับงานเดิม ──────────────────────────────────────────────────
+   6 ขั้นงานเดิมอยู่แถวบน · ชั้น APEX 2 สายอยู่แถวล่าง · เส้นแนวตั้งคือจุดเชื่อม
+   ทิศลูกศรเป็นตัวเล่าเรื่องเอง จึงไม่ต้องมีคำอธิบายในกล่อง:
+     ลง = APEX ขอข้อมูลจากงานเดิม · ขึ้น = APEX ส่งผลลัพธ์กลับเข้างานเดิม
+   ช่องสุดท้าย (สายต้นทุน) ตั้งใจไม่มีเส้น — งานต้นทุนอ่านอย่างเดียว จบที่ต้นทุนมาตรฐาน
+   แล้วต่อด้วยการจำลองในระบบเรา ไม่ได้เขียนอะไรกลับเข้างานเดิม จึงลากลูกศรแนวนอน
+   จากใบที่ 5 เข้าใบที่ 6 แทน  ความไม่สมมาตรของสองสายคือใจความ ไม่ใช่ความผิดพลาด
+   DIR ผูกกับตำแหน่งขั้นตอน ไม่ได้อยู่ในข้อมูล — สลับภาษาแล้วผังยังเหมือนเดิม
+   ไอคอนอยู่ในตัว render ไม่ใช่ในข้อมูล จะได้ไม่ต้องก๊อป SVG ซ้ำในดิกต์ภาษาไทย */
+bridge:s=>{
+  const NW=214, NG=(1470-6*NW)/5, PW=3*NW+2*NG;      /* 6 กล่อง + 5 ช่องไฟ = 1470 พอดี */
+  const L=i=>i*(NW+NG), CX=i=>L(i)+NW/2, f=n=>n.toFixed(1);
+  const DIR=['d','u','u','d','d',''], END=5;         /* '' = ไม่มีเส้นขึ้นไปหาแถวบน */
+  const C=i=>s.branches[i<3?0:1][2];
+  const ic=d=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const IC=[ic('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8.5 13h7M8.5 17h5"/>'),
+            ic('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h3M13.5 14h3M7.5 17.5h3"/>'),
+            ic('<path d="M12 2.6 20.5 7v10L12 21.4 3.5 17V7z"/><path d="M3.5 7 12 11.4 20.5 7M12 11.4v10"/>'),
+            ic('<rect x="7" y="7" width="10" height="10" rx="1.4"/><rect x="10.6" y="10.6" width="2.8" height="2.8"/><path d="M10 3.2v3.8M14 3.2v3.8M10 17v3.8M14 17v3.8M3.2 10h3.8M3.2 14h3.8M17 10h3.8M17 14h3.8"/>'),
+            ic('<circle cx="10.5" cy="10.5" r="6.4"/><path d="M15.2 15.2 21 21"/><path d="M7.8 10.6l2 2 3.6-3.7"/>'),
+            ic('<path d="M2.5 6.5h11v10h-11z"/><path d="M13.5 9.8h3.6l3.4 3.4v3.3h-7z"/><circle cx="6.6" cy="18.4" r="1.9"/><circle cx="16.4" cy="18.4" r="1.9"/>')];
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.4"
+      markerHeight="5.4" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="${c}"/></marker>`;
+  const wire=`<svg class="bwire" viewBox="0 0 1470 700" width="1470" height="700"><defs>
+      ${s.branches.map((b,i)=>mk('bm'+i,b[2])).join('')}</defs>
+    ${[0,1,2,3,4].map(i=>{const x=L(i)+NW+NG/2;
+      return `<path class="chv" d="M${f(x-5.5)},136 L${f(x+5.5)},145 L${f(x-5.5)},154"/>`;}).join('')}
+    ${DIR.map((d,i)=>d?`<path d="M${f(CX(i))},${d==='d'?'256 V344':'346 V258'}"
+      stroke="${C(i)}" marker-end="url(#bm${i<3?0:1})"/>`:'').join('')}
+    <path d="M${f(L(END-1)+NW+3)},584 H${f(L(END)-4)}"
+      stroke="${C(END)}" marker-end="url(#bm1)"/></svg>`;
+  return head(s)+`<div class="fill"><div class="brg"
+      style="--c1:${s.branches[0][2]};--c2:${s.branches[1][2]}">${wire}
+    <div class="lane">${s.lane}</div>
+    <div class="lgd"><span><i>↓</i>${s.legend[0]}</span><span><i>↑</i>${s.legend[1]}</span></div>
+    ${s.nodes.map((n,i)=>`<div class="nd" style="left:${f(L(i))}px;width:${NW}px">
+      ${IC[i]}<span class="nm">${n[0]}</span><span class="ds">${n[1]}</span></div>`).join('')}
+    <div class="rail"></div><div class="apx">APEX</div>
+    ${s.branches.map((b,bi)=>`<div class="bhd"
+      style="--c:${b[2]};left:${f(bi*(PW+NG))}px;width:${f(PW)}px">
+      <b>${b[0]}</b><span>${b[1]}</span></div>`).join('')}
+    ${s.hooks.map((h,i)=>`<div class="hk${i===END?' end':''}"
+      style="--c:${C(i)};--tint:${s.branches[1][3]};left:${f(L(i))}px;width:${NW}px">
+      <span class="nm">${h[0]}</span><span class="ds">${h[1]}</span></div>`).join('')}
+    </div></div>`;   /* บรรทัดปิดท้าย (foot) ไม่ขึ้นจอเหมือนสไลด์ผังอื่น — ผู้นำเสนอพูดเอง */
+},
+
 flow:s=>head(s)+`<div class="fill">
   <div class="fw" style="--rail:linear-gradient(90deg,${s.steps.map(x=>x[3]).join(',')})">
     ${s.steps.map(([code,t,d,c],i)=>`<div class="stw" style="--c:${c}">
@@ -1372,7 +1701,6 @@ conn:s=>head(s)+`<div class="fill cnn">
       <div class="ch"><h4>${t}</h4><span class="chip">${tag}</span></div>
       <p class="cd">${desc}</p></div>`).join('')}
   </div>
-  <div class="cnn-note">${s.note}</div>
 </div>`,
 
 /* เอกสารส่งมอบ — การ์ดกลุ่มเอกสาร 3 คอลัมน์ 2 แถว ใช้สไตล์การ์ดชุดเดียวกับ Pre-requisite */
@@ -1388,17 +1716,27 @@ prereq:s=>{const solo=s.groups.length===1;
       items.map((x,i)=>`<li${solo&&(i+1)%rw===0?' class="lr"':''}>${x}</li>`).join('')}</ul></div>`;
   }).join('')}</div>`;},
 
-server:s=>head(s)+`<div class="grid g2 srv">
-  <div><h4 style="font-size:16px;letter-spacing:.1em;color:var(--org);margin-bottom:10px">${U('s_app')}</h4>
+/* สเปกเครื่อง — เครื่องแอปกับเครื่องฐานข้อมูลอยู่บน ไลเซนส์ระบบปฏิบัติการกับฐานข้อมูลอยู่ล่าง
+   ปิดท้ายด้วยหมายเหตุรุ่น SQL Server เพราะเป็นข้อที่ลูกค้าต้องซื้อเอง */
+server:s=>head(s)+`<div class="srvw">
+  <div class="grid g2 srv">
+  <div><h4 class="sph">${U('s_app')}</h4>
   <table class="tb"><tr><th>${U('s_cu')}</th><th>CPU</th><th>RAM</th><th>${U('s_st')}</th></tr>
   ${s.app.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:700"':''}>${c}</td>`).join('')}</tr>`).join('')}</table></div>
-  <div><h4 style="font-size:16px;letter-spacing:.1em;color:var(--org);margin-bottom:10px">${U('s_db')}</h4>
+  <div><h4 class="sph">${U('s_db')}</h4>
   <table class="tb"><tr><th>${U('s_tier')}</th><th>CPU</th><th>RAM</th><th>${U('s_st')}</th></tr>
-  ${s.db.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:700"':''}>${c}</td>`).join('')}</tr>`).join('')}</table></div></div>`,
+  ${s.db.map(r=>`<tr>${r.map((c,i)=>`<td${i===0?' style="font-weight:700"':''}>${c}</td>`).join('')}</tr>`).join('')}</table></div></div>
+  <div class="lic"><h4 class="sph">${U('s_lic')}</h4>
+  <table class="tb">${s.lic.map(([a,b])=>`<tr><td class="k">${a}</td><td>${b}</td></tr>`).join('')}</table></div>
+  <div class="note">${U('n_server')}</div></div>`,
 
-tech:s=>head(s)+`<table class="tb tech">
-  <tr><th style="width:19%">${U('t_layer')}</th><th>${U('t_tech')}</th></tr>
-  ${s.rows.map(([a,b])=>`<tr><td style="font-weight:700">${a}</td><td>${b}</td></tr>`).join('')}</table>`,
+/* Technology stack — แผงต่อหนึ่งด้านของระบบ หัวแผงสีประจำด้าน ข้างในคู่ "รายการ → เทคโนโลยี"
+   ใช้ตัวสร้างเดียวกันทั้งสองหน้า ต่างกันแค่จำนวนคอลัมน์ (2 กับ 3) */
+tech:s=>head(s)+`<div class="stkw">${stkGrid(s.panels,2)}
+  ${s.foot?`<div class="note">${s.foot}</div>`:''}</div>`,
+
+tech2:s=>head(s)+`<div class="stkw">${stkGrid(s.panels,3)}
+  ${s.foot?`<div class="note">${s.foot}</div>`:''}</div>`,
 
 /* การ์ดสรุป 3 ใบถูกเอาออกตามที่เจ้าของงานสั่ง — ข้อมูล pts[] ยังอยู่ในเด็คทั้งสองภาษา ใส่กลับได้ทันที */
 qa:s=>`<div class="fill" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
