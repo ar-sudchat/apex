@@ -177,6 +177,13 @@ td.r{text-align:right} td.c{text-align:center}
 .gn .gc{font-size:13.5px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gn .gs{font-size:10.5px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gn .gsale{display:flex;align-items:center;gap:5px;margin-top:6px;font-size:10.5px;line-height:1.3}
+.gn .gsale i{width:15px;height:15px;border-radius:50%;flex:none;display:flex;align-items:center;
+  justify-content:center;background:#e8f1fa;color:#2a6ba8}
+.gn .gsale i svg{width:9.5px;height:9.5px;stroke:currentColor;fill:none;stroke-width:2.2;
+  stroke-linecap:round;stroke-linejoin:round}
+.gn .gsale b{font-weight:600;color:#31536f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gn .gsale span{color:var(--mut);flex:none}
 .gn .gm{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px;font-size:11px}
 .gn .gm .q{font-weight:700;font-variant-numeric:tabular-nums}
 .gn .gm .d{color:var(--mut);font-variant-numeric:tabular-nums}
@@ -263,7 +270,7 @@ html.embed .content{padding-top:14px}
 
       <div class="frow">
         <div class="search"><span class="si"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span>
-          <input id="q" placeholder="ค้นหา เลขที่ PR / PO / รหัสวัตถุดิบ / ผู้ขาย / ลูกค้า" /></div>
+          <input id="q" placeholder="ค้นหา เลขที่ PR / PO / รหัสวัตถุดิบ / ผู้ขาย / ลูกค้า / พนักงานขาย" /></div>
         <select class="sel" id="fSt" style="width:175px"><option value="">ทุกสถานะ</option>
           <option value="plan">ยังเป็นแผน</option><option value="pr">ออก PR แล้ว</option>
           <option value="po">ออก PO แล้ว</option><option value="rcv">รับของแล้ว</option></select>
@@ -331,6 +338,13 @@ const RM={
 const nm=c=>RM[c][0], grp=c=>RM[c][1], sup=c=>RM[c][2], un=c=>RM[c][3],
       lt=c=>RM[c][4], moq=c=>RM[c][5], ss=c=>RM[c][6];
 const ST={plan:['ยังเป็นแผน','k-plan'],pr:['ออก PR แล้ว','k-pr'],po:['ออก PO แล้ว','k-po'],rcv:['รับของแล้ว','k-rcv']};
+
+/* พนักงานขายที่ดูแลลูกค้าแต่ละราย — ชุดเดียวกับหน้าจอลำดับความสำคัญและการล็อกแผน */
+const SALES={'SEMCO':'ปิยะนุช ท.','KYOCERA':'ปิยะนุช ท.','MURATA':'ปิยะนุช ท.','NIDEC':'ปิยะนุช ท.',
+             'TDK':'ณัฐพล ว.','PANASONIC':'ณัฐพล ว.','FOXCONN':'ณัฐพล ว.','LG INNOTEK':'ณัฐพล ว.',
+             'HITACHI ASTEMO':'ธนากร ศ.','DELTA ELECTRONICS':'ธนากร ศ.','DENSO':'ธนากร ศ.'};
+const saleOf = c => SALES[c]||'—';
+const IC_SALE='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20c.6-3.5 3.3-5.4 6.5-5.4s5.9 1.9 6.5 5.4"/></svg>';
 
 /* ความต้องการปลายทาง: [WO, สินค้า, ลูกค้า, ชนิดต้นทาง, เลขที่ต้นทาง, จำนวนบอร์ด, วันต้องใช้, สัดส่วน] */
 const D=(wo,fg,cust,src,sdoc,qty,date)=>({wo,fg,cust,src,sdoc,qty,date});
@@ -438,6 +452,7 @@ function list(){
   if(fc)l=l.filter(o=>o.cust.includes(fc));
   if(fq){const q=fq.toLowerCase();
     l=l.filter(o=>(o.doc+' '+o.c+' '+nm(o.c)+' '+sup(o.c)+' '+o.cust.join(' ')+' '+
+      o.cust.map(saleOf).join(' ')+' '+
       o.dem.map(x=>x.wo+' '+x.sdoc+' '+x.fg).join(' ')).toLowerCase().includes(q));}
   const k=o=>({doc:o.doc,rel:o.relD.getTime(),need:P(o.need).getTime()})[sortK];
   return l.sort((a,b)=>{const A=k(a),B=k(b);return(typeof A==='string'?A.localeCompare(B):A-B)*sortD;});
@@ -486,6 +501,11 @@ function openTrace(doc){
   const net=o.net, lots=o.lots;
   const sos=[...new Set(o.dem.filter(d=>d.src==='SO').map(d=>d.sdoc))];
   const fcs=[...new Set(o.dem.filter(d=>d.src==='FC').map(d=>d.sdoc))];
+  /* พนักงานขายที่ต้องแจ้งถ้าใบสั่งซื้อนี้สะดุด — พร้อมออเดอร์ที่แต่ละคนดูแล */
+  const saleMap=new Map();
+  o.dem.forEach(d=>{const s=saleOf(d.cust); if(!saleMap.has(s))saleMap.set(s,new Set());
+    saleMap.get(s).add(d.sdoc);});
+  const sales=[...saleMap].map(([s,docs])=>`<b>${s}</b> (${[...docs].join(' · ')})`);
   const steps=[
     {d:o.rel,t:'ต้องออกใบสั่งซื้อ',g:`ย้อนจากวันต้องใช้ ลบ Lead Time ${lt(o.c)} วัน`,late:o.late,done:o.st!=='plan'},
     {d:F(minus(o.need,Math.round(lt(o.c)*0.55))),t:'ผู้ขายเริ่มผลิต / เตรียมของ',g:'ประมาณการจากรอบผลิตของผู้ขาย',done:o.st==='rcv'},
@@ -497,13 +517,16 @@ function openTrace(doc){
      <span class="lb"><b>${label}</b>${memo?`<div class="m">${memo}</div>`:''}</span>
      <span class="vv">${nf(val,dp)} ${u}</span></div>`;
   /* ───── แผนผังความสัมพันธ์ของเอกสาร ───── */
-  const NW=206,NH=96,CG=68,RG=20, SW=NW+CG, SH=NH+RG;
-  const rows=o.dem.length, GW=4*SW-CG, GH=rows*SH-RG;
-  const yOf=(i,cnt)=>(GH-(cnt*SH-RG))/2+i*SH;
-  const card=(x,y,cls,ic,typ,code,sub,q,dt,extra,br)=>
+  /* NH = จุดยึดหัวลูกศร (กึ่งกลางส่วนบนของการ์ด) · CH = ความสูงจริงของการ์ดที่สูงที่สุด
+     ใช้ CH คิดความสูงผืนผ้าใบ ไม่งั้นการ์ดแถวสุดท้ายจะล้นไปทับแถบคำอธิบายสี */
+  const NW=206,NH=96,CH=122,CG=68,RG=22, SW=NW+CG, SH=NH+RG;
+  const rows=o.dem.length, GW=4*SW-CG, GH=(rows-1)*SH+CH;
+  const yOf=(i,cnt)=>(GH-((cnt-1)*SH+CH))/2+i*SH;
+  const card=(x,y,cls,ic,typ,code,sub,q,dt,extra,br,who)=>
     `<div class="gn" style="left:${x}px;top:${y}px" data-b="${br}" onclick="gFocus(${br})">
        <div class="gh ${cls}">${ic}<span>${typ}</span></div>
        <div class="gb"><div class="gc">${code}</div><div class="gs">${sub}</div>
+         ${who?`<div class="gsale"><i>${IC_SALE}</i><b>${who}</b><span>ผู้ดูแล</span></div>`:''}
          <div class="gm"><span class="q">${q}</span><span class="d">${dt}</span></div>
          ${extra||''}</div></div>`;
   const edge=(x1,y1,x2,y2,br)=>{const mx=(x1+x2)/2;
@@ -515,7 +538,7 @@ function openTrace(doc){
     const y=yOf(i,rows), pull=o.woQ[i];
     gNodes+=card(0,y, x.src==='SO'?'g-so':'g-fc', x.src==='SO'?ICO.so:ICO.fc,
       x.src==='SO'?'คำสั่งซื้อจากลูกค้า':'พยากรณ์การขาย', x.sdoc, x.cust,
-      nf(x.qty)+' บอร์ด', x.date, '', i);
+      nf(x.qty)+' บอร์ด', x.date, '', i, saleOf(x.cust));
     gNodes+=card(SW,y,'g-mps',ICO.mps,'แผนผลิตสินค้าสำเร็จรูป','MPS-2608 · '+x.fg,
       'สัปดาห์ที่ '+wkOf(x.date)+' · โรงงาน '+(Number(x.wo.replace(/\D/g,'').slice(-3))%2?'A1':'A3'), nf(x.qty)+' บอร์ด', x.date, '', i);
     gNodes+=card(2*SW,y,'g-wo',ICO.wo,'ใบสั่งผลิต',x.wo, x.fg+' · '+nf(x.qty)+' บอร์ด',
@@ -612,7 +635,8 @@ function openTrace(doc){
       <div class="sect">แยกตามใบสั่งผลิต <small>ความต้องการวัตถุดิบของแต่ละใบ — รวมเป็นยอด Gross ${nf(o.gross,dp)} ${u} ก่อนหักสต๊อกและปัด MOQ</small></div>
       <div class="tw" style="max-height:none"><table>
         <thead><tr><th class="c" style="width:48px">#</th><th style="width:145px">ใบสั่งผลิต</th>
-          <th style="width:145px">สินค้า</th><th style="width:180px">ลูกค้า</th>
+          <th style="width:145px">สินค้า</th><th style="width:150px">ลูกค้า</th>
+          <th style="width:125px">พนักงานขาย</th>
           <th style="width:150px">ต้นทางความต้องการ</th>
           <th class="r" style="width:120px">จำนวนบอร์ด</th>
           <th class="r" style="width:140px">ดึงวัตถุดิบไป</th>
@@ -622,26 +646,29 @@ function openTrace(doc){
           <td><span class="code">${x.wo}</span></td>
           <td><span class="code">${x.fg}</span></td>
           <td class="sup">${x.cust}</td>
+          <td class="sup">${saleOf(x.cust)}</td>
           <td><span class="chip ${x.src==='SO'?'k-rcv':'k-sub'}">${x.src==='SO'?'ออเดอร์จริง':'พยากรณ์'}</span>
             <span style="color:var(--mut);font-size:11.5px"> ${x.sdoc}</span></td>
           <td class="r mono">${nf(x.qty)}</td>
           <td class="r mono" style="font-weight:600">${nf(o.woQ[i],dp)} ${u}</td>
           <td class="c mono">${x.date}</td>
           <td class="r mono">${nf(o.woP[i],1)}%</td></tr>`).join('')}
-          <tr style="background:#f7fafd"><td colspan="5" style="font-weight:700;text-align:right">รวม</td>
+          <tr style="background:#f7fafd"><td colspan="6" style="font-weight:700;text-align:right">รวม</td>
             <td class="r mono" style="font-weight:700">${nf(o.dem.reduce((a,x)=>a+x.qty,0))}</td>
             <td class="r mono" style="font-weight:700">${nf(o.gross,dp)} ${u}</td>
             <td class="c dash">—</td><td class="r mono" style="font-weight:700">100.0%</td></tr>
         </tbody></table></div>
       <div class="hint">ถ้าลูกค้ายกเลิกออเดอร์ใดออเดอร์หนึ่ง ระบบจะรู้ทันทีว่าต้องลดใบสั่งซื้อไหนลงเท่าไร
         และในทางกลับกัน เมื่อฝ่ายจัดซื้อถามว่า "ทำไมต้องซื้อของตัวนี้" ก็ตอบได้ถึงระดับเลขที่ออเดอร์ลูกค้า
+        และพนักงานขายที่ดูแลออเดอร์นั้น
         ${sos.length?`<br>ออเดอร์จริงที่เกี่ยวข้อง: ${sos.join(' · ')}`:''}
-        ${fcs.length?`<br>พยากรณ์ที่เกี่ยวข้อง: ${fcs.join(' · ')}`:''}</div>
+        ${fcs.length?`<br>พยากรณ์ที่เกี่ยวข้อง: ${fcs.join(' · ')}`:''}
+        <br>พนักงานขายที่ต้องแจ้งถ้าของเข้าช้า: ${sales.join(' · ')}</div>
       </div>
 
     </div>
     <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">
-      ${o.dem.length} ใบสั่งผลิต · ${o.cust.length} ลูกค้า · ${sos.length} ออเดอร์จริง · ${fcs.length} พยากรณ์</span>
+      ${o.dem.length} ใบสั่งผลิต · ${o.cust.length} ลูกค้า · ${saleMap.size} พนักงานขาย · ${sos.length} ออเดอร์จริง · ${fcs.length} พยากรณ์</span>
       <span><button class="btn">Excel</button><button class="btn" onclick="openTracePdf('${o.doc}')">PDF</button>
       <button class="btn btn-p" onclick="closeDlg()">ปิด</button></span></div>
   </div></div>`;
@@ -684,7 +711,8 @@ function apexOpen(f){ if(window.self!==window.top){ parent.postMessage({apexOpen
 function openTraceReport(){
   const Fm=ApexReport.fmt;
   const rows=ORD.map((o,i)=>[i+1,o.doc,ST[o.st][0]+(o.late?' · ล่าช้า':''),o.c,nm(o.c),sup(o.c),
-    Fm(o.qty)+' '+un(o.c),o.rel,o.need,lt(o.c)+' วัน',o.cust.join(', ')]);
+    Fm(o.qty)+' '+un(o.c),o.rel,o.need,lt(o.c)+' วัน',o.cust.join(', '),
+    [...new Set(o.cust.map(saleOf))].join(', ')]);
   ApexReport.open({
     docNo:'TRACE-260803',
     title:'รายงานที่มาของการสั่งซื้อ',
@@ -696,12 +724,13 @@ function openTraceReport(){
            ['ออก PO แล้ว',ORD.filter(o=>o.st==='po').length+' ฉบับ'],
            ['รับของแล้ว',ORD.filter(o=>o.st==='rcv').length+' ฉบับ']],
     cols:[{t:'#',a:'c',w:'30px'},{t:'เลขที่เอกสาร'},{t:'สถานะ'},{t:'รหัสวัตถุดิบ'},{t:'ชื่อวัตถุดิบ'},
-          {t:'ผู้ขาย'},{t:'จำนวนสั่ง',a:'r'},{t:'วันออกสั่ง',a:'c'},{t:'วันต้องใช้',a:'c'},{t:'LT',a:'r'},{t:'ลูกค้าปลายทาง'}],
+          {t:'ผู้ขาย'},{t:'จำนวนสั่ง',a:'r'},{t:'วันออกสั่ง',a:'c'},{t:'วันต้องใช้',a:'c'},{t:'LT',a:'r'},
+          {t:'ลูกค้าปลายทาง'},{t:'พนักงานขาย'}],
     rows,
     totals:[['เอกสารทั้งหมด',ORD.length+' ฉบับ'],
             ['ใบสั่งผลิตปลายทางรวม',ORD.reduce((a,o)=>a+o.dem.length,0)+' ใบ'],
             ['ล่าช้า — ต้องเร่งดำเนินการ',ORD.filter(o=>o.late).length+' ฉบับ','b']],
-    note:'ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม "ตรวจสอบย้อนกลับที่มา" ในหน้าจอเพื่อดูแผนภาพและสูตรคำนวณจำนวน',
+    note:'ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า พนักงานขายที่ดูแล และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม "ตรวจสอบย้อนกลับที่มา" ในหน้าจอเพื่อดูแผนภาพและสูตรคำนวณจำนวน',
     signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายจัดซื้อ','Purchasing'],['ผู้อนุมัติ','Approved by']]
   });
 }
@@ -710,7 +739,7 @@ function openTraceReport(){
 function openTracePdf(doc){
   const Fm=ApexReport.fmt;
   const o=ORD.find(x=>x.doc===doc); if(!o) return;
-  const rows=o.dem.map((d,i)=>[i+1,d.wo,d.fg,d.cust,d.src+' · '+d.sdoc,Fm(d.qty),d.date,Fm(o.woP[i],1)+'%']);
+  const rows=o.dem.map((d,i)=>[i+1,d.wo,d.fg,d.cust,saleOf(d.cust),d.src+' · '+d.sdoc,Fm(d.qty),d.date,Fm(o.woP[i],1)+'%']);
   ApexReport.open({
     docNo:o.doc,
     title:'ใบแสดงที่มาของการสั่งซื้อ',
@@ -718,7 +747,7 @@ function openTracePdf(doc){
     meta:[['เลขที่เอกสาร',o.doc],['สถานะ',ST[o.st][0]],['รหัสวัตถุดิบ',o.c],['ชื่อวัตถุดิบ',nm(o.c)]],
     meta2:[['ผู้ขาย',sup(o.c)],['จำนวนสั่ง',Fm(o.qty)+' '+un(o.c)],
            ['วันออกสั่ง → ต้องใช้',o.rel+' → '+o.need],['Lead Time',lt(o.c)+' วัน']],
-    cols:[{t:'#',a:'c',w:'34px'},{t:'ใบสั่งผลิต'},{t:'สินค้า FG'},{t:'ลูกค้า'},{t:'เอกสารต้นทาง'},
+    cols:[{t:'#',a:'c',w:'34px'},{t:'ใบสั่งผลิต'},{t:'สินค้า FG'},{t:'ลูกค้า'},{t:'พนักงานขาย'},{t:'เอกสารต้นทาง'},
           {t:'จำนวนบอร์ด',a:'r'},{t:'วันต้องใช้',a:'c'},{t:'สัดส่วน',a:'r'}],
     rows,
     totals:[['ความต้องการรวม (Gross)',Fm(o.gross)+' '+un(o.c)],
@@ -739,7 +768,7 @@ function openTracePdf(doc){
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
 "ส่งออกรายการเป็นไฟล์ Excel":"Export list as an Excel file",
 "ส่งออก Excel":"Export Excel",
-"ค้นหา เลขที่ PR / PO / รหัสวัตถุดิบ / ผู้ขาย / ลูกค้า":"Search PR / PO no. / material code / supplier / customer",
+"ค้นหา เลขที่ PR / PO / รหัสวัตถุดิบ / ผู้ขาย / ลูกค้า / พนักงานขาย":"Search PR / PO no. / material code / supplier / customer / salesperson",
 "ทุกสถานะ":"All Statuses",
 "ยังเป็นแผน":"Planned",
 "ออก PR แล้ว":"PR Issued",
@@ -834,8 +863,15 @@ function openTracePdf(doc){
 "และในทางกลับกัน เมื่อฝ่ายจัดซื้อถามว่า":"and conversely, when Purchasing asks",
 "ทำไมต้องซื้อของตัวนี้":"why are we buying this item",
 "ก็ตอบได้ถึงระดับเลขที่ออเดอร์ลูกค้า":"the answer traces down to the customer order number",
+"และพนักงานขายที่ดูแลออเดอร์นั้น":"and the salesperson who owns that order",
 "ออเดอร์จริงที่เกี่ยวข้อง:":"Related firm orders:",
 "พยากรณ์ที่เกี่ยวข้อง:":"Related forecasts:",
+"พนักงานขายที่ต้องแจ้งถ้าของเข้าช้า:":"Salespersons to notify if the material arrives late:",
+"พนักงานขาย":"Salesperson",
+"ผู้ดูแล":"Owner",
+"ปิยะนุช ท.":"Piyanuch T.",
+"ณัฐพล ว.":"Nattapon W.",
+"ธนากร ศ.":"Thanakorn S.",
 "เหลือเวลาอีก":"Still",
 "วันก่อนถึงวันที่ต้องออกใบสั่งซื้อ":"day(s) before the PO release date",
 "วันที่ต้องออกใบสั่งซื้อคือ":"The PO release date was",
@@ -865,7 +901,7 @@ function openTracePdf(doc){
 "เอกสารทั้งหมด":"Total documents",
 "ใบสั่งผลิตปลายทางรวม":"Destination work orders",
 "ล่าช้า — ต้องเร่งดำเนินการ":"Late — action required",
-"ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม":"Every purchase order traces back to its work orders, customers, and source documents (SO / Forecast) · click the",
+"ทุกใบสั่งซื้อตรวจสอบย้อนกลับได้ถึงใบสั่งผลิต ลูกค้า พนักงานขายที่ดูแล และเอกสารต้นทาง (SO / Forecast) · กดปุ่ม":"Every purchase order traces back to its work orders, customers, the salesperson who owns the account, and source documents (SO / Forecast) · click the",
 "ในหน้าจอเพื่อดูแผนภาพและสูตรคำนวณจำนวน":"button on the screen to view the diagram and quantity calculation",
 "ฝ่ายจัดซื้อ":"Purchasing",
 "สินค้า FG":"FG Product",

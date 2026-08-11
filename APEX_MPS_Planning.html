@@ -157,6 +157,10 @@ tr.sub:hover .fz{background:#fafcfe}
 .v-net-lo{color:#a06a00;font-weight:600;background:#fdf7e2!important}
 .v-net-neg{color:var(--red);font-weight:700;background:var(--p-red)!important}
 .v-open{color:#5a6b7d;background:#f2f5f8!important}
+/* ของพร้อมใช้ยกมา — เป็นตัวตั้ง ไม่ใช่รายการเคลื่อนไหว จึงใช้สีกลางไม่แย่งสายตา */
+.v-avail{color:#4a5c6e;font-weight:600;background:#f4f7fa!important}
+/* เบิกออกจากคลัง — ลดยอดเหมือนส่งมอบ แต่คนละเหตุ ใช้ส้มแยกจากแดงของส่งมอบลูกค้า */
+.v-iss{color:#a35a12;font-weight:600;background:#fdf6ee!important}
 tr.row-net td{background:var(--p-green)}
 tr.row-net .fz{background:var(--p-green)}
 tr.row-net .lbl{color:#22684a;font-weight:600}
@@ -222,6 +226,7 @@ td.clk:hover{outline:2px solid #7fb3e0;outline-offset:-2px}
 .obj{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10.5px;font-weight:700}
 .obj-wo{background:#e9f3fd;color:#1f6fc4}
 .obj-so{background:#fdeceb;color:#b32b2b}
+.obj-mr{background:#fdf1e3;color:#a35a12}
 .dbtn{border:1.5px solid var(--line-d);background:#fff;border-radius:16px;padding:4px 13px;
       font-family:inherit;font-size:12px;font-weight:600;color:var(--blue);cursor:pointer}
 .dbtn:hover{border-color:#9dbdd9;background:#f2f8fd}
@@ -516,8 +521,10 @@ html.embed .content{padding-top:14px}
       </div>
 
       <div class="legend">
+        <span><i style="background:#f4f7fa;border:1px solid #ccd8e4"></i> Available (ของพร้อมใช้ยกมา)</span>
         <span><i style="background:var(--p-blue);border:1px solid #b9d8f5"></i> Projected Inbound (แผนผลิตเข้าคลัง)</span>
         <span><i style="background:var(--p-red);border:1px solid #f3c9c7"></i> Projected Outbound (ส่งมอบลูกค้า)</span>
+        <span><i style="background:#fdf6ee;border:1px solid #edd2b0"></i> Issued (เบิกออกจากคลัง)</span>
         <span><i style="background:var(--p-green);border:1px solid #c3e8d3"></i> Net Balance ≥ Min</span>
         <span><i style="background:#fdf7e2;border:1px solid #ecdba6"></i> ต่ำกว่า Min</span>
         <span><i style="background:#c62828;border:1px solid #a02121"></i> ติดลบ / Stock-out</span>
@@ -547,26 +554,29 @@ const HORIZON = 200;                            // จำนวนวันท�
 
 // daily = ปริมาณส่งมอบเฉลี่ยต่อ "วันปฏิทิน"
 // lotQty / lotEvery = ขนาด lot ผลิต และรอบการผลิต (วัน)
+// issRate = สัดส่วนของยอดส่งมอบที่ถูกเบิกออกจากคลังไปใช้งานอื่น (งานซ่อม · ตัวอย่างลูกค้า · ชดเชยของเสีย)
+//   ตัวนี้กดยอดคงเหลือลงโดยไม่แตะแผนผลิต — % กำลังผลิตรายโรงจึงไม่เปลี่ยน
+//   ตั้งรายตัวเพื่อให้แต่ละรายการเล่าคนละเรื่อง: ขาดหนัก · ต่ำกว่า Min · ยังปกติ
 const ITEMS = [
   { code:'W054Q-062A',  name:'PCB HITACHI ASTEMO 2L Normal', spec:'1 BRD : 6 PNL : 3 PCS · HASL', unit:'PCS', pnl:6, pcs:3,
     plant:'A1', cust:'HITACHI ASTEMO', min:500,  max:5000, opening:1200,
-    daily:520,  lotEvery:7,  lotQty:3650, lotOffset:0 },
+    daily:520,  lotEvery:7,  lotQty:3650, lotOffset:0, issRate:0.24 },
 
   { code:'A048T-168BJ', name:'PCB SEMCO 4L Gold HDI', spec:'1 BRD : 16 PNL : 4 PCS · Laser Via · Gold', unit:'PCS', pnl:16, pcs:4,
     plant:'A3', cust:'SEMCO', min:300,  max:3000, opening:450,
-    daily:215,  lotEvery:6,  lotQty:1300, lotOffset:1 },
+    daily:215,  lotEvery:6,  lotQty:1300, lotOffset:1, issRate:0.16 },
 
   { code:'A188D-023A',  name:'PCB NIDEC 6L Silver Coating', spec:'1 BRD : 6 PNL : 1 PCS · Immersion Silver', unit:'PCS', pnl:6, pcs:1,
     plant:'A2', cust:'NIDEC', min:400,  max:4000, opening:0,
-    daily:290,  lotEvery:5,  lotQty:1500, lotOffset:0 },
+    daily:290,  lotEvery:5,  lotQty:1500, lotOffset:0, issRate:0.13 },
 
   { code:'G120A-017A',  name:'PCB SEMCO 4L Normal', spec:'1 BRD : 13 PNL : 4 PCS · HASL', unit:'PCS', pnl:13, pcs:4,
     plant:'A1', cust:'SEMCO', min:600,  max:6000, opening:2100,
-    daily:480,  lotEvery:8,  lotQty:3900, lotOffset:2 },
+    daily:480,  lotEvery:8,  lotQty:3900, lotOffset:2, issRate:0.05 },
 
   { code:'K129B-036A',  name:'PCB Western Digital 2L Tin', spec:'1 BRD : 8 PNL : 2 PCS · Immersion Tin', unit:'PCS', pnl:8, pcs:2,
     plant:'A1', cust:'WESTERN DIGITAL', min:800,  max:8000, opening:600,
-    daily:640,  lotEvery:6,  lotQty:3900, lotOffset:0 },
+    daily:640,  lotEvery:6,  lotQty:3900, lotOffset:0, issRate:0.21 },
 ];
 
 /* ── date helpers ─────────────────────────────────────────── */
@@ -592,21 +602,34 @@ function series(it){
   const rnd = () => { s = (Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; };
   const inb = new Array(HORIZON).fill(0);
   const outb= new Array(HORIZON).fill(0);
+  const iss = new Array(HORIZON).fill(0);
   for(let i=0;i<HORIZON;i++){
     const w = addDays(ORIGIN,i).getDay();               // 0=Sun 6=Sat
     const f = w===0 ? 0 : (w===6 ? 0.636 : 1.273);      // รวมทั้งสัปดาห์ = 7 × daily
     if(f) outb[i] = -Math.round(it.daily * f * (0.82 + rnd()*0.36));
+    /* เบิกออกจากคลัง — ไม่ลงทุกวัน ลงราว 3 ใน 4 ของวันทำงาน
+       เว้นวันบ้างเพื่อให้ดูเหมือนใบเบิกจริง ไม่ใช่ค่าคงที่หารเฉลี่ย
+       และค่อย ๆ เบาลงหลังสัปดาห์ที่ 5 เพราะของที่เบิกผูกกับล็อตที่ค้างอยู่ตอนนี้
+       (ซ่อมแก้ · ตัวอย่างรออนุมัติ) ไม่ใช่ภาระถาวร — ถ้าปล่อยให้คงที่ยาว ๆ
+       มุมมองสัปดาห์กับเดือนจะติดลบทบไปเรื่อยจนแดงทั้งกระดาน อ่านไม่ออกว่าตรงไหนคือปัญหาจริง */
+    const fade = i<35 ? 1 : Math.max(0.12, 1-(i-35)/60);
+    if(f && rnd() > 0.26)
+      iss[i] = -Math.round(it.daily * f * it.issRate * fade * (0.5 + rnd()*1.1));
     if(i >= it.lotOffset && (i - it.lotOffset) % it.lotEvery === 0){
       const t = w===0 ? i+1 : i;                      // รับเข้าไม่ลงวันอาทิตย์ — เลื่อนไปวันจันทร์
-      if(t < HORIZON) inb[t] += it.lotQty;
+      /* ล็อตตั้งแต่สัปดาห์ที่ 6 ขึ้นไปโตขึ้น = แผนไล่เก็บของที่ขาดสะสมช่วงต้นคืน
+         ทำให้มุมมองสัปดาห์/เดือนเล่าเรื่องได้ว่า "ขาดตอนนี้ แล้วค่อยไต่กลับ"
+         แทนที่จะแดงทบไปจนสุดกระดาน · ช่วง 2 สัปดาห์แรกไม่แตะ ตัวเลข % กำลังผลิตรายวันจึงเท่าเดิม */
+      const boost = i < 40 ? 1 : 1.17;
+      if(t < HORIZON) inb[t] += Math.round(it.lotQty * boost);
     }
   }
-  return { inb, outb };
+  return { inb, outb, iss };
 }
-ITEMS.forEach(it => { const s = series(it); it.inb = s.inb; it.outb = s.outb;
-  // net balance รายวันสะสม
+ITEMS.forEach(it => { const s = series(it); it.inb = s.inb; it.outb = s.outb; it.iss = s.iss;
+  // net balance รายวันสะสม — ยอดยกมา + รับเข้า − ส่งมอบ − เบิกออก (outb กับ iss เก็บเป็นค่าลบอยู่แล้ว)
   it.net = []; let r = it.opening;
-  for(let i=0;i<HORIZON;i++){ r += it.inb[i] + it.outb[i]; it.net.push(r); }
+  for(let i=0;i<HORIZON;i++){ r += it.inb[i] + it.outb[i] + it.iss[i]; it.net.push(r); }
 });
 
 /* ── กำลังผลิตรายโรง (FR-10) ──────────────────────────────────
@@ -614,8 +637,10 @@ ITEMS.forEach(it => { const s = series(it); it.inb = s.inb; it.outb = s.outb;
    การตรวจถึงระดับศูนย์งาน (work centre) เป็นงานเฟสถัดไป
    หน่วยเป็นแผ่นแพเนล (PNL) ซึ่งเป็นหน่วยกำลังผลิตของโรงงาน PCB
    แปลงจาก PCS ด้วยจำนวนชิ้นต่อแพเนลของสินค้าตัวนั้น (1 BRD : pnl PNL : pcs PCS) */
-const PLANTS = [{c:'A1',cap:850},{c:'A2',cap:400},{c:'A3',cap:78}];   // PNL ต่อวันทำงาน
-const isWorkday = i => addDays(ORIGIN,i).getDay() !== 0;             // อาทิตย์หยุด — ตรงกับตัวสร้างยอดส่งมอบ
+/* กำลังผลิตต่อวันทำงาน หน่วยแผ่นแพเนล (PNL) */
+const PLANTS = [{c:'A1',cap:850},{c:'A2',cap:400},{c:'A3',cap:78}];
+/* อาทิตย์หยุด — ตรงกับตัวสร้างยอดส่งมอบด้านบน */
+const isWorkday = i => addDays(ORIGIN,i).getDay() !== 0;
 
 /* ปฏิทินกำลังผลิต — วันที่โรงเดินไม่เต็มกำลัง
    สาเหตุที่ทำให้แผนเกินกำลังส่วนใหญ่มาจากฝั่งกำลังผลิตหด ไม่ใช่ยอดสั่งเพิ่ม
@@ -644,8 +669,9 @@ ITEMS.forEach(it => {
     const days=[]; let n=0;
     for(let k=0;k<it.lotEvery;k++){
       const d=i-k;
-      if(addDays(ORIGIN,d).getDay()===0) continue;      // อาทิตย์ไม่ผลิต
-      n++; if(d>=0) days.push(d);                       // นับวันก่อนต้นช่วงด้วย แต่ลงตัวเลขเฉพาะที่อยู่ในช่วง
+      if(addDays(ORIGIN,d).getDay()===0) continue;      /* อาทิตย์ไม่ผลิต */
+      /* นับวันก่อนต้นช่วงด้วย แต่ลงตัวเลขเฉพาะวันที่อยู่ในช่วง */
+      n++; if(d>=0) days.push(d);
     }
     if(!n) continue;
     const per = pnlPerLot / n;
@@ -770,6 +796,13 @@ function render(){
         onclick="openWO(${idx},${b.to},${v})">${nf(v)}</td>`;
     }).join('');
 
+    /* ของพร้อมใช้ = ยอดคงเหลือ ณ สิ้นงวดก่อนหน้า จึงเป็นค่า ณ จุดเวลา ไม่ใช่ผลรวมทั้งงวด
+       ใช้ row() ไม่ได้เพราะ row() บวกทุกวันในงวด */
+    const availRow = B.map(b=>{
+      const v = b.from === 0 ? it.opening : it.net[b.from-1];
+      return `<td class="v-avail${b.wkend?' wkend-c':''}">${nf(v)}</td>`;
+    }).join('');
+
     const blank = `<td></td>`.repeat(B.length);
     const openBal = B[0].from === 0 ? it.opening : it.net[B[0].from-1];
     const isOff = collapsed.has(idx);   // ยุบอยู่ → โชว์ Net Balance บนแถวหัวรายการ
@@ -794,8 +827,10 @@ function render(){
       ${isOff ? TD(C.open, nf(openBal), 'v-net') : TD(C.open)}
       ${isOff ? netRow : blank}
     </tr>
+    <tr class="sub s${idx}">${subHead('Available Inventory')}${TD(C.open, nf(openBal), 'v-avail')}${availRow}</tr>
     <tr class="sub s${idx}">${subHead('Projected Inbound Inventory')}${TD(C.open,'','v-open')}${row(it.inb,'v-in','inb')}</tr>
     <tr class="sub s${idx}">${subHead('Projected Outbound Inventory')}${TD(C.open)}${row(it.outb,'v-out','outb')}</tr>
+    <tr class="sub s${idx}">${subHead('Issued Inventory')}${TD(C.open)}${row(it.iss,'v-iss','iss')}</tr>
     <tr class="sub row-net s${idx}">${subHead('Net Inventory Balance')}${TD(C.open, nf(openBal), 'v-net')}${netRow}</tr>`;
   }).join('');
 
@@ -835,7 +870,7 @@ function renderCap(B, C){
         >${Math.round(u)}%${why.length?'<i>*</i>':''}</td>`;
     }).join('');
     return `<tr class="cap-row">${lbl(
-      `โรง ${p.c}<small>กำลังผลิต ${nf0(p.cap)} PNL/วันทำงาน · ${list.length} รายการ</small>`)}
+      `โรงงาน ${p.c}<small>กำลังผลิต ${nf0(p.cap)} PNL ต่อวันทำงาน · ${list.length} รายการ</small>`)}
       ${TD(C.open, nf0(p.cap), 'cap-cap')}${cells}</tr>`;
   }).join('');
 
@@ -886,6 +921,15 @@ const PROC = ['CUT','DRI','PLT','DFO','SOM','LAS','AOI','PAK'];
 const RM = ['RM-CCL-S1000H-036 · CCL FR-4','RM-PP-7628-S1000HB · Prepreg',
             'RM-CU-FOIL-1OZ · Copper Foil','RM-AL-MVC1240 · Aluminum Sheet',
             'RM-SM-GRN-HFLF · Solder Mask','RM-DF-E9415DI · Dry Film'];
+/* เหตุผลที่ของถูกเบิกออกจากคลังนอกเหนือแผนส่งมอบ — [ผู้ขอเบิก, เหตุผล] */
+const ISSUE = [
+  ['ฝ่ายผลิต','เบิกไปทำงานซ่อมแก้ลอตที่ AOI ตีกลับ'],
+  ['ฝ่ายขาย','ตัวอย่างส่งลูกค้าอนุมัติแบบ'],
+  ['ฝ่ายประกันคุณภาพ','สุ่มทดสอบความน่าเชื่อถือ (Reliability Test)'],
+  ['ฝ่ายผลิต','ชดเชยของเสียในกระบวนการชุบ'],
+  ['ฝ่ายบริการหลังการขาย','เปลี่ยนทดแทนให้ลูกค้าตามการรับประกัน'],
+  ['ฝ่ายวิศวกรรม','ทดลองตั้งเครื่องสำหรับรุ่นใหม่'],
+];
 
 function rng(seed){ let s=hash(seed); return ()=>{ s=(Math.imul(s,1664525)+1013904223)>>>0; return s/4294967296; }; }
 function splitQty(total,n,r){
@@ -904,6 +948,11 @@ function docsOfDay(it,key,d){
     for(let i=0;i<n;i++) out.push({date, obj:'WO', doc:dnum('WO',r),
       ref:`${it.plant}-${PROC[Math.floor(r()*PROC.length)]}-0${1+Math.floor(r()*4)}`,
       note:RM[Math.floor(r()*RM.length)], qty:q[i]});
+  } else if(key==='iss'){
+    /* เบิกออกจากคลัง = ใบเบิก (Material Requisition) */
+    const n=1+Math.floor(r()*2), q=splitQty(Math.abs(v),n,r);
+    for(let i=0;i<n;i++){ const p=ISSUE[Math.floor(r()*ISSUE.length)];
+      out.push({date, obj:'MR', doc:dnum('MR',r), ref:p[0], note:p[1], qty:q[i]}); }
   } else {                                      // ส่งมอบลูกค้า = Sale Order / Delivery
     const n=1+Math.floor(r()*3), q=splitQty(Math.abs(v),n,r);
     for(let i=0;i<n;i++) out.push({date, obj:'SO', doc:dnum('SO',r),
@@ -915,6 +964,7 @@ function docsOfDay(it,key,d){
 const ROWMETA={
   inb :{t:'Projected Inbound Inventory', c:['วันที่','ประเภท','เลขที่เอกสาร','โรงงาน · เครื่องจักร','วัตถุดิบหลัก','จำนวน','']},
   outb:{t:'Projected Outbound Inventory',c:['วันที่','ประเภท','เลขที่เอกสาร','ลูกค้า','หมายเหตุ','จำนวน','']},
+  iss :{t:'Issued Inventory',            c:['วันที่','ประเภท','เลขที่ใบเบิก','ผู้ขอเบิก','เหตุผลที่เบิก','จำนวน','']},
 };
 
 let DLG=[];
@@ -943,6 +993,7 @@ function openCell(idx,key,from,to){
               <td style="color:#7d8ea0">${x.note}</td>
               <td class="num"><b>${nf(x.qty)}</b> ${it.unit}</td>
               <td>${key==='outb'?`<button class="dbtn" onclick="openDemand(${idx},${i})">ดู WO</button>`
+                    :key==='iss'?`<button class="dbtn">เปิดใบเบิก</button>`
                                 :`<button class="dbtn">เปิด WO</button>`}</td></tr>`).join('')}</tbody>
             <tfoot><tr><td colspan="5">รวม ${rows.length} รายการ</td>
               <td class="num">${nf(total)} ${it.unit}</td><td></td></tr></tfoot>
@@ -1337,20 +1388,28 @@ function openMpsReport(){
   const e=document.getElementById('fEnd')?.value||'16-08-2026';
   const rows=ITEMS.map((it,i)=>[i+1,it.code,it.name,it.unit,it.plant,it.cust,
     F(it.min),F(it.max),F(it.opening),F(it.daily),F(it.lotQty)]);
+  /* นับของขาดจากช่วงที่กระดานแสดงอยู่จริง ไม่ใช่ทั้ง horizon 200 วัน */
+  const Bp=buckets(), shortBd=[Bp[0].from, Bp[Bp.length-1].to];
+  const shortN=ITEMS.filter(it=>
+    it.net.slice(shortBd[0],shortBd[1]+1).some(v=>v<0)).length;
   ApexReport.open({
     docNo:'MPS-260803-01',
     title:'รายงานแผนผลิตสินค้าสำเร็จรูป',
     titleEn:'Master Production Schedule (MPS) Report',
     meta:[['เลขที่รายงาน','MPS-260803-01'],['วันที่วางแผน','03-08-2026'],
           ['ช่วงแผน',s+' – '+e],['สถานะ','ยืนยันแล้ว']],
-    meta2:[['โรงงาน','A1 · A2 · A3'],['ประเภทสินค้า','FG — PCB'],
+    meta2:[['โรงงาน',PLANTS.map(x=>x.c+' '+nf0(x.cap)).join(' · ')+' PNL/วันทำงาน'],['ประเภทสินค้า','FG — PCB'],
            ['แหล่งความต้องการ','Sales Order · Sale Forecast'],['ผู้วางแผน','อาทิตย์ สุดชาติ']],
     cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสสินค้า'},{t:'ชื่อสินค้า'},{t:'หน่วย',a:'c'},{t:'โรงงาน',a:'c'},
           {t:'ลูกค้า'},{t:'Min',a:'r'},{t:'Max',a:'r'},{t:'ยอดยกมา',a:'r'},{t:'แผน/วัน',a:'r'},{t:'Lot Size',a:'r'}],
     rows,
     totals:[['จำนวนสินค้าในแผน',ITEMS.length+' รายการ'],
             ['ยอดยกมารวม',F(ITEMS.reduce((a,x)=>a+x.opening,0))+' PCS'],
-            ['กำลังผลิตรวมต่อวัน',F(ITEMS.reduce((a,x)=>a+x.daily,0))+' PCS','b']],
+            ['ยอดส่งมอบเฉลี่ยต่อวัน',F(ITEMS.reduce((a,x)=>a+x.daily,0))+' PCS'],
+            ['ยอดเบิกออกจากคลังในช่วงแผน',F(Math.abs(ITEMS.reduce((a,x)=>
+              a+x.iss.slice(shortBd[0],shortBd[1]+1).reduce((p,q)=>p+q,0),0)))+' PCS'],
+            ['สินค้าที่ยอดคงเหลือติดลบในช่วงแผน',shortN+' รายการ','b'],
+            ['กำลังผลิตรวมต่อวันทำงาน',nf0(PLANTS.reduce((a,x)=>a+x.cap,0))+' PNL']],
     note:'แผนผลิตเทียบ Sales Order / Forecast ช่วง '+s+' ถึง '+e+' · รายละเอียดรายวัน-สัปดาห์-เดือน ดูจากกระดานวางแผน MPS',
     signs:[['ผู้จัดทำ','Prepared by'],['ผู้ตรวจสอบ','Checked by'],['ผู้อนุมัติแผน','Approved by']]
   });
@@ -1358,6 +1417,21 @@ function openMpsReport(){
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
 "อาทิตย์ สุดชาติ":"Artit Sudchat",
+"เช็คกำลังผลิตรายโรง":"Capacity Check by Plant",
+"แผนผลิตในงวด เทียบกำลังผลิตของโรง · หน่วยแผ่นแพเนล (PNL)":"Planned production for the period vs plant capacity · unit: panels (PNL)",
+"ใช้กำลังผลิตไม่เกิน 85% — รับไหวสบาย":"Utilisation up to 85% — comfortable",
+"85–100% — ตึง ไม่เหลือที่รับงานแทรก":"85–100% — tight, no room for extra work",
+"เกิน 100% — แผนเกินกว่าที่โรงนั้นรับไหว":"Over 100% — the plan is more than that plant can take",
+"วันที่กำลังผลิตไม่เต็ม — ชี้ที่ช่องเพื่อดูสาเหตุ":"Days at reduced capacity — hover a cell for the reason",
+"หยุดซ่อมบำรุงไลน์ Hot Press":"Hot Press line maintenance shutdown",
+"เปลี่ยนอ่างชุบทองแดง":"Copper plating bath replacement",
+"สอบเทียบเครื่องเจาะเลเซอร์":"Laser drill calibration",
+"กำลังผลิตรวมต่อวันทำงาน":"Total Capacity per Working Day",
+"ยอดส่งมอบเฉลี่ยต่อวัน":"Average Delivery per Day",
+"ต่อวันทำงาน":"per working day",
+"วันทำงาน":"Working days",
+"แผนผลิต":"Planned production",
+"กำลังผลิต":"Capacity",
 "Master Production Schedule · แผนผลิต FG เทียบ Sales Order / Forecast · A1 · A2 · A3":"Master Production Schedule · FG production plan vs Sales Order / Forecast · A1 · A2 · A3",
 "ดูประวัติการรันแผนย้อนหลัง":"View past plan runs",
 "ประวัติการรันแผน (Plan Run History)":"Plan Run History",
@@ -1374,6 +1448,25 @@ function openMpsReport(){
 "เดือน":"Month",
 "แผนผลิตเข้าคลัง":"planned production receipts",
 "ส่งมอบลูกค้า":"customer deliveries",
+"ของพร้อมใช้ยกมา":"on-hand brought forward",
+"ยอดเบิกออกจากคลังในช่วงแผน":"Withdrawn from warehouse in this window",
+"สินค้าที่ยอดคงเหลือติดลบในช่วงแผน":"Items going negative in this window",
+"เบิกออกจากคลัง":"withdrawn from the warehouse",
+"เลขที่ใบเบิก":"Requisition No.",
+"ผู้ขอเบิก":"Requested By",
+"เหตุผลที่เบิก":"Reason for Withdrawal",
+"เปิดใบเบิก":"Open requisition",
+"ฝ่ายผลิต":"Production",
+"ฝ่ายขาย":"Sales",
+"ฝ่ายประกันคุณภาพ":"Quality Assurance",
+"ฝ่ายบริการหลังการขาย":"After-sales Service",
+"ฝ่ายวิศวกรรม":"Engineering",
+"เบิกไปทำงานซ่อมแก้ลอตที่ AOI ตีกลับ":"Rework on a lot rejected at AOI",
+"ตัวอย่างส่งลูกค้าอนุมัติแบบ":"Sample for customer design approval",
+"สุ่มทดสอบความน่าเชื่อถือ (Reliability Test)":"Reliability test sampling",
+"ชดเชยของเสียในกระบวนการชุบ":"Replacing scrap from the plating process",
+"เปลี่ยนทดแทนให้ลูกค้าตามการรับประกัน":"Warranty replacement for a customer",
+"ทดลองตั้งเครื่องสำหรับรุ่นใหม่":"Machine set-up trial for a new model",
 "ต่ำกว่า Min":"Below Min",
 "ติดลบ / Stock-out":"Negative / Stock-out",
 "ปกติ":"Normal",

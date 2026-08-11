@@ -213,8 +213,12 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
 .frame.live .veil{display:none}
 /* คอลัมน์ซ้ายกว้างขึ้นจากเดิม 31% — แผงนี้เป็นภาพหน้าจอแล้ว ไม่ใช่ย่อหน้า ยิ่งกว้างยิ่งดูออก */
 .veil .vin{flex:1;min-height:0;display:grid;grid-template-columns:41% 1fr;gap:30px}
-.veil .vh{display:block;font-size:12.5px;font-weight:800;letter-spacing:.16em;color:var(--org-d)}
+/* --vhh = ความสูงบรรทัดหัวข้อคอลัมน์ ตรึงไว้เป็นตัวเลขเดียว เพราะคอลัมน์ซ้ายไม่มีหัวข้อแล้ว
+   แต่ต้องกันที่สูงเท่ากันไว้ ยอดแผงภาพจึงจะตรงกับการ์ดใบแรกฝั่งขวาพอดี */
+.veil{--vhh:17px}
+.veil .vh{display:block;font-size:12.5px;line-height:var(--vhh);font-weight:800;letter-spacing:.16em;color:var(--org-d)}
 .veil .vl,.veil .vr{display:flex;flex-direction:column;min-height:0}
+.veil .vl{padding-top:var(--vhh)}
 /* คอลัมน์ซ้าย — เหตุผลของหน้าจอ วางเป็นแผงเต็มความสูงให้เท่ากับการ์ดฝั่งขวา
    เดิมย่อหน้าถูก margin-top:auto ดันลงไปติดปุ่มล่าง (เพราะถอดบรรทัดสรุปเล็ก p.sm ออกแล้ว)
    หัวข้อจึงลอยเดี่ยวอยู่บน เหลือรูโหว่ใต้หัวข้อ 335–436px ทุกหน้า
@@ -580,8 +584,8 @@ const SLIDES=[
 {k:'delivery',nm:'Project Delivery',cd:'PROJECT DELIVERY',type:'scope',
  tt:'Project <em>Delivery</em>',
  lead:'What is in this project — and, just as important, what is not.',
- cards:[['Production Planning','8 SCREENS','#1F6FC4',
-   ['MPS board with capacity check','MRP board','Priority &amp; freeze','Substitute materials','Stock at risk — expiry and idle money','Idle material — money nobody has reserved','Purchase traceability &amp; document map','Planning parameters']],
+ cards:[['Production Planning','7 SCREENS','#1F6FC4',
+   ['MPS board with capacity check','MRP board','Priority &amp; freeze','Substitute materials','Stock at risk — expiry and idle money','Purchase traceability &amp; document map','Planning parameters']],
   ['Costing','3 SCREENS','#00B28F',
    ['Standard Cost Book','Cost Sheet','Cost simulation — price shock']],
   ['Shared Platform','1 SCREEN + REPORTS','#FF8006',
@@ -597,13 +601,13 @@ const SLIDES=[
  steps:[['INPUT','Demand','Sale forecast &amp; sale order','#245477'],
         ['FR-1','MPS','Production plan by period','#1F6FC4'],
         ['FR-1.4','MO','Planner adjusts, then approves','#0A96E8'],
-        ['FR-2.1','BOM Explosion','Material needed per work order','#00B28F'],
+        ['FR-2.1','BOM Breakdown','Demand broken down by BOM into material per work order','#00B28F'],
         ['FR-2.3','MRP','What to buy, how much, when','#FF8006'],
         ['FR-6','Allocation','Priority and freeze','#C25F1E'],
         ['FR-2.6','ERP','Data handed back to ERP','#A32311']],
  formulas:[['Demand','#245477','Forecast − Sale Order = Demand',
             'Forecast minus the orders you already have, so the same demand is never counted twice.'],
-           ['BOM explosion','#00B28F','BOM = MO + (MO × % scrap)',
+           ['Demand broken down by BOM','#00B28F','BOM = MO + (MO × % scrap)',
             'Scrap is added per process, so the number matches what the line really uses.'],
            ['MRP net requirement','#FF8006','Net requirement = (gross + safety stock) − available − scheduled receipts − allocated',
             'Then rounded up to the supplier MOQ before the requisition goes out.']],
@@ -616,11 +620,11 @@ const SLIDES=[
         ['STEP 1','Direct Material','BOM quantity × price of the period','#1E9E50'],
         ['STEP 2','Direct Labour','Standard minutes × rate per cost centre','#0E8CA8'],
         ['STEP 3','Overhead','Machine and labour hours × OH rate','#1F6FC4'],
-        ['','Waste &amp; Scrap Resale','Loss per plant, minus the scrap you sell back','#C25F1E'],
+        ['','Waste &amp; Scrap Resale','Loss per plant, minus gold scrap — the only scrap sold back today','#C25F1E'],
         ['STEP 4','Cost Book','Standard cost per board, one version per period','#FF8006'],
         ['STEP 5','Simulation','What-if on price, wage and exchange rate','#A32311']],
- formulas:[['Standard cost','#FF8006','Standard cost = DM + DL + OH + Waste − Scrap Resale',
-            'Costed on the real BOM and routing of each item code. Never a plant average.'],
+ formulas:[['Standard cost','#FF8006','Standard cost = DM + DL + OH + Waste − Gold Scrap Resale',
+            'Costed on the real BOM and routing of each item code. Gold is the only scrap credited back today.'],
            ['Direct labour','#0E8CA8','DL = Σ (standard minutes ÷ 60) × rate per hour × manpower',
             'Taken process by process, so changing one work centre only moves the items that pass through it.'],
            ['Break-even on material','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
@@ -678,17 +682,7 @@ const SLIDES=[
        P(4,'One action per line','Return to supplier · use as a substitute · push to sell · write off')],
  foot:'Both views run on the same data and the same filters, so the two numbers can never disagree.'},
 
-{k:'idle',nm:'Idle Material',cd:'SCREEN 06',type:'demo',file:'APEX_Idle_Material_Dashboard.html',vw:1380,
- tt:'Idle <em>Material</em>',
- lead:'The money sitting in raw material that no work order and no forecast has claimed.',
- why:'Stock can come down without putting the line at risk, because the money that is genuinely free to release is kept apart from the stock the plan still needs.',
- pins:[P(1,'Matched against the real plan','Stock is matched to work orders and the sales forecast 3 or 4 months ahead'),
-       P(2,'Idle value split by cause','Never reserved · more than the plan needs · will expire before it is used'),
-       P(3,'How long it has been sitting','Value grouped by last issue date, from under 3 months to over a year'),
-       P(4,'A recommended action per item','Return to supplier · use as a substitute · push to sell · write off · review with Sales')],
- foot:'The list goes straight to purchasing, so the decision is made before the next order is raised.'},
-
-{k:'trace',nm:'Purchase Traceability',cd:'SCREEN 07',type:'demo',file:'APEX_Purchase_Traceability_Mockup.html',
+{k:'trace',nm:'Purchase Traceability',cd:'SCREEN 06',type:'demo',file:'APEX_Purchase_Traceability_Mockup.html',
  tt:'Purchase <em>Traceability</em>',
  lead:'Answers purchasing’s question — “why are we buying this, and why this much?”',
  why:'Every baht spent on material ties back to the customer it was bought for — so a buy stands up when it is questioned, and is cut cleanly when an order changes.',
@@ -698,7 +692,7 @@ const SLIDES=[
        P(4,'Document map','The whole document chain on one page')],
  foot:'If a customer cancels an order, the system tells you right away which purchase line to cut and by how much.'},
 
-{k:'doa',nm:'Approval Chain (DOA)',cd:'SCREEN 08',type:'demo',file:'APEX_Approval_DOA_Mockup.html',
+{k:'doa',nm:'Approval Chain (DOA)',cd:'SCREEN 07',type:'demo',file:'APEX_Approval_DOA_Mockup.html',
  tt:'Approval <em>Chain (DOA)</em>',
  lead:'The approval chain an approver sees on the document itself — for everything that changes the plan or the cost.',
  why:'Approvals move at the speed of the plan — and the record of who decided what stays intact for as long as anyone needs to look at it.',
@@ -708,7 +702,7 @@ const SLIDES=[
        P(4,'The document read in full','Header, lines and the reason for the request, all on the approval screen')],
  foot:'Built on the central DOA component you already have, so this is integration work, not new development.'},
 
-{k:'param',nm:'Planning Parameters',cd:'SCREEN 09',type:'demo',file:'APEX_Planning_Parameter_Mockup.html',
+{k:'param',nm:'Planning Parameters',cd:'SCREEN 08',type:'demo',file:'APEX_Planning_Parameter_Mockup.html',
  tt:'Planning <em>Parameters</em>',
  lead:'The values that make MRP correct — and the checks that catch a bad value before it throws off the plan.',
  why:'MRP is only as good as the numbers underneath it. Keeping those values straight is what lets the plan be trusted from the first run.',
@@ -718,18 +712,18 @@ const SLIDES=[
        P(4,'Change history kept','Who changed which value, and when')],
  foot:'One wrong parameter throws off a whole month of planning, which is why the checks are built in from the start.'},
 
-{k:'cost',nm:'Standard Cost Book',cd:'SCREEN 10',type:'demo',file:'APEX_StandardCostBook_Mockup.html',
+{k:'cost',nm:'Standard Cost Book',cd:'SCREEN 09',type:'demo',file:'APEX_StandardCostBook_Mockup.html',
  tt:'Standard <em>Cost Book</em>',
  lead:'Shows what one board costs — and exactly which lines that number came from.',
  why:'Cost becomes a number you can stand behind in a pricing meeting — one agreed figure per item per period, and a clear reason whenever it moves.',
  pins:[P(1,'Built from the real BOM and routing','Not an average — costed on the route of each item code'),
-       P(2,'Material, labour and overhead kept apart','Plus scrap cost and the money you get back from selling scrap'),
+       P(2,'Material, labour and overhead kept apart','Plus scrap cost, and the money back from gold scrap — the only scrap sold today'),
        P(3,'Cost sheet down to the line','Open it to see which material and which process the cost came from'),
        P(4,'Flags items that cannot be costed yet','With the reason, down to the material line that has no price')],
  foot:'Saved as one version per period, so you can compare periods and say exactly why the cost moved.'},
 
 /* เปิด Standard Cost Book พร้อม Cost Sheet Report เด้งขึ้นมาเลย (#sheet=<รหัสสินค้า>) */
-{k:'sheet',nm:'Cost Sheet',cd:'SCREEN 11',type:'demo',
+{k:'sheet',nm:'Cost Sheet',cd:'SCREEN 10',type:'demo',
  file:'APEX_StandardCostBook_Mockup.html#sheet=A048T-168BJ',url:'APEX_StandardCostBook_Mockup.html',
  vw:1480,   /* ไม่ซูม — รายงานกว้าง 14 คอลัมน์ ต้องการ viewport กว้างสุดเท่าที่กรอบมี */
  tt:'Cost <em>Sheet</em>',
@@ -737,11 +731,11 @@ const SLIDES=[
  why:'The total opens up into the steps behind it. You can see where along the process the money goes — and that is where any serious cost-down has to start.',
  pins:[P(1,'Material, labour and machine side by side','Each process step carries its own numbers, read across a single row'),
        P(2,'Every routing step listed','Cut · dry film · AOI · hot press · drill · laser via · plating · solder mask · surface finish · final test · packing'),
-       P(3,'Scrap and resale value included','Waste cost and the money back from selling scrap are part of the same total'),
+       P(3,'Scrap and gold resale included','Waste cost and the gold scrap sold back sit in the same total. Other scrap is not credited'),
        P(4,'Open any number to see how it got there','Each cost band expands into the quantity × unit price and the hours × rate behind it')],
  foot:'Printable and exportable as it stands, so it can go straight into a pricing pack or an audit file.'},
 
-{k:'sim',nm:'Cost Simulation',cd:'SCREEN 12',type:'demo',file:'APEX_PriceShockSimulator_Mockup.html',
+{k:'sim',nm:'Cost Simulation',cd:'SCREEN 11',type:'demo',file:'APEX_PriceShockSimulator_Mockup.html',
  tt:'Cost <em>Simulation</em>',
  lead:'If material prices or wages move, which items are hit and by how much — and what price should you quote?',
  why:'A price rise from a supplier can be answered the same day — you know where it lands on your margin, and which customer to talk to first.',
@@ -754,19 +748,19 @@ const SLIDES=[
 /* ─── plan & technical ─── */
 {k:'timeline',nm:'Project Timeline',cd:'PROJECT TIMELINE',type:'timeline',
  tt:'Project <em>Timeline</em>',
- lead:'11 weeks to go-live. Planning and costing are built at the same time because the screens and the calculations have already been reviewed with your users.',
- weeks:11,
+ lead:'12 weeks to go-live. Planning and costing are built at the same time because the screens and the calculations have already been reviewed with your users.',
+ weeks:12,
  rows:[['Preparation and design',1,4,'#4F9DE6'],
-       ['Development — planning',2,8,'#1F6FC4'],
-       ['Development — costing',3,8,'#00B28F'],
-       ['ERP data integration',5,8,'#7A4FD3'],
-       ['Standard reports',6,9,'#0E8CA8'],
-       ['Internal testing &amp; QA',3,10,'#D9A400'],
-       ['User acceptance test (UAT)',9,10,'#C25F1E'],
-       ['Training, install and acceptance',10,11,'#A32311'],
-       ['Master data preparation (APEX)',1,8,'#FF8006']],
+       ['Development — planning',2,10,'#1F6FC4'],
+       ['Development — costing',3,10,'#00B28F'],
+       ['ERP data integration',5,10,'#7A4FD3'],
+       ['Standard reports',6,10,'#0E8CA8'],
+       ['Internal testing &amp; QA',3,11,'#D9A400'],
+       ['User acceptance test (UAT)',10,11,'#C25F1E'],
+       ['Training, install and acceptance',11,12,'#A32311'],
+       ['Master data preparation (APEX)',1,10,'#FF8006']],
  ms:[['W1','Kick-off'],['W4','Requirements signed'],['W5','Demo 1'],
-     ['W8','Demo 2 · ready for UAT'],['W11','Acceptance and go-live']],
+     ['W10','Demo 2 · ready for UAT'],['W12','Acceptance and go-live']],
  foot:'After go-live a dedicated team stays with you for the first 30 days, then a 90-day warranty on the system.'},
 
 {k:'prereq',nm:'Pre-requisite',cd:'PRE-REQUISITE',type:'prereq',
@@ -857,8 +851,8 @@ four:{nm:'4 คำถามสำคัญ',cd:'4 คำถามสำคัญ
 delivery:{nm:'สิ่งที่ส่งมอบ',cd:'สิ่งที่ส่งมอบ',
  tt:'สิ่งที่<em>ส่งมอบ</em>',
  lead:'ในโครงการนี้มีอะไรบ้าง — และที่สำคัญพอกัน คือไม่มีอะไรบ้าง',
- cards:[['งานวางแผนการผลิต','8 หน้าจอ','#1F6FC4',
-   ['กระดาน MPS พร้อมเช็คกำลังผลิต','กระดาน MRP','จัดลำดับและล็อกแผน','วัตถุดิบทดแทน','สต๊อกที่ต้องเฝ้า — ของใกล้หมดอายุและเงินจม','วัตถุดิบที่ไม่มีใครจอง — เงินจมในคลัง','ที่มาการสั่งซื้อ &amp; ผังเอกสาร','ค่าที่ใช้วางแผน']],
+ cards:[['งานวางแผนการผลิต','7 หน้าจอ','#1F6FC4',
+   ['กระดาน MPS พร้อมเช็คกำลังผลิต','กระดาน MRP','จัดลำดับและล็อกแผน','วัตถุดิบทดแทน','สต๊อกที่ต้องเฝ้า — ของใกล้หมดอายุและเงินจม','ที่มาการสั่งซื้อ &amp; ผังเอกสาร','ค่าที่ใช้วางแผน']],
   ['งานต้นทุน','3 หน้าจอ','#00B28F',
    ['สมุดต้นทุนมาตรฐาน','Cost Sheet','จำลองผลกระทบราคา']],
   ['ระบบกลาง','1 หน้าจอ + รายงาน','#FF8006',
@@ -874,13 +868,13 @@ flow:{nm:'ภาพรวม — งานวางแผน',cd:'ภาพร�
  steps:[['INPUT','ความต้องการ','Forecast &amp; Sale Order','#245477'],
         ['FR-1','MPS','แผนผลิตรายงวด','#1F6FC4'],
         ['FR-1.4','MO','ฝ่ายวางแผนปรับ แล้วอนุมัติ','#0A96E8'],
-        ['FR-2.1','กระจาย BOM','วัตถุดิบที่ใช้ต่อใบสั่งผลิต','#00B28F'],
+        ['FR-2.1','กระจาย BOM','กระจายความต้องการตาม BOM เป็นวัตถุดิบรายใบสั่งผลิต','#00B28F'],
         ['FR-2.3','MRP','ซื้ออะไร เท่าไหร่ เมื่อไหร่','#FF8006'],
         ['FR-6','จองของ','จัดลำดับและล็อกแผน','#C25F1E'],
         ['FR-2.6','ERP','ส่งข้อมูลกลับให้ ERP','#A32311']],
  formulas:[['ความต้องการ','#245477','Forecast − Sale Order = Demand',
             'เอา Forecast ลบยอดที่ลูกค้าสั่งมาแล้ว ของชิ้นเดียวกันจะได้ไม่ถูกนับซ้ำ'],
-           ['กระจาย BOM','#00B28F','BOM = MO + (MO × % scrap)',
+           ['กระจายความต้องการตาม BOM','#00B28F','BOM = MO + (MO × % scrap)',
             'บวกของเสียเข้าไปทีละกระบวนการ ตัวเลขจะได้ตรงกับที่ไลน์ใช้จริง'],
            ['ยอดที่ต้องซื้อจริง','#FF8006','Net requirement = (gross + safety stock) − available − scheduled receipts − allocated',
             'แล้วปัดขึ้นตาม MOQ ของผู้ขาย ก่อนจะออกใบขอซื้อ']],
@@ -893,11 +887,11 @@ flowc:{nm:'ภาพรวม — งานต้นทุน',cd:'ภาพร�
         ['STEP 1','ค่าวัตถุดิบ','จำนวนตาม BOM × ราคาของงวดนั้น','#1E9E50'],
         ['STEP 2','ค่าแรงทางตรง','นาทีมาตรฐาน × อัตราของหน่วยงาน','#0E8CA8'],
         ['STEP 3','ค่าโสหุ้ย','ชั่วโมงเครื่องและชั่วโมงคน × อัตรา OH','#1F6FC4'],
-        ['','ของเสียและเศษขายคืน','ของเสียรายโรง หักมูลค่าเศษที่ขายกลับ','#C25F1E'],
+        ['','ของเสียและเศษขายคืน','ของเสียรายโรง หักมูลค่าเศษทอง ซึ่งตอนนี้ขายคืนได้อย่างเดียว','#C25F1E'],
         ['STEP 4','สมุดต้นทุน','ต้นทุนมาตรฐานต่อแผ่น เก็บเป็นเวอร์ชันรายงวด','#FF8006'],
         ['STEP 5','จำลอง','ลองปรับราคา ค่าแรง และอัตราแลกเปลี่ยน','#A32311']],
- formulas:[['ต้นทุนมาตรฐาน','#FF8006','Standard cost = DM + DL + OH + Waste − Scrap Resale',
-            'คิดตาม BOM และ Routing จริงของแต่ละรหัสสินค้า ไม่ใช่ค่าเฉลี่ยทั้งโรง'],
+ formulas:[['ต้นทุนมาตรฐาน','#FF8006','Standard cost = DM + DL + OH + Waste − Gold Scrap Resale',
+            'คิดตาม BOM และ Routing จริงของแต่ละรหัสสินค้า ตอนนี้คิดเครดิตขายคืนเฉพาะเศษทอง'],
            ['ค่าแรงทางตรง','#0E8CA8','DL = Σ (standard minutes ÷ 60) × rate per hour × manpower',
             'คิดทีละกระบวนการ แก้อัตราที่หน่วยงานเดียว จะขยับเฉพาะสินค้าที่ผ่านหน่วยงานนั้น'],
            ['จุดคุ้มทุนวัตถุดิบ','#A32311','Break-even % = (selling price − new cost) ÷ (direct material + waste) × 100',
@@ -954,17 +948,7 @@ risk:{nm:'สต๊อกที่ต้องเฝ้า',cd:'หน้าจ�
        P(4,'แต่ละบรรทัดมีทางออกให้','คืนผู้ขาย · เอาไปใช้แทนตัวอื่น · เร่งขาย · ตัดจำหน่าย')],
  foot:'สองมุมนี้ใช้ข้อมูลชุดเดียวกันและตัวกรองเดียวกัน ตัวเลขสองฝั่งเลยขัดกันไม่ได้'},
 
-idle:{nm:'วัตถุดิบที่ไม่มีใครจอง',cd:'หน้าจอ 06',
- tt:'วัตถุดิบ<em>ที่ไม่มีใครจอง</em>',
- lead:'เงินที่จมอยู่กับวัตถุดิบซึ่งไม่มีใบสั่งผลิตและไม่มี Forecast ตัวไหนจองไว้',
- why:'ลดสต๊อกได้โดยไม่กระทบไลน์ผลิต เพราะระบบแยกให้ชัดว่าของก้อนไหนปล่อยได้ ของก้อนไหนแผนยังต้องใช้',
- pins:[P(1,'หักกับแผนจริง','เทียบของคงเหลือกับใบสั่งผลิตและ Sale Forecast ล่วงหน้า 3–4 เดือน'),
-       P(2,'แยกมูลค่าเงินจมตามสาเหตุ','ไม่มีใครจองเลย · เหลือค้างเกินแผน · จะหมดอายุก่อนได้ใช้'),
-       P(3,'ค้างมานานแค่ไหน','แยกมูลค่าตามวันเบิกครั้งล่าสุด ตั้งแต่ไม่เกิน 3 เดือน จนถึงเกิน 1 ปี'),
-       P(4,'บอกทางออกให้ทีละรายการ','คืนผู้ขาย · ใช้ทดแทนรุ่นอื่น · เร่งระบาย · ตัดจำหน่าย · ทบทวนกับ Sales')],
- foot:'ส่งรายการให้จัดซื้อได้ทันที ตัดสินใจได้ก่อนที่จะออกใบสั่งซื้อรอบถัดไป'},
-
-trace:{nm:'ที่มาของการสั่งซื้อ',cd:'หน้าจอ 07',
+trace:{nm:'ที่มาของการสั่งซื้อ',cd:'หน้าจอ 06',
  tt:'ที่มา<em>ของการสั่งซื้อ</em>',
  lead:'ตอบคำถามฝ่ายจัดซื้อว่า “ซื้อตัวนี้ทำไม แล้วทำไมต้องเท่านี้”',
  why:'ของทุกตัวที่สั่งซื้อ บอกได้ว่าเป็นของลูกค้าเจ้าไหน ใครถามก็ตอบได้ทันที ลูกค้ายกเลิกงานก็ตัดได้ถูกตัว',
@@ -974,7 +958,7 @@ trace:{nm:'ที่มาของการสั่งซื้อ',cd:'หน
        P(4,'ผังความสัมพันธ์เอกสาร','สายเอกสารทั้งเส้นอยู่ในหน้าเดียว')],
  foot:'ถ้าลูกค้ายกเลิกออเดอร์ ระบบบอกได้ทันทีว่าต้องไปตัดบรรทัดสั่งซื้อไหน ตัดเท่าไหร่'},
 
-doa:{nm:'สายอนุมัติ (DOA)',cd:'หน้าจอ 08',
+doa:{nm:'สายอนุมัติ (DOA)',cd:'หน้าจอ 07',
  tt:'สาย<em>อนุมัติ (DOA)</em>',
  lead:'สายอนุมัติที่คนเซ็นเห็นบนตัวเอกสารเลย ครอบคลุมทุกอย่างที่ไปแตะแผนหรือแตะต้นทุน',
  why:'งานอนุมัติเดินทันแผน ทุกใบวิ่งไปหาคนเซ็นเอง และผ่านไปเป็นปี ยังย้อนดูได้ว่าใครตัดสินใจอะไรไว้ ตอนไหน',
@@ -984,7 +968,7 @@ doa:{nm:'สายอนุมัติ (DOA)',cd:'หน้าจอ 08',
        P(4,'อ่านเอกสารได้ครบในหน้าเดียว','ทั้งหัวเอกสารและรายการทุกบรรทัด อยู่บนหน้าจออนุมัติเลย')],
  foot:'ต่อยอดจากระบบ DOA กลางที่มีอยู่แล้ว งานนี้จึงเป็นการเชื่อมต่อ ไม่ใช่พัฒนาขึ้นใหม่'},
 
-param:{nm:'ค่าที่ใช้วางแผน',cd:'หน้าจอ 09',
+param:{nm:'ค่าที่ใช้วางแผน',cd:'หน้าจอ 08',
  tt:'ค่า<em>ที่ใช้วางแผน</em>',
  lead:'ค่าที่ทำให้ MRP คำนวณถูก — และตัวตรวจที่คอยจับค่าผิดก่อนจะทำแผนเพี้ยน',
  why:'MRP จะแม่นแค่ไหน อยู่ที่ค่าที่ใส่เข้าไป หน้านี้ดูแลค่าพวกนั้นให้ตรง แผนที่ออกมาจึงใช้ได้ตั้งแต่รอบแรก',
@@ -994,27 +978,27 @@ param:{nm:'ค่าที่ใช้วางแผน',cd:'หน้าจอ
        P(4,'เก็บประวัติการแก้','ใครแก้ค่าไหน ตอนไหน')],
  foot:'ค่าผิดตัวเดียวทำแผนเพี้ยนได้ทั้งเดือน ตัวตรวจเลยต้องมีตั้งแต่แรก'},
 
-cost:{nm:'สมุดต้นทุนมาตรฐาน',cd:'หน้าจอ 10',
+cost:{nm:'สมุดต้นทุนมาตรฐาน',cd:'หน้าจอ 09',
  tt:'สมุด<em>ต้นทุนมาตรฐาน</em>',
  lead:'บอกว่าบอร์ดหนึ่งแผ่นต้นทุนเท่าไหร่ — และตัวเลขนั้นมาจากบรรทัดไหนบ้าง',
  why:'เวลาคุยเรื่องราคา ต้นทุนเป็นตัวเลขที่ยืนยันได้ สินค้าตัวหนึ่งมีต้นทุนเดียวในงวดนั้น ขยับเมื่อไหร่ก็บอกได้ว่าเพราะอะไร',
  pins:[P(1,'คิดจาก BOM และ Routing จริง','ไม่ใช่ค่าเฉลี่ย — คิดตามเส้นทางของแต่ละรหัสสินค้า'),
-       P(2,'แยกค่าวัตถุดิบ ค่าแรง ค่าโสหุ้ย','พร้อมต้นทุนของเสีย และเงินที่ได้คืนจากการขายเศษ'),
+       P(2,'แยกค่าวัตถุดิบ ค่าแรง ค่าโสหุ้ย','พร้อมต้นทุนของเสีย และเงินที่ได้คืนจากเศษทอง ซึ่งขายคืนได้อย่างเดียวตอนนี้'),
        P(3,'Cost Sheet ลงลึกถึงบรรทัด','กดเข้าไปดูได้ว่าต้นทุนมาจากวัตถุดิบตัวไหน กระบวนการไหน'),
        P(4,'ติดธงตัวที่ยังคิดต้นทุนไม่ได้','พร้อมเหตุผล ลงลึกถึงบรรทัดวัตถุดิบที่ยังไม่มีราคา')],
  foot:'เก็บเป็นเวอร์ชันรายงวด เอามาเทียบข้ามงวดได้ และบอกได้ชัดว่าต้นทุนขยับเพราะอะไร'},
 
-sheet:{nm:'Cost Sheet',cd:'หน้าจอ 11',
+sheet:{nm:'Cost Sheet',cd:'หน้าจอ 10',
  tt:'Cost <em>Sheet</em>',
  lead:'ต้นทุนของสินค้าตัวหนึ่ง แตกให้ดูทีละบรรทัด ทั้งวัตถุดิบและทุกกระบวนการ เรียงตามลำดับที่บอร์ดเดินจริง',
  why:'ยอดรวมก้อนเดียว แตกออกมาให้เห็นทั้งเส้นทาง เงินหมดไปกับขั้นตอนไหน ดูออกทันที จะลดก็ลดได้ถูกจุด',
  pins:[P(1,'ค่าวัตถุดิบ ค่าแรง ค่าเครื่อง อยู่บรรทัดเดียวกัน','ทุกกระบวนการมีตัวเลขของตัวเองครบ อ่านเทียบกันได้ในแถวเดียว'),
        P(2,'ลงครบทุกขั้นใน Routing','ตัด · ฟิล์มแห้ง · AOI · Hot Press · เจาะ · Laser Via · ชุบ · Solder Mask · ผิวสำเร็จ · ทดสอบ · แพ็ก'),
-       P(3,'รวมของเสียและเงินที่ได้คืนจากเศษ','ต้นทุนของเสียกับรายได้จากการขายเศษ อยู่ในยอดรวมเดียวกัน'),
+       P(3,'รวมของเสียและเงินที่ได้คืนจากเศษทอง','ต้นทุนของเสียกับรายได้จากเศษทอง อยู่ในยอดรวมเดียวกัน เศษอื่นยังไม่คิดเครดิตคืน'),
        P(4,'กดเปิดดูที่มาของทุกตัวเลขได้','แต่ละกลุ่มต้นทุนกางออกเป็นจำนวน × ราคาต่อหน่วย และชั่วโมง × อัตรา ที่ใช้คำนวณจริง')],
  foot:'สั่งพิมพ์หรือส่งออก Excel ได้ทันทีตามที่เห็น เอาไปแนบชุดคิดราคาหรือแฟ้มตรวจสอบได้เลย'},
 
-sim:{nm:'จำลองผลกระทบต้นทุน',cd:'หน้าจอ 12',
+sim:{nm:'จำลองผลกระทบต้นทุน',cd:'หน้าจอ 11',
  tt:'จำลอง<em>ผลกระทบต้นทุน</em>',
  lead:'ถ้าราคาวัตถุดิบหรือค่าแรงขยับ ตัวไหนโดนบ้าง โดนเท่าไหร่ — แล้วควรเสนอราคาเท่าไหร่',
  why:'ผู้ขายขึ้นราคามา ตอบกลับด้วยตัวเลขได้ทันที ว่ากระทบกำไรตรงไหน และต้องไปคุยกับลูกค้าเจ้าไหนก่อน',
@@ -1026,18 +1010,18 @@ sim:{nm:'จำลองผลกระทบต้นทุน',cd:'หน้�
 
 timeline:{nm:'แผนงานโครงการ',cd:'แผนงานโครงการ',
  tt:'แผนงาน<em>โครงการ</em>',
- lead:'11 สัปดาห์ถึงวันใช้งานจริง งานวางแผนกับงานต้นทุนทำคู่กันไป เพราะหน้าจอและวิธีคำนวณผ่านการรีวิวกับผู้ใช้ของคุณมาแล้ว',
+ lead:'12 สัปดาห์ถึงวันใช้งานจริง งานวางแผนกับงานต้นทุนทำคู่กันไป เพราะหน้าจอและวิธีคำนวณผ่านการรีวิวกับผู้ใช้ของคุณมาแล้ว',
  rows:[['เตรียมงานและออกแบบ',1,4,'#4F9DE6'],
-       ['พัฒนา — งานวางแผน',2,8,'#1F6FC4'],
-       ['พัฒนา — งานต้นทุน',3,8,'#00B28F'],
-       ['เชื่อมข้อมูลกับ ERP',5,8,'#7A4FD3'],
-       ['ชุดรายงานมาตรฐาน',6,9,'#0E8CA8'],
-       ['ทดสอบภายในและ QA',3,10,'#D9A400'],
-       ['ผู้ใช้ทดสอบ (UAT)',9,10,'#C25F1E'],
-       ['อบรม ติดตั้ง และตรวจรับ',10,11,'#A32311'],
-       ['เตรียมข้อมูลหลัก (APEX)',1,8,'#FF8006']],
+       ['พัฒนา — งานวางแผน',2,10,'#1F6FC4'],
+       ['พัฒนา — งานต้นทุน',3,10,'#00B28F'],
+       ['เชื่อมข้อมูลกับ ERP',5,10,'#7A4FD3'],
+       ['ชุดรายงานมาตรฐาน',6,10,'#0E8CA8'],
+       ['ทดสอบภายในและ QA',3,11,'#D9A400'],
+       ['ผู้ใช้ทดสอบ (UAT)',10,11,'#C25F1E'],
+       ['อบรม ติดตั้ง และตรวจรับ',11,12,'#A32311'],
+       ['เตรียมข้อมูลหลัก (APEX)',1,10,'#FF8006']],
  ms:[['W1','เริ่มโครงการ'],['W4','เซ็นรับข้อกำหนด'],['W5','เดโมครั้งที่ 1'],
-     ['W8','เดโมครั้งที่ 2 · พร้อม UAT'],['W11','ตรวจรับและใช้งานจริง']],
+     ['W10','เดโมครั้งที่ 2 · พร้อม UAT'],['W12','ตรวจรับและใช้งานจริง']],
  foot:'หลังใช้งานจริง มีทีมดูแลใกล้ชิด 30 วันแรก ต่อด้วยการรับประกันระบบอีก 90 วัน'},
 
 prereq:{nm:'สิ่งที่ต้องเตรียม',cd:'สิ่งที่ต้องเตรียม',
@@ -1239,8 +1223,9 @@ demo:s=>`<div class="demo-head"><h2>${s.tt}</h2></div>
         <!-- บรรทัดสรุปเล็ก (lead) กับบรรทัดปิดท้าย (foot) ถอดออกจากทุกหน้าจอเดโม
              ผู้นำเสนอพูดเอง ข้อความยังเก็บไว้ใน SLIDES[]/TH[] เผื่อเปิดกลับ -->
         <!-- แผงซ้ายเป็นภาพหน้าจอย่อส่วนแทนย่อหน้าอธิบาย — เห็นของจริงก่อนกดเปิด
-             ประโยค why ยังเก็บไว้ใน SLIDES[]/TH[] เผื่อเปิดกลับ (เหมือน lead กับ foot) -->
-        <div class="vl"><span class="vh">${U('v_why')}</span>
+             ถอดหัวข้อ v_why ออกด้วย เพราะภาพบอกตัวเองอยู่แล้ว ไม่ต้องมีคำกำกับ
+             ประโยค why กับคำหัวข้อยังเก็บไว้ใน SLIDES[]/TH[] เผื่อเปิดกลับ (เหมือน lead กับ foot) -->
+        <div class="vl">
           <div class="vp"><div class="vshot"><iframe class="pv" loading="lazy" src="about:blank"
                 data-src="${s.file}" scrolling="no" tabindex="-1" aria-hidden="true"></iframe></div>
             <div class="vgo"><button class="play">${U('v_play')}</button></div></div></div>

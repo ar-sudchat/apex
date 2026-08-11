@@ -379,7 +379,7 @@ const NODES=[
 const EDGES=[
  ['SO1','MPS1','ตั้งแผนผลิต'],['SO2','MPS2','ตั้งแผนผลิต'],['SO3','MPS3','ตั้งแผนผลิต'],['FC1','MPS4','ตั้งแผนผลิต'],
  ['MPS1','WO1','ออกใบสั่งผลิต'],['MPS2','WO2','ออกใบสั่งผลิต'],['MPS3','WO3','ออกใบสั่งผลิต'],['MPS4','WO4','ออกใบสั่งผลิต'],
- ['WO1','PLN','ระเบิด BOM'],['WO2','PLN','ระเบิด BOM'],['WO3','PLN','ระเบิด BOM'],['WO4','PLN','ระเบิด BOM'],
+ ['WO1','PLN','กระจายตาม BOM'],['WO2','PLN','กระจายตาม BOM'],['WO3','PLN','กระจายตาม BOM'],['WO4','PLN','กระจายตาม BOM'],
  ['PLN','PR','แปลงเป็นใบขอซื้อ'],['PR','PO','อนุมัติและสั่งซื้อ'],['PO','GR','รับของ'],['GR','IN','เข้าคลัง'],
 ];
 const IDX=Object.fromEntries(NODES.map(n=>[n.id,n]));
@@ -676,7 +676,7 @@ function openDocMapReport(){
 "01-RM คลังวัตถุดิบ":"01-RM Raw Material Warehouse",
 "ตั้งแผนผลิต":"Create production plan",
 "ออกใบสั่งผลิต":"Issue work order",
-"ระเบิด BOM":"Explode BOM",
+"กระจายตาม BOM":"Break down by BOM",
 "แปลงเป็นใบขอซื้อ":"Convert to PR",
 "อนุมัติและสั่งซื้อ":"Approve & order",
 "รับของ":"Receive goods",
