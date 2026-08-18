@@ -237,6 +237,64 @@ table.tb tr:nth-child(even) td{background:var(--bg2)}
 .s3 .stkp td{padding:7px 14px}
 .s3 .stkp td.k{width:39%}
 .stkw .note{margin-top:0;font-size:16.5px;padding:12px 20px}
+/* ── การดูแลหลังส่งมอบ ── หน้านี้เอาแบบเรียบตามต้นฉบับของพาร์ตเนอร์
+   ไม่ใส่การ์ด ไม่ใส่แถบสี — หัวข้อขีดเส้นใต้ แล้วไล่บรรทัดลงมาเหมือนสไลด์เดิม */
+.wsw{gap:0;justify-content:flex-start}
+.wsub{font-size:31px;font-weight:800;color:var(--ink);margin-bottom:26px}
+.wbk{margin-bottom:30px;padding-left:40px}
+.wbk h4{font-size:27px;font-weight:800;color:var(--ink);margin-bottom:14px;
+  text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px}
+.wbk p{font-size:25px;line-height:1.5;color:var(--ink);margin-bottom:9px}
+.wbk p:last-child{margin-bottom:0}
+.wbk p.bl{padding-left:30px;position:relative}
+.wbk p.bl::before{content:'\2022';position:absolute;left:8px;color:var(--mut)}
+.wnx{margin:0 0 0 40px;padding:0;list-style:none}
+.wnx li{position:relative;padding-left:26px;font-size:23px;line-height:1.5;
+  color:#C0392B;margin-bottom:10px}
+.wnx li::before{content:'\2013';position:absolute;left:2px;font-weight:700}
+/* ── เส้นทางแจ้งเรื่อง ── สี่ขั้นเรียงซ้ายไปขวา + แถบตีกลับหา APEX + ช่องติดต่อ 24×7
+   แต่ละขั้นสูงเท่ากันด้วย grid-auto-rows:1fr ไม่ต้องไล่ปรับความสูงเอง */
+.spf{gap:15px}
+.sprail{flex:1 1 auto;min-height:0;display:flex;align-items:stretch;gap:0}
+.spn{flex:1 1 0;min-width:0;background:#fff;border:1px solid var(--line);border-top:4px solid var(--c);
+  border-radius:12px;padding:22px 22px;display:flex;flex-direction:column;
+  position:relative;overflow:hidden}
+.spn::after{content:attr(data-n);position:absolute;right:18px;bottom:-44px;font-size:200px;
+  font-weight:800;line-height:1;color:var(--c);opacity:.11;pointer-events:none}
+.spn>*{position:relative;z-index:1}
+.spn .sptag{font-size:14px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--c)}
+.spn h4{font-size:28px;font-weight:800;color:var(--ink);line-height:1.24;margin-top:9px}
+.spn ul{margin:16px 0 0;padding:0;list-style:none}
+.spn li{position:relative;padding-left:20px;font-size:19.5px;line-height:1.45;color:var(--mut);
+  margin-bottom:11px;overflow-wrap:break-word}
+.spn li:last-child{margin-bottom:0}
+.spn li::before{content:'';position:absolute;left:1px;top:.6em;width:8px;height:8px;
+  border-radius:50%;background:var(--c);opacity:.55}
+.spn li b{color:var(--ink);font-weight:700}
+.sparr{flex:0 0 46px;display:flex;align-items:center;justify-content:center}
+.sparr svg{width:38px;height:22px;fill:none;stroke:var(--grey);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round}
+.sparr svg .hd{fill:var(--grey);stroke:none}
+.spbk{flex:0 0 auto;display:flex;align-items:center;gap:16px;background:var(--bg);
+  border:1px solid var(--line);border-left:5px solid var(--org);border-radius:0 10px 10px 0;
+  padding:14px 24px}
+.spbk svg{flex:0 0 26px;height:26px;fill:none;stroke:var(--org);stroke-width:2.4;
+  stroke-linecap:round;stroke-linejoin:round}
+.spbk b{font-size:15px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--org-d);
+  white-space:nowrap}
+.spbk span{font-size:20px;line-height:1.4;color:var(--ink)}
+.spft{flex:0 0 auto;display:flex;align-items:center;gap:26px;background:var(--ink);color:#fff;
+  border-radius:12px;padding:16px 26px}
+.spft .spfl b{display:block;font-size:15px;font-weight:800;letter-spacing:.11em;color:var(--org)}
+.spft .spfl span{display:block;font-size:19px;line-height:1.4;margin-top:5px}
+.spft .spfr{margin-left:auto;display:flex;gap:34px}
+.spft .spfr i{display:block;font-style:normal;font-size:13.5px;letter-spacing:.09em;
+  text-transform:uppercase;opacity:.72}
+.spft .spfr b{display:block;font-size:21px;font-weight:800;margin-top:3px;white-space:nowrap}
+.picw{gap:15px}
+.picw .pic{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;
+  background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.picw .pic img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 /* 4 คำถามสำคัญ — มีแค่ 4 แถวยืดเต็มความสูง แถวสูง 148px ต่อข้อความบรรทัดเดียว
    ขยายคำถามได้ถึง 28px เพราะข้อ EN ที่ยาวที่สุด ('WHAT SHOULD WE DO IF RAW
    MATERIAL PRICES CHANGE?') เริ่มตัดสองบรรทัดที่ 30px บนคอลัมน์ 54% (800px)   */
@@ -475,6 +533,21 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
 .brg .bhd b{font-size:26px;font-weight:800;letter-spacing:.02em}
 .brg .bhd span{margin-left:auto;font-size:15px;font-weight:700;letter-spacing:.07em;
   background:rgba(255,255,255,.22);border-radius:20px;padding:6px 16px}
+.sfl{position:relative;width:1470px;height:648px;margin:0 auto}
+.sfl svg.wire{position:absolute;left:0;top:0;overflow:visible}
+.sfl svg.wire path{fill:none;stroke-width:3}
+.sfl .bx{position:absolute;border:2.5px solid var(--c);border-radius:16px;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:14px 16px;box-shadow:0 2px 10px rgba(30,40,55,.05)}
+.sfl .bx .ttl{font-size:27px;font-weight:700;color:#173A4F;text-align:center;line-height:1.22}
+.sfl .bx .ln{font-size:22px;color:#4A5A6B;text-align:center;line-height:1.45;margin-top:7px}
+.sfl .bx .ic{margin-bottom:9px;color:var(--c)}
+.sfl .chip{background:#fff;border:2px solid #1B6C7A;border-radius:11px;padding:9px 0;width:78%;
+  font-size:23px;color:#173A4F;text-align:center;margin-top:12px}
+.sfl .lbl{position:absolute;background:#DCEEF5;border-radius:7px;padding:5px 13px;
+  font-size:20px;color:#12546B;white-space:nowrap;font-weight:600}
+.sfl .note{position:absolute;left:0;right:0;bottom:0;font-size:23px;color:#4A5A6B;line-height:1.55}
+.sfl .note b{color:#173A4F}
 .brg .hk .sc{font-size:15px;font-weight:800;color:var(--c);line-height:1.3;margin-top:9px}
 .brg .hk .ot{font-size:14px;color:#5B7590;line-height:1.4;margin-top:9px;
   border-top:1px dashed var(--line);padding-top:9px}
@@ -947,7 +1020,7 @@ const SLIDES=[
        ['Master data preparation (APEX)',1,10,'#FF8006']],
  ms:[['W1','Kick-off'],['W4','Requirements signed'],['W5','Demo 1'],
      ['W10','Demo 2 · ready for UAT'],['W12','Acceptance and go-live']],
- foot:'After go-live a dedicated team stays with you for the first 30 days, then a 90-day warranty on the system.'},
+ foot:'After go-live a dedicated team stays with you for the first 30 days, then a 3-month warranty, followed by one year of maintenance service.'},
 
 {k:'docs',nm:'Deliverable Documents',cd:'DELIVERABLE DOCUMENTS',type:'deliv',
  tt:'Deliverable <em>Documents</em>',
@@ -1008,6 +1081,41 @@ const SLIDES=[
     ['Environments','Two — production and UAT / training'],
     ['Export','Excel and PDF']]]],
  foot:'Full component and version detail is listed in the proposal document.'},
+
+{k:'warranty',nm:'Support and Warranty',cd:'SUPPORT AND WARRANTY',type:'warr',
+ tt:'Support and <em>Warranty</em>',
+ sub:'Web Application',
+ blocks:[['G-Able provide :',
+   ['<b>90 Days Warranty period</b> after system go-live date',
+    '<b>1 Year MA Support period</b> after out of warranty']],
+  ['Warranty &amp; MA including (5x8) :',
+   ['Weekday (8.30 – 17.30)',
+    '*<b>Hotfix supports service (Application)</b>',
+    'Remote support bug fixes of the web app system and remote deployment']]],
+ excl:['Does not include maintenance servicing for upgrade of software components.',
+       'Does not include upgrade, enhancement or additional features as they will be quoted on a case-by-case basis']},
+
+/* ใช้ผังต้นฉบับของ G-Able ตามที่เจ้าของงานสั่ง — ครอปจากสไลด์ Support flow ของพาร์ตเนอร์
+   ตัดหัวเรื่องกับบรรทัด 24×7 ของต้นฉบับออก เพราะสไลด์นี้มีหัวเรื่องและแถบติดต่อของตัวเองแล้ว
+   จะกลับไปใช้ผัง 4 ขั้นที่วาดเอง เปลี่ยน type กลับเป็น 'sflow' — ข้อมูล steps/back ยังอยู่ครบข้างล่าง */
+{k:'sflow',nm:'Support Flow',cd:'SUPPORT FLOW',type:'sflowv',
+ who:'APEX',chan:['Via phone','Via e-mail'],
+ cc:['G-Able Call Center','Phone 02-781-9333','callcenter@g-able.com'],
+ sts:'Support Team System',spec:'Product Specialist',adm:'Account Delivery Manager',
+ lb:['Open case','Update','Get case no.','Contact customer · investigate · on-site'],
+ tt:'Support <em>Flow</em>',
+ lead:'Where a case goes from the moment you report it, and who comes back to you.',
+ steps:[['Step 01','You report it','#1F6FC4',
+         ['By phone or by e-mail','Whichever is faster on the day']],
+        ['Step 02','G-Able call centre','#0E8CA8',
+         ['<b>02-781-9333</b>','<b>callcenter@g-able.com</b>','The case is logged and given a case number']],
+        ['Step 03','Support team','#7A4FD3',
+         ['The case is routed by what it is','A product specialist works the fix']],
+        ['Step 04','Account Delivery Manager','#00B28F',
+         ['Holds the case number','Stays on the case until it closes']]],
+ back:['Back to you','We come back with what we found, and go on-site when the case needs it.'],
+ ft:['24 × 7','On a 24 × 7 agreement you can reach the service centre at any hour.',
+     [['Phone','02-781-9333'],['E-mail','ContactCenter@g-able.com']]]},
 
 {k:'qa',nm:'Q&A',cd:'Q & A',type:'qa',
  tt:'Thank <em>You</em>',
@@ -1301,7 +1409,7 @@ timeline:{nm:'แผนงานโครงการ',cd:'แผนงานโ
        ['เตรียมข้อมูลหลัก (APEX)',1,10,'#FF8006']],
  ms:[['W1','เริ่มโครงการ'],['W4','เซ็นรับข้อกำหนด'],['W5','เดโมครั้งที่ 1'],
      ['W10','เดโมครั้งที่ 2 · พร้อม UAT'],['W12','ตรวจรับและใช้งานจริง']],
- foot:'หลังใช้งานจริง มีทีมดูแลใกล้ชิด 30 วันแรก ต่อด้วยการรับประกันระบบอีก 90 วัน'},
+ foot:'หลังใช้งานจริง มีทีมดูแลใกล้ชิด 30 วันแรก ต่อด้วยรับประกันระบบ 3 เดือน แล้วเข้าสู่บริการบำรุงรักษา (MA) 1 ปี'},
 
 docs:{nm:'เอกสารส่งมอบ',cd:'เอกสารส่งมอบ',
  tt:'เอกสาร<em>ส่งมอบ</em>',
@@ -1359,6 +1467,38 @@ tech:{nm:'เทคโนโลยีที่ใช้',cd:'เทคโนโ�
     ['สภาพแวดล้อม','2 ชุด — ใช้งานจริง และทดสอบ/อบรม'],
     ['การส่งออก','ส่งออก Excel และ PDF ได้']]]],
  foot:'รายละเอียดคอมโพเนนต์และเวอร์ชันย่อยทั้งหมด ระบุไว้ในเอกสารข้อเสนอ'},
+
+warranty:{nm:'การดูแลหลังส่งมอบ',cd:'การดูแลหลังส่งมอบ',
+ tt:'การดูแล<em>หลังส่งมอบ</em>',
+ sub:'เว็บแอปพลิเคชัน',
+ blocks:[['G-Able ดูแลให้ :',
+   ['<b>รับประกัน 90 วัน</b> นับจากวันที่ระบบเริ่มใช้งานจริง',
+    '<b>บริการดูแลระบบ (MA) 1 ปี</b> ต่อจากวันที่หมดประกัน']],
+  ['ช่วงประกันและ MA ครอบคลุม (5x8) :',
+   ['จันทร์ถึงศุกร์ (08.30 – 17.30 น.)',
+    '*<b>บริการแก้ข้อขัดข้องของตัวระบบ (Hotfix)</b>',
+    'แก้บั๊กของเว็บแอปให้จากระยะไกล พร้อมนำตัวที่แก้แล้วขึ้นเครื่องให้']]],
+ excl:['ไม่รวมงานบำรุงรักษาเพื่ออัปเกรดเวอร์ชันของซอฟต์แวร์ที่ระบบใช้ประกอบ',
+       'ไม่รวมงานอัปเกรด งานเพิ่มความสามารถ หรือฟีเจอร์ใหม่ ซึ่งจะเสนอราคาเป็นรายกรณี']},
+
+sflow:{nm:'เส้นทางแจ้งเรื่อง',cd:'เส้นทางแจ้งเรื่อง',
+ tt:'เส้นทาง<em>แจ้งเรื่อง</em>',
+ who:'APEX',chan:['แจ้งทางโทรศัพท์','แจ้งทางอีเมล'],
+ cc:['G-Able Call Center','โทร 02-781-9333','callcenter@g-able.com'],
+ sts:'ระบบติดตามงานของทีมสนับสนุน',spec:'ผู้เชี่ยวชาญประจำผลิตภัณฑ์',adm:'Account Delivery Manager',
+ lb:['เปิดเคส','อัปเดตสถานะ','รับเลขที่เคส','ติดต่อกลับ · ตรวจสอบปัญหา · เข้าหน้างาน'],
+ lead:'แจ้งเรื่องแล้วเคสวิ่งไปทางไหน ใครรับช่วง และใครเป็นคนติดต่อกลับ',
+ steps:[['ขั้นที่ 01','คุณแจ้งเรื่อง','#1F6FC4',
+         ['โทร หรือส่งอีเมล','วันนั้นทางไหนเร็วกว่าใช้ทางนั้น']],
+        ['ขั้นที่ 02','คอลเซ็นเตอร์ G-Able','#0E8CA8',
+         ['<b>02-781-9333</b>','<b>callcenter@g-able.com</b>','รับเรื่อง เปิดเคส และออกเลขเคส']],
+        ['ขั้นที่ 03','ทีมซัพพอร์ต','#7A4FD3',
+         ['ส่งเคสตามอาการที่แจ้ง','Product Specialist ลงมือแก้']],
+        ['ขั้นที่ 04','Account Delivery Manager','#00B28F',
+         ['ถือเลขเคสไว้','ตามเรื่องให้จนปิดเคส']]],
+ back:['ติดต่อกลับ','แจ้งผลที่ตรวจเจอกลับไป และเข้าหน้างานให้เมื่อเคสนั้นต้องเข้า'],
+ ft:['24 × 7','ถ้าทำสัญญาแบบ 24 × 7 โทรเข้าศูนย์บริการได้ทุกช่วงเวลา',
+     [['โทรศัพท์','02-781-9333'],['อีเมล','ContactCenter@g-able.com']]]},
 
 qa:{nm:'ถาม-ตอบ',cd:'ถาม-ตอบ',
  tt:'ขอบคุณ<em>ครับ</em>',
@@ -1665,7 +1805,84 @@ tech:s=>head(s)+`<div class="stkw">${stkGrid(s.panels,2)}
 tech2:s=>head(s)+`<div class="stkw">${stkGrid(s.panels,3)}
   ${s.foot?`<div class="note">${s.foot}</div>`:''}</div>`,
 
+/* การดูแลหลังส่งมอบ — เรียงข้อความตรง ๆ ตามต้นฉบับ ไม่มีการ์ด
+   blocks = [[หัวข้อ, [บรรทัด…]], …]  บรรทัดที่ขึ้นต้นด้วย * จะได้จุดนำหน้า */
+warr:s=>head(s)+`<div class="fill wsw">
+  <div class="wsub">${s.sub}</div>
+  ${s.blocks.map(([h,rows])=>`<div class="wbk"><h4>${h}</h4>
+    ${rows.map(r=>r[0]==='*'?`<p class="bl">${r.slice(1)}</p>`:`<p>${r}</p>`).join('')}</div>`).join('')}
+  <ul class="wnx">${s.excl.map(x=>`<li>${x}</li>`).join('')}</ul>
+</div>`,
+
+/* สไลด์ที่เนื้อหาเป็นภาพจากพาร์ตเนอร์ — วางภาพเต็มกรอบ ไม่ครอบทับด้วยกราฟิกของเรา
+   แถบติดต่อด้านล่างยังเป็นตัวหนังสือจริง จะได้คมและแก้เบอร์ได้โดยไม่ต้องแก้ภาพ */
+pic:s=>head(s)+`<div class="fill picw">
+  <div class="pic"><img src="${s.img}" alt="${s.alt||''}" /></div>
+  ${s.ft?`<div class="spft"><div class="spfl"><b>${s.ft[0]}</b><span>${s.ft[1]}</span></div>
+    <div class="spfr">${s.ft[2].map(([a,b])=>`<div><i>${a}</i><b>${b}</b></div>`).join('')}</div></div>`:''}
+</div>`,
+
+/* เส้นทางแจ้งเรื่อง — สี่ขั้นเรียงเป็นราง คั่นด้วยลูกศร แล้วปิดด้วยแถบตีกลับหา APEX
+   ลูกศรวาดเป็น SVG ไม่ใช้อักขระ → เพราะฟอนต์ Sarabun เรนเดอร์ลูกศรบางจนหายบนโปรเจกเตอร์ */
+sflow:s=>{
+  const arr=`<div class="sparr"><svg viewBox="0 0 46 24" aria-hidden="true">
+    <path d="M3 12h29"/><path class="hd" d="M29 5.4 L42 12 L29 18.6 z"/></svg></div>`;
+  return head(s)+`<div class="fill spf">
+  <div class="sprail">${s.steps.map(([tag,t,c,lines],i)=>
+    `${i?arr:''}<div class="spn" data-n="${i+1}" style="--c:${c}"><span class="sptag">${tag}</span><h4>${t}</h4>
+      <ul>${lines.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
+  <div class="spbk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12H4M11 5l-7 7 7 7"/></svg>
+    <b>${s.back[0]}</b><span>${s.back[1]}</span></div>
+  <div class="spft"><div class="spfl"><b>${s.ft[0]}</b><span>${s.ft[1]}</span></div>
+    <div class="spfr">${s.ft[2].map(([a,b])=>`<div><i>${a}</i><b>${b}</b></div>`).join('')}</div></div>
+</div>`;},
+
 /* การ์ดสรุป 3 ใบถูกเอาออกตามที่เจ้าของงานสั่ง — ข้อมูล pts[] ยังอยู่ในเด็คทั้งสองภาษา ใส่กลับได้ทันที */
+sflowv:s=>{
+  const O='#FF8006', T='#1B6C7A';                     /* ส้ม G-Able · เขียวน้ำเงินเข้ม */
+  const grp=`<svg width="66" height="40" viewBox="0 0 66 40" fill="currentColor">
+    <circle cx="11" cy="12" r="6.4" opacity=".38"/><path d="M1 38c0-7 4.5-11 10-11s10 4 10 11z" opacity=".38"/>
+    <circle cx="55" cy="12" r="6.4" opacity=".38"/><path d="M45 38c0-7 4.5-11 10-11s10 4 10 11z" opacity=".38"/>
+    <circle cx="33" cy="10" r="8"/><path d="M20 38c0-8.5 5.8-13.5 13-13.5S46 29.5 46 38z"/></svg>`;
+  const ic=d=>`<svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const phone=ic('<path d="M6.6 3h3l1.5 4-2 1.4a12 12 0 0 0 5.5 5.5L16 12l4 1.5v3a2 2 0 0 1-2.2 2A16.8 16.8 0 0 1 4 6.2 2 2 0 0 1 6.6 3z"/>');
+  const A='#7FB6CE';
+  const tri=(x,y,d)=>{const p={r:`${x-13},${y-8} ${x},${y} ${x-13},${y+8}`,
+      l:`${x+13},${y-8} ${x},${y} ${x+13},${y+8}`,
+      d:`${x-8},${y-13} ${x},${y} ${x+8},${y-13}`,
+      u:`${x-8},${y+13} ${x},${y} ${x+8},${y+13}`}[d];
+    return `<polygon points="${p}" fill="${A}" stroke="none"/>`;};
+  const wire=`<svg class="wire" viewBox="0 0 1470 648" width="1470" height="648">
+    <g stroke="${A}" stroke-width="3.4" fill="none" stroke-linejoin="round">
+      <path d="M286,196 H344"/><path d="M762,140 H818"/><path d="M1104,196 H1154"/>
+      <path d="M556,300 V338"/><path d="M960,300 V420 H778"/>
+      <path d="M556,492 V566 H150 V400"/></g>
+    ${tri(352,196,'r')}${tri(826,140,'r')}${tri(1162,196,'r')}${tri(1096,196,'l')}
+    ${tri(556,346,'d')}${tri(770,420,'l')}${tri(150,392,'u')}</svg>`;
+  return head(s)+`<div class="fill spf"><div class="sfl">${wire}
+    <div class="bx" style="--c:${T};left:0;top:56px;width:286px;height:336px">
+      <img src="apex-logo.png" alt="APEX" style="width:172px;margin-bottom:6px">
+      ${s.chan.map(c=>`<div class="chip">${c}</div>`).join('')}</div>
+    <div class="bx" style="--c:${O};left:352px;top:56px;width:410px;height:244px">
+      <div class="ic">${phone}</div><div class="ttl">${s.cc[0]}</div>
+      <div class="ln">${s.cc[1]}<br>${s.cc[2]}</div></div>
+    <div class="bx" style="--c:${O};left:826px;top:56px;width:270px;height:244px">
+      <div class="ic">${grp}</div><div class="ttl">${s.sts}</div></div>
+    <div class="bx" style="--c:${T};left:1162px;top:56px;width:270px;height:244px">
+      <div class="ic">${grp}</div><div class="ttl">${s.spec}</div></div>
+    <div class="bx" style="--c:${O};left:352px;top:346px;width:410px;height:146px">
+      <div class="ic">${grp}</div><div class="ttl">${s.adm}</div></div>
+    <div class="lbl" style="left:262px;top:150px">${s.lb[0]}</div>
+    <div class="lbl" style="left:748px;top:96px">${s.lb[1]}</div>
+    <div class="lbl" style="left:786px;top:378px">${s.lb[2]}</div>
+    <div class="lbl" style="left:300px;top:540px">${s.lb[3]}</div>
+  </div>
+  <div class="spft"><div class="spfl"><b>${s.ft[0]}</b><span>${s.ft[1]}</span></div>
+    <div class="spfr">${s.ft[2].map(([a,b])=>`<div><i>${a}</i><b>${b}</b></div>`).join('')}</div></div>
+  </div>`;
+},
+
 qa:s=>`<div class="fill" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
   <h2 class="tt" style="font-size:104px;line-height:1.1">${s.tt}</h2>
   <div class="rule" style="margin:30px auto 0;width:190px;height:7px"></div></div>`
