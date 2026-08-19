@@ -274,9 +274,12 @@ kbd{background:#fff;border:1px solid var(--line-d);border-bottom-width:2px;borde
 .dtb{width:100%;border-collapse:collapse;font-size:12px}
 .dtb th{background:#f3f7fc;color:#3a5773;font-weight:600;text-align:left;padding:7px 9px;
         border-bottom:1px solid var(--line-d);white-space:nowrap}
-.dtb td{padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+.dtb td{padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:left}
 .dtb .num{text-align:right}
 .dtb tfoot td{background:#f5f9fd;font-weight:700}
+/* บรรทัดรองสีจางใต้ค่าหลัก — ใส่ข้อมูลประกอบได้โดยไม่ต้องเพิ่มคอลัมน์จนตารางแน่น */
+.dtb small{display:block;font-size:10.5px;color:#8a9bad;font-weight:400;margin-top:2px}
+.dtb td b{color:var(--ink)}
 .kv{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
 .kv div{background:#f5f9fd;border-radius:7px;padding:9px 12px;font-size:11.5px;color:var(--mut)}
 .kv b{display:block;font-size:14px;color:var(--ink);margin-top:2px;font-weight:700}
@@ -290,6 +293,8 @@ kbd{background:#fff;border:1px solid var(--line-d);border-bottom-width:2px;borde
 .obj{display:inline-block;padding:1px 7px;border-radius:9px;font-size:10px;font-weight:700}
 .obj-po{background:#e9f3fd;color:#1f6fc4} .obj-wo{background:#fdeceb;color:#b32b2b}
 .obj-lot{background:#fdf3dc;color:#8a6a00} .obj-pln{background:#f4eefd;color:#54339c}
+/* ใบขอซื้อที่ออกไปแล้ว — แยกสีจากแผนที่ MRP เพิ่งเสนอ จะได้รู้ว่าอันไหนแก้ไม่ได้แล้ว */
+.obj-pr{background:#e6f6ee;color:#1a7a42}
 .hint{background:#f5f9fd;border-left:3px solid var(--hdr);border-radius:0 6px 6px 0;padding:9px 13px;
       font-size:12px;color:#4a6b86;line-height:1.6;margin-top:12px}
 
@@ -541,8 +546,8 @@ html.embed .content{padding-top:14px}
 
       <div class="toolbar">
         <div class="seg" id="zoom">
-          <button class="on" data-m="day"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>วัน</button>
-          <button data-m="week"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v11M15 10v11"/></svg>สัปดาห์</button>
+          <button data-m="day"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>วัน</button>
+          <button class="on" data-m="week"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v11M15 10v11"/></svg>สัปดาห์</button>
           <button data-m="month"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 10h18M12 10v11"/></svg>เดือน</button>
         </div>
         <div class="seg" id="disp">
@@ -595,6 +600,8 @@ html.embed .content{padding-top:14px}
 <script>
 /* ══════════ ข้อมูลจำลอง ══════════ */
 const ORIGIN=new Date(2026,7,3), HORIZON=190;
+/* Freeze Window — ยอดที่ถือว่าจองให้ใบสั่งผลิตแล้ว นับความต้องการกี่วันข้างหน้า */
+const FZ_DAYS=7;
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const addDays=(b,n)=>new Date(b.getFullYear(),b.getMonth(),b.getDate()+n);
@@ -679,9 +686,9 @@ function computeAll(){
     }
     /* ยอดที่ถูกจองไว้ให้ใบสั่งผลิตแล้ว = ความต้องการที่ยืนยันแล้วในช่วง Freeze Window
        ยอดคงเหลือที่ยังไม่ถูกจอง = ยอดคงเหลือสุทธิ − ยอดจอง */
-    const FZ=7, resv=new Array(HORIZON).fill(0), atp=new Array(HORIZON).fill(0);
+    const resv=new Array(HORIZON).fill(0), atp=new Array(HORIZON).fill(0);
     for(let i=0;i<HORIZON;i++){
-      let r=0; for(let j=i;j<Math.min(HORIZON,i+FZ);j++) r+=-outb[j];
+      let r=0; for(let j=i;j<Math.min(HORIZON,i+FZ_DAYS);j++) r+=-outb[j];
       resv[i]=Math.round(r); atp[i]=net[i]-resv[i];
     }
     Object.assign(it,{inb,outb,exp,plan,net,resv,atp});
@@ -693,12 +700,50 @@ function computeAll(){
     it.expSoon=(useExp&&it.expiries.length)?it.expiries[0].d:-1;
   });
 }
-computeAll();
-function setUseExp(on){ useExp=on; computeAll(); renderBody(true); }
+/* ── ข้อมูลจำลองของ 4 รายการแรก ────────────────────────────────────────────
+   ตัวจำลองหลักสร้างเฉพาะ "แผนใหม่ที่ MRP เพิ่งเสนอ" ซึ่งเริ่มได้ก็ต่อเมื่อพ้น Lead Time
+   และล็อตใกล้หมดอายุก็ออกให้แค่ 34% ของกลุ่มที่คุม Batch แถมวันกระจายไกลถึง 90 วัน
+   สองแถวนี้เลยว่างในมุมมองรายวันแทบทุกตัว ทั้งที่ของจริงต้องมี
+   ใส่ให้เฉพาะ 4 รายการแรกของมุมมองตั้งต้น พอให้กดดูรายละเอียดได้ ไม่ต้องมีทุกช่อง */
+const NEAR_N=4, NEAR=new Set();
+let nearSeeded=false;
+function seedNear(){
+  if(nearSeeded) return;
+  const risk=it=>Math.min(...it.net.slice(0,14))/(it.safety||1);
+  [...ITEMS].sort((a,b)=>risk(a)-risk(b)).slice(0,NEAR_N).forEach(it=>NEAR.add(it.code));
+  /* ล็อตที่จะหมดอายุในสองสัปดาห์นี้ — เฉพาะรายการที่คุม Batch เท่านั้น
+     ตัวที่ไม่คุม Batch แถวนี้จะไม่ขึ้นอยู่แล้ว ไม่ต้องยัดข้อมูลให้ */
+  ITEMS.forEach(it=>{ if(!NEAR.has(it.code)||!it.batch) return;
+    const r=rng(it.code+'nearexp');
+    for(let k=0;k<2;k++) it.expiries.push({
+      d:4+k*5+Math.floor(r()*3),
+      qty:Math.max(1,Math.round(it.safety*(0.4+r()*0.45))),
+      lot:`${(it.code.split('-')[1]||'LOT')}-26${String(Math.floor(r()*90)+10)}-${String.fromCharCode(65+Math.floor(r()*6))}`});
+    it.expiries.sort((a,b)=>a.d-b.d);
+  });
+  nearSeeded=true;
+}
+function addNearPlans(){
+  seedNear();
+  ITEMS.forEach(it=>{ if(!NEAR.has(it.code)) return;
+    const r=rng(it.code+'near');
+    /* กระจายวันไม่ให้ตรงกันทั้งสี่แถว จะได้ไม่เห็นเป็นแถบเดียวกัน */
+    const k=[...NEAR].indexOf(it.code);
+    const days=[...new Set([2+k, 6+Math.floor(r()*3), 10+Math.floor(r()*3)])].filter(d=>d>0&&d<14);
+    days.forEach(d=>{ if(!it.plan[d]) it.plan[d]=it.moq*(1+Math.floor(r()*2)); });
+    /* ไม่บวกกลับเข้ายอดคงเหลือสุทธิ — ใบพวกนี้ออกไปก่อนหน้านี้แล้ว ของที่จะเข้ามาจึงนับ
+       อยู่ในยอดคงเหลือตั้งต้นเรียบร้อย แถวนี้แค่บอกว่ามันมาจากแผนใบไหน วันไหน จำนวนเท่าไหร่
+       (ถ้าบวกซ้ำ ยอดจะเกินจริงและรายการจะหลุดจากหัวลิสต์ทั้งที่ยังขาดของอยู่)
+       ส่วนล็อตใกล้หมดอายุที่ใส่ไว้ ถูกหักออกจากยอดคงเหลือตามปกติผ่าน computeAll แล้ว */
+    it.prSoon=it.plan.findIndex((v,i)=>v>0&&(i-it.lt)>=0&&(i-it.lt)<=7);
+  });
+}
+computeAll(); seedNear(); computeAll(); addNearPlans();
+function setUseExp(on){ useExp=on; computeAll(); addNearPlans(); renderBody(true); }
 
 /* ══════════ มุมมองเวลา ══════════ */
 const VIEW={day:{cols:14},week:{cols:10},month:{cols:6}};
-let mode='day',disp='num';
+let mode='week',disp='num';   /* ค่าเริ่มต้น = รายสัปดาห์ รายวันเห็นแค่ 14 วัน ซึ่งอยู่ใน Firm Zone ของเกือบทุกรายการ */
 function buckets(){
   const out=[],n=VIEW[mode].cols; let i=0;
   if(mode==='day'){ for(let k=0;k<n;k++,i++){const d=addDays(ORIGIN,i);
@@ -919,6 +964,7 @@ function rowHtml(r){
     cells=B_.map(b=>{let t=0;for(let i=b.from;i<=b.to;i++)t+=it[key][i];
       if(!t) return '<td></td>';
       const txt = key==='exp' ? '-'+ni(Math.abs(t)) : ni(t);
+      if(!RMETA[key]) return `<td class="${vcls}">${txt}</td>`;
       return `<td class="${vcls} clk" onclick="openCellDlg('${it.code}','${key}',${b.from},${b.to})">${txt}</td>`;}).join('');
   }
   return `<tr class="sub ${rcls}">${head}${TD(C.open,openCell,key==='net'?'v-net':'')}${cells}</tr>`;
@@ -1103,6 +1149,10 @@ const FG=[{c:'W054Q-062A',n:'PCB HITACHI ASTEMO 2L',cus:'HITACHI ASTEMO',p:'A1'}
           {c:'G120A-017A',n:'PCB SEMCO 4L Normal',cus:'SEMCO',p:'A1'},
           {c:'K129B-036A',n:'PCB Western Digital 2L',cus:'WESTERN DIGITAL',p:'A1'}];
 const PROC=['CUT','DRI','PLT','DFO','SOM','LAS','AOI','PAK'];
+/* พนักงานขายผูกกับลูกค้า ไม่ใช่สุ่มรายใบ — เปิดหน้าจออื่นแล้วชื่อต้องตรงกัน
+   ใช้ชื่อชุดเดียวกับหน้าจอ "จัดลำดับและล็อกแผน" */
+const SALES={'HITACHI ASTEMO':'ธนากร ศ.','SEMCO':'ปิยะนุช ท.',
+             'NIDEC':'ณัฐพล ว.','WESTERN DIGITAL':'ปิยะนุช ท.'};
 function splitQty(t,n,r){const w=Array.from({length:n},()=>0.5+r());const s=w.reduce((a,b)=>a+b,0);
   const o=w.map(x=>Math.round(t*x/s)); o[n-1]=t-o.slice(0,-1).reduce((a,b)=>a+b,0); return o;}
 const dnum=(p,r)=>`${p}-26${String(Math.floor(r()*90000)+10000)}`;
@@ -1113,38 +1163,65 @@ function docsOfDay(it,key,d){
     for(let i=0;i<n;i++) out.push({date,obj:'PO',doc:dnum('PO',r),ref:it.sup,note:`ETA ${fmtShort(date)}`,qty:q[i]});
   } else if(key==='outb'){ const n=1+Math.floor(r()*3),q=splitQty(Math.abs(v),n,r);
     for(let i=0;i<n;i++){const f=FG[Math.floor(r()*FG.length)];
+      const pr=PROC[Math.floor(r()*PROC.length)];
       out.push({date,obj:'WO',doc:dnum('WO',r),ref:`${f.c} · ${f.n}`,
-        note:`${f.p} · ${PROC[Math.floor(r()*PROC.length)]}`,qty:q[i]});}
+        note:`${f.p} · ${pr}`,qty:q[i],
+        fg:f.c,fgn:f.n,cus:f.cus,plant:f.p,proc:pr,
+        so:dnum('SO',r),sale:SALES[f.cus]||'—'});}
   } else if(key==='exp'){ it.expiries.filter(e=>e.d===d).forEach(e=>out.push({date,obj:'LOT',doc:e.lot,
       ref:`รับเข้า ${fmtShort(addDays(date,-it.shelf))} ${yy(addDays(date,-it.shelf))}`,
       note:`Shelf Life ${it.shelf} วัน`,qty:e.qty}));
-  } else if(key==='plan'){ out.push({date,obj:'PLN',doc:dnum('PR',r),
+  } else if(key==='resv'){
+    /* ยอดจอง ณ วันนั้น = ความต้องการจากใบสั่งผลิตในกรอบ Freeze 7 วันข้างหน้า
+       ดึงรายการจากตัวสร้างเดียวกับ Projected Outbound เลขที่ใบสั่งผลิตจึงตรงกันทุกช่อง
+       ช่อง "สินค้าที่ผลิต" กับ "SO · พนักงานขาย" ซ้อนบรรทัดรอง แทนที่จะเพิ่มคอลัมน์จนตารางแน่น */
+    const acc=[];
+    for(let j=d;j<Math.min(HORIZON,d+FZ_DAYS);j++)
+      docsOfDay(it,'outb',j).forEach(x=>acc.push(Object.assign({},x,{
+        ref:`<b>${x.fg}</b><small>${x.fgn} · ${x.cus}</small>`,
+        note:`<b>${x.so}</b><small>${x.sale} · ${x.plant} · ${x.proc}</small>`})));
+    /* เรียงวันที่ต้องใช้ก่อน แล้วยอดมากขึ้นก่อนในวันเดียวกัน — ตาไล่จากบนลงล่างได้เลย */
+    acc.sort((a,b)=>a.date-b.date||b.qty-a.qty);
+    acc.forEach(x=>out.push(x));
+  } else if(key==='plan'){
+    /* วันสั่งซื้อ = วันที่ต้องการของ ลบ Lead Time ถ้าย้อนไปก่อนวันนี้ แปลว่าใบนี้ออกไปแล้ว */
+    const ord=addDays(date,-it.lt), issued=d-it.lt<0;
+    out.push({date,obj:issued?'PR':'PLN',doc:dnum(issued?'PR':'PLN',r),
       ref:`ปัดขึ้นตาม MOQ ${ni(it.moq)}`,
-      note:`ต้องออก PR ภายใน ${fmtShort(addDays(date,-it.lt))} ${yy(addDays(date,-it.lt))}`,qty:v}); }
+      note:issued?`ออก PR แล้วเมื่อ ${fmtShort(ord)} ${yy(ord)} · อยู่ในช่วงล็อก แก้ไม่ได้แล้ว`
+                 :`ต้องออก PR ภายใน ${fmtShort(ord)} ${yy(ord)}`,qty:v}); }
   return out;
 }
 const RMETA={inb:['Projected Inbound Inventory',['วันที่','ประเภท','เลขที่เอกสาร','ผู้ขาย','หมายเหตุ','จำนวน']],
   outb:['Projected Outbound Inventory',['วันที่','ประเภท','เลขที่เอกสาร','สินค้าที่ใช้','โรงงาน · กระบวนการ','จำนวน']],
   exp:['Expiring Stock',['วันหมดอายุ','ประเภท','Lot No.','วันที่รับเข้า','หมายเหตุ','จำนวน']],
-  plan:['Planned Order (MRP Suggest)',['วันที่ต้องการของ','ประเภท','เลขที่แนะนำ','การคำนวณ','เงื่อนไข','จำนวน']]};
+  plan:['Planned Order (MRP Suggest)',['วันที่ต้องการของ','ประเภท','เลขที่แนะนำ','การคำนวณ','เงื่อนไข','จำนวน']],
+  resv:['จองแล้ว (Reserved to MO)',['วันที่ต้องใช้','ประเภท','เลขที่ใบสั่งผลิต','สินค้าที่ผลิต · ลูกค้า','SO · พนักงานขาย','จำนวน']]};
+/* ยอดจองเป็นค่า ณ วันนั้น (snapshot) ไม่ใช่ยอดไหลเข้าออก บวกข้ามวันไม่ได้
+   ช่องรายสัปดาห์/รายเดือนจึงเปิดดูรายละเอียดของวันแรกในช่วงนั้น */
+const SNAP=new Set(['resv']);
 function openCellDlg(code,key,from,to){
   if(typeof event!=='undefined'&&event&&event.stopPropagation) event.stopPropagation();
-  const it=ITEMS.find(x=>x.code===code),[title,cols]=RMETA[key];
-  let rows=[];for(let d=from;d<=to;d++) rows=rows.concat(docsOfDay(it,key,d));
+  const meta=RMETA[key]; if(!meta) return;
+  const it=ITEMS.find(x=>x.code===code),[title,cols]=meta;
+  const snap=SNAP.has(key), last=snap?from:to, act=(key==='inb'||key==='outb'||key==='plan');
+  let rows=[];for(let d=from;d<=last;d++) rows=rows.concat(docsOfDay(it,key,d));
   const tot=rows.reduce((a,x)=>a+x.qty,0);
-  const s=addDays(ORIGIN,from),e=addDays(ORIGIN,to);
+  const s=addDays(ORIGIN,from),e=addDays(ORIGIN,snap?from:to);
   document.getElementById('dlgRoot').innerHTML=`
   <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
-    <div class="dlg-hd"><h3>${title}<small>${it.code} | ${it.name} · ${from===to?fmtFull(s):fmtShort(s)+' – '+fmtShort(e)+' '+yy(e)}</small></h3>
+    <div class="dlg-hd"><h3>${title}<small>${it.code} | ${it.name} · ${(snap||from===to)?fmtFull(s):fmtShort(s)+' – '+fmtShort(e)+' '+yy(e)}${
+      snap?` · ยอดจอง ณ วันนี้ ครอบคลุมงานที่ต้องใช้ของภายใน ${FZ_DAYS} วันข้างหน้า`:''}</small></h3>
       <button class="dlg-x" onclick="closeDlg()">×</button></div>
     <div class="dlg-bd"><table class="dtb">
-      <thead><tr>${cols.map((h,i)=>`<th class="${i===5?'num':''}">${h}</th>`).join('')}<th></th></tr></thead>
+      <thead><tr>${cols.map((h,i)=>`<th class="${i===5?'num':''}">${h}</th>`).join('')}${act?'<th></th>':''}</tr></thead>
       <tbody>${rows.map(x=>`<tr><td>${fmtShort(x.date)} ${yy(x.date)}</td>
         <td><span class="obj obj-${x.obj.toLowerCase()}">${x.obj}</span></td><td><b>${x.doc}</b></td>
         <td>${x.ref}</td><td style="color:#7d8ea0">${x.note}</td>
         <td class="num"><b>${ni(x.qty)}</b> ${it.unit}</td>
-        <td>${key==='inb'?'<button class="dbtn">เปิด PO</button>':key==='outb'?'<button class="dbtn">ดู WO</button>':key==='plan'?'<button class="dbtn dbtn-p">สร้าง PR</button>':''}</td></tr>`).join('')}</tbody>
-      <tfoot><tr><td colspan="5">รวม ${rows.length} รายการ</td><td class="num">${ni(tot)} ${it.unit}</td><td></td></tr></tfoot>
+        ${act?`<td>${key==='inb'?'<button class="dbtn">เปิด PO</button>':key==='outb'?'<button class="dbtn">ดู WO</button>'
+          :x.obj==='PR'?'<button class="dbtn">ดู PR</button>':'<button class="dbtn dbtn-p">สร้าง PR</button>'}</td>`:''}</tr>`).join('')}</tbody>
+      <tfoot><tr><td colspan="5">รวม ${rows.length} รายการ</td><td class="num">${ni(tot)} ${it.unit}</td>${act?'<td></td>':''}</tr></tfoot>
     </table></div>
     <div class="dlg-ft"><span>Safety ${ni(it.safety)} · MOQ ${ni(it.moq)} · Lead Time ${it.lt} วัน</span>
       <button class="dbtn" onclick="closeDlg()">ปิด</button></div></div></div>`;
@@ -1443,6 +1520,18 @@ function openMrpAdvReport(){
 "วันหมดอายุ":"Expiry Date",
 "วันที่รับเข้า":"Receipt Date",
 "วันที่ต้องการของ":"Required Date",
+"ออก PR แล้วเมื่อ":"PR issued on",
+"ดู PR":"View PR",
+"· อยู่ในช่วงล็อก แก้ไม่ได้แล้ว":"· inside the firm zone, can no longer be changed",
+"วันที่ต้องใช้":"Date Needed",
+"เลขที่ใบสั่งผลิต":"Work Order No.",
+"สินค้าที่ผลิต · ลูกค้า":"Product · Customer",
+"SO · พนักงานขาย":"SO · Salesperson",
+"· ยอดจอง ณ วันนี้ ครอบคลุมงานที่ต้องใช้ของภายใน":"· Reserved as of this date, covering jobs needing material within the next",
+"วันข้างหน้า":"days",
+"ปิยะนุช ท.":"Piyanuch T.",
+"ณัฐพล ว.":"Nattapon W.",
+"ธนากร ศ.":"Thanakorn S.",
 "เลขที่แนะนำ":"Suggested No.",
 "การคำนวณ":"Calculation",
 "เงื่อนไข":"Condition",

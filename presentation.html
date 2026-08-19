@@ -708,7 +708,24 @@ table.tb.four .chip{font-size:22px;padding:8px 20px;border-radius:20px}
 body.fs header{display:none}
 body.fs .stage{padding:0;align-items:center;background:#2E2E2F}
 body.fs .sheet{box-shadow:none}
-@media print{header,nav,.edge,.scrim{display:none}.stage{padding:0}.sheet{box-shadow:none}}
+/* ── บันทึกเป็น PDF ──
+   กล่อง #printroot ถือสไลด์ทั้งเด็คขนาดจริง 1600×900 ไว้นอกจอ (ไม่ใช้ display:none
+   เพราะภาพตัวอย่างหน้าจอเดโมต้องวัดความกว้างได้ ถึงจะย่อภาพถูก)
+   ตอนสั่งพิมพ์ค่อยดึงกลับเข้าหน้า แล้วซ่อนแถบควบคุมกับเวทีปกติทิ้ง */
+#printroot{position:absolute;left:-100000px;top:0;width:1600px}
+@media print{
+  @page{size:1600px 900px;margin:0}
+  /* ต้องบังคับพิมพ์สีพื้น ไม่งั้นหน้าปกพื้นเข้ม แถบส้ม และการ์ดสีจะออกมาขาวโล่ง
+     (ช่อง "กราฟิกพื้นหลัง" ในหน้าต่างพิมพ์ของ Chrome ปิดไว้เป็นค่าตั้งต้น) */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  html,body{height:auto!important;overflow:visible!important;background:#fff!important;display:block!important}
+  header,nav,.edge,.scrim,.stage{display:none!important}
+  .body{display:block!important;position:static!important}
+  #printroot{position:static!important;left:auto!important;top:auto!important;width:auto!important}
+  #printroot .sheet{box-shadow:none!important;margin:0!important;transform:none!important;
+    break-after:page;page-break-after:always}
+  #printroot .sheet:last-child{break-after:auto;page-break-after:auto}
+}
 </style>
 </head>
 <body>
@@ -724,6 +741,7 @@ body.fs .sheet{box-shadow:none}
   <span id="zoom">
     <button data-m="width" title="Fit width (1)">Fit width</button><button data-m="page" class="on" title="Fit page (2)">Fit page</button>
   </span>
+  <button id="pdf" title="Save the deck as PDF (D)">PDF</button>
   <button id="full" title="Full screen (F)">⛶</button>
   <button id="prev" title="Previous (←)">‹</button>
   <span class="count" id="count"></span>
@@ -740,6 +758,8 @@ body.fs .sheet{box-shadow:none}
   <div class="stage" id="stage"></div>
 </div>
 
+<div id="printroot" aria-hidden="true"></div>
+
 <script>
 /* ══════════════════════════════════════════════════════════
    Slide content — English deck, G-Able frame
@@ -755,11 +775,11 @@ const SLIDES=[
 
 {k:'agenda',nm:'Agenda',cd:'AGENDA',type:'agenda',
  tt:'Agenda',
- rows:[['1','DAILY QUESTIONS','The questions you hear every day that nobody can answer on the spot'],
-       ['2','4 IMPORTANT QUESTIONS FOR YOUR BUSINESS','What the system has to answer, and which screen answers it'],
-       ['3','SYSTEM WORKFLOW — PLANNING AND COSTING','Two flows, start to end. Then the real screens — all live, all clickable'],
-       ['4','PROJECT DELIVERY PLAN AND PRE-REQUISITE','What we deliver, when, and what APEX has to get ready'],
-       ['5','TECHNOLOGY STACK','System design, security and server size']]},
+ rows:[['1','WHY THIS SYSTEM','The questions you hear every day, and the four your business has to answer'],
+       ['2','WHAT IT COVERS, AND HOW IT SITS WITH THE ERP','The scope of both streams, and how data moves in and out of the ERP'],
+       ['3','HOW IT WORKS — AND THE REAL SCREENS','Two flows start to end, then 11 live screens, all clickable'],
+       ['4','PLAN, DELIVERABLES AND PRE-REQUISITE','12 weeks to go-live, what you receive, and what APEX gets ready'],
+       ['5','TECHNOLOGY AND ONGOING SUPPORT','System design, server size, 90-day warranty and one year of service']]},
 
 {k:'daily',nm:'Daily Questions',cd:'DAILY QUESTIONS',type:'daily',
  tt:'Daily <em>Questions</em>',
@@ -1157,11 +1177,11 @@ cover:{nm:'หน้าปก',cd:'APEX PLANNING & COSTING',
  meta:[['จัดทำให้','APEX Circuit (Thailand) Co., Ltd.']]},
 
 agenda:{nm:'หัวข้อวันนี้',cd:'หัวข้อวันนี้',tt:'หัวข้อวันนี้',
- rows:[['1','คำถามที่เจอทุกวัน','คำถามที่ได้ยินทุกวัน แต่ไม่มีใครตอบได้ทันที'],
-       ['2','4 คำถามสำคัญของธุรกิจ','ระบบต้องตอบอะไรบ้าง และหน้าจอไหนเป็นคนตอบ'],
-       ['3','ภาพรวมการทำงาน — วางแผนและต้นทุน','สองสายงานตั้งแต่ต้นจนจบ แล้วดูหน้าจอจริง กดเล่นได้ทุกหน้า'],
-       ['4','แผนส่งมอบและสิ่งที่ต้องเตรียม','ส่งมอบอะไร เมื่อไหร่ และ APEX ต้องเตรียมอะไรบ้าง'],
-       ['5','เทคโนโลยีที่ใช้','โครงสร้างระบบ ความปลอดภัย และขนาดเครื่อง']]},
+ rows:[['1','ทำไมต้องมีระบบนี้','คำถามที่ได้ยินทุกวัน และ 4 คำถามสำคัญที่ต้องตอบให้ได้'],
+       ['2','ระบบทำอะไรให้ และต่อกับ ERP ยังไง','ครอบคลุมงานไหนบ้าง และรับส่งข้อมูลกับ ERP ที่ใช้อยู่ทางไหน'],
+       ['3','ระบบทำงานยังไง แล้วเปิดของจริงให้ดู','ไล่ตั้งแต่รับออเดอร์จนจบ แล้วเปิดหน้าจอจริง กดใช้ได้ทุกหน้า'],
+       ['4','แผนงาน และสิ่งที่ต้องเตรียม','ใช้เวลาเท่าไหร่ ได้เอกสารอะไร และ APEX ต้องเตรียมข้อมูลอะไร'],
+       ['5','หลังใช้งานจริง ดูแลกันยังไง','เทคโนโลยีที่ใช้ ขนาดเครื่อง การรับประกัน และช่องทางแจ้งปัญหา']]},
 
 daily:{nm:'คำถามที่เจอทุกวัน',cd:'คำถามที่เจอทุกวัน',
  tt:'คำถาม<em>ที่เจอทุกวัน</em>',
@@ -2042,6 +2062,55 @@ function fit(){
   sh.style.transform='scale('+sc+')';
   sh.style.marginBottom=(natH*(sc-1))+'px';
 }
+/* ── บันทึกเป็น PDF ──
+   ประกอบสไลด์ทั้งเด็คขนาดจริง 1600×900 ลง #printroot แล้วเรียกหน้าต่างพิมพ์ของเบราว์เซอร์
+   ผู้ใช้เลือกปลายทางเป็น "บันทึกเป็น PDF" — ได้ไฟล์ที่ตัวหนังสือเป็นเวกเตอร์ ค้นข้อความในไฟล์ได้
+   ไม่พึ่งไลบรารีนอกเลย เพราะเด็คนี้ต้องเปิดจากไฟล์เดียวแบบออฟไลน์ได้
+   ได้ภาษาตามที่กำลังดูอยู่ — อยากได้ PDF ไทย กดปุ่ม "ไทย" ก่อนแล้วค่อยกด PDF */
+function buildPrint(){
+  const root=g('printroot'), n=SLIDES.length;
+  root.innerHTML=SLIDES.map((_,i)=>{
+    const s=S(i), isCover=s.type==='cover', isDemo=s.type==='demo';
+    return `<div class="sheet${isCover?' dark':''}">
+      ${isCover?'':'<div class="gh"><img src="gable-logo-dark.png" alt="G-Able" /></div>'}
+      <div class="gb${isDemo?' dm':''}">${R[s.type](s)}</div>
+      ${isCover?'':`<div class="gf"><img src="gable-bar.png" alt="" />
+        <span class="pg">${i+1} / ${n}</span>
+        <span class="cf">Copyright @ G-ABLE Public Company Limited</span></div>`}</div>`;
+  }).join('');
+  /* ภาพตัวอย่างหน้าจอเดโมเป็น iframe — ต้องสั่งย่อและใส่ src เองเหมือนตอนขึ้นเวที
+     ไม่งั้นหน้าเดโมจะพิมพ์ออกมาเป็นกล่องขาว */
+  root.querySelectorAll('.veil .vshot').forEach(b=>{
+    const f=b.querySelector('iframe'), sc=b.clientWidth/FRAME_W;
+    if(!f||!(sc>0)) return;
+    f.style.width=FRAME_W+'px';f.style.height=SHOT_H+'px';
+    f.style.transform='scale('+sc.toFixed(4)+')';
+    if(f.src.indexOf('about:blank')>=0) f.src=f.dataset.src;
+  });
+}
+/* รอภาพกับหน้าจอตัวอย่างในกล่องพิมพ์ให้โหลดจบก่อน ไม่งั้นบางหน้าจะออกมาว่าง
+   เพดาน 8 วินาที เผื่อมีตัวไหนโหลดไม่ขึ้น จะได้ไม่ค้างรอไปเรื่อย ๆ */
+function printReady(root){
+  const w=[...root.querySelectorAll('img')].filter(i=>!i.complete)
+    .map(i=>new Promise(r=>{i.onload=i.onerror=r;}));
+  w.push(new Promise(r=>setTimeout(r,2600)));
+  return Promise.race([Promise.all(w), new Promise(r=>setTimeout(r,8000))]);
+}
+let pdfBusy=false;
+async function toPdf(){
+  if(pdfBusy) return;
+  pdfBusy=true;
+  const b=g('pdf'), lb=b.textContent;
+  b.textContent='…';b.disabled=true;
+  buildPrint();
+  await printReady(g('printroot'));
+  b.textContent=lb;b.disabled=false;pdfBusy=false;
+  window.print();
+}
+g('pdf').onclick=toPdf;
+/* เคลียร์กล่องพิมพ์ทิ้งหลังปิดหน้าต่างพิมพ์ — หน้าจอตัวอย่าง 11 ตัวกินแรงเครื่องเปล่า ๆ */
+window.addEventListener('afterprint',()=>{g('printroot').innerHTML='';});
+
 g('full').onclick=()=>{
   if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
   else document.exitFullscreen();
@@ -2086,6 +2155,7 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='p'||e.key==='P') g('pin').click();
   else if(e.key==='l'||e.key==='L') setLang(plang==='en'?'th':'en');
   else if(e.key==='f'||e.key==='F') g('full').click();
+  else if(e.key==='d'||e.key==='D') toPdf();
   else if(e.key===']') stepZoom(-40);      /* จอในสไลด์ใหญ่ขึ้น */
   else if(e.key==='[') stepZoom(40);       /* เห็นเนื้อหากว้างขึ้น */
   else if(e.key==='1'){zoom='width';document.querySelectorAll('#zoom button').forEach(x=>x.classList.toggle('on',x.dataset.m==='width'));fit();}

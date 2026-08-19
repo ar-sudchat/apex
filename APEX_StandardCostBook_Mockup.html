@@ -353,8 +353,12 @@ html.embed .content{padding-top:14px}
       <div class="tabs" id="tabs">
         <button class="tab on" data-t="items"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>รายการสินค้า</button>
         <button class="tab" data-t="cmp"><svg viewBox="0 0 24 24"><path d="M4 8h12l-3-3M20 16H8l3 3"/></svg>เปรียบเทียบ</button>
+        <!-- แท็บ What-if กับ พร้อมคำนวณ? ถอดออกจากหน้าจอตามคำสั่ง
+             แผงทั้งสอง (#p-whatif, #p-ready) และโค้ดที่เกี่ยวข้องยังอยู่ครบ
+             ลบบรรทัดเปิดกับปิดคอมเมนต์นี้ออก แท็บทั้งสองกลับมาทันที
         <button class="tab" data-t="whatif"><svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/></svg>What-if</button>
         <button class="tab" data-t="ready"><svg viewBox="0 0 24 24"><path d="M4 7l2 2 3-3M4 15l2 2 3-3M13 8h7M13 16h7"/></svg>พร้อมคำนวณ?</button>
+        -->
       </div>
 
       <!-- รายการสินค้า -->
@@ -542,7 +546,7 @@ const PRODS=[
  P('A048T-168BJ','PCB SEMCO 4L Gold HDI',      'SEMCO',         'A3',4,'Gold',1, 16, 4, null, 1481.54),
  P('A188D-023A','PCB NIDEC 6L Silver Coating', 'NIDEC',         'A2',6,'Silver',0, 6, 1, null, 1359.65),
  P('G120A-017A','PCB SEMCO 4L Normal',         'SEMCO',         'A1',4,'HASL',0, 13, 4, .224),
- P('K129B-036A','PCB Western Digital 2L Tin',  'WESTERN DIGITAL','A1',8,'Tin',0,  8, 2, null, 1147.15),
+ P('K129B-036A','PCB Western Digital 2L Tin',  'WESTERN DIGITAL','A1',2,'Tin',0,  8, 2, null, 761.65),
  P('T772F-041C','PCB DENSO 8L HDI Gold',       'DENSO',         'A3',8,'Gold',1, 12, 2, .215),
  P('T118M-204R','PCB KYOCERA 6L Gold ENIG',    'KYOCERA',       'A3',6,'Gold',1, 18, 3, .246),
  P('R806N-115K','PCB MURATA 4L Silver',        'MURATA',        'A2',4,'Silver',0,24, 2, .284),

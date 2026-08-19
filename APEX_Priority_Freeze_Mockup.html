@@ -273,8 +273,7 @@ html.embed .content{padding-top:14px}
   <div class="content">
     <div class="card">
       <div class="page-head">
-        <div><div class="page-title">จัดลำดับและล็อกแผน</div>
-          <div class="page-sub">การจองวัตถุดิบรายใบสั่งผลิต · ล็อกช่วงเวลาไม่ให้แผนขยับ · MO ที่เข้ามาใหม่ต้องไม่ดึงของจาก MO เดิมเอง</div></div>
+        <div><div class="page-title">จัดลำดับและล็อกแผน</div></div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="demo">ตัวอย่างหน้าจอ · ข้อมูลจำลอง</span>
           <button class="btn" onclick="openNewMO()">
@@ -299,10 +298,6 @@ html.embed .content{padding-top:14px}
             <select class="sel" style="width:130px"><option>ทุกวันจันทร์</option><option>ทุกวัน</option><option>ทุกวันจันทร์และพฤหัส</option></select>
           </span></div>
         <div class="days" id="days"></div>
-        <div class="expl" style="margin:12px 0 0">
-          <b>ช่องสีเข้ม</b> คือช่วงล็อก งานที่ต้องใช้ของในช่วงนี้แก้ไม่ได้แล้ว ·
-          <b>ช่องสีอ่อน</b> ยังปรับลำดับได้ตามปกติ
-        </div>
       </div>
 
       <div class="frow">
@@ -688,7 +683,6 @@ function openPfReport(){
 "จัดลำดับและล็อกแผน — APEX Circuit":"Priority & Plan Freeze — APEX Circuit",
 "จัดลำดับและล็อกแผน":"Priority & Plan Freeze",
 "อาทิตย์ สุดชาติ":"Artit Sudchat",
-"การจองวัตถุดิบรายใบสั่งผลิต · ล็อกช่วงเวลาไม่ให้แผนขยับ · MO ที่เข้ามาใหม่ต้องไม่ดึงของจาก MO เดิมเอง":"Material reservations per work order · Freeze window keeps the plan from shifting · New MOs must not pull stock from existing MOs on their own",
 "ตัวอย่างหน้าจอ · ข้อมูลจำลอง":"Screen Mockup · Sample Data",
 "ดูตัวอย่าง: ของไม่พอแล้วทำอย่างไร":"See Example: What to Do When Stock Runs Short",
 "ช่วงเวลาของแผน":"Plan Timeline",
@@ -701,10 +695,6 @@ function openPfReport(){
 "ทุกวันจันทร์และพฤหัส":"Every Mon & Thu",
 "ทุกวันจันทร์":"Every Monday",
 "ทุกวัน":"Every Day",
-"ช่องสีเข้ม":"Dark cells",
-"คือช่วงล็อก งานที่ต้องใช้ของในช่วงนี้แก้ไม่ได้แล้ว ·":"mark the freeze window — jobs needing material in this period can no longer be changed ·",
-"ช่องสีอ่อน":"Light cells",
-"ยังปรับลำดับได้ตามปกติ":"can still be resequenced normally",
 "ค้นหา วัตถุดิบ / MO / ลูกค้า / พนักงานขาย":"Search material / MO / customer / salesperson",
 "ทุกสถานะ":"All Statuses",
 "อยู่ในช่วงล็อก":"In Freeze Window",

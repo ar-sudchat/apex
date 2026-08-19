@@ -6,7 +6,7 @@
 <link rel="icon" href="apex-logo.png" />
 <meta name="robots" content="noindex, nofollow" />
 
-<title>Price Shock Simulator — APEX Circuit</title>
+<title>Cost Simulator — APEX Circuit</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
 :root{
@@ -119,6 +119,10 @@ footer{background:var(--hdr);color:#eaf4fd;text-align:center;font-size:13px;padd
 
 .tw{border:1px solid var(--line-d);border-radius:6px;overflow:auto;max-height:520px}
 table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+tfoot td{background:#f5f9fd;font-weight:700;padding:11px 10px;border-top:2px solid #cfdcea;
+  border-bottom:1px solid var(--line-d);white-space:nowrap}
+tfoot td:first-child{color:#3a5773;text-align:left}
+tfoot td small{display:block;font-size:10.5px;font-weight:400;color:#8a9bad;margin-top:1px}
 thead th small{display:block;font-weight:400;font-size:10px;opacity:.8;margin-top:2px}
 thead th{background:var(--th);color:#fff;font-weight:600;padding:10px 12px;text-align:left;white-space:nowrap;
   position:sticky;top:0;z-index:5;border-right:1px solid rgba(255,255,255,.18)}
@@ -159,6 +163,12 @@ td.r{text-align:right} td.c{text-align:center}
       align-items:flex-start;justify-content:center;padding:48px 20px;overflow:auto}
 .dlg{background:#fff;border-radius:8px;box-shadow:0 14px 44px rgba(15,40,80,.3);width:70%;max-width:1000px;overflow:hidden}
 .dlg.wide{width:88%;max-width:1420px}
+.mask.full{padding:0;align-items:stretch;overflow:hidden}
+.dlg.full{width:100%;max-width:none;height:100%;border-radius:0;box-shadow:none;
+          display:flex;flex-direction:column}
+.dlg.full .dlg-hd{flex:0 0 auto}
+.dlg.full .dlg-bd{flex:1 1 auto;max-height:none;padding:18px 26px}
+.dlg.full .dlg-ft{flex:0 0 auto}
 .dlg-hd{background:var(--th);color:#fff;padding:12px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .dlg-hd h3{font-size:15px;font-weight:600;line-height:1.4}
 .dlg-hd small{display:block;font-weight:400;opacity:.9;font-size:12px;margin-top:3px}
@@ -200,7 +210,8 @@ td.r{text-align:right} td.c{text-align:center}
 @media(max-width:1100px){.g3{grid-template-columns:1fr}}
 
 /* แถบสรุปผลลัพธ์ */
-.ressum{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:0 0 13px}
+.ressum{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 13px}
+.ressum:empty{display:none;margin:0}
 .rk{border:1px solid #e3ebf4;border-radius:11px;background:#fff;padding:12px 14px;position:relative;overflow:hidden}
 .rk::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#c3d0dd}
 .rk.bad::before{background:var(--red)} .rk.good::before{background:var(--green)}
@@ -268,7 +279,7 @@ html.embed .content{padding-top:14px}
 
       <div class="page-head">
         <div>
-          <div class="page-title">Price Shock Simulator</div>
+          <div class="page-title">Cost Simulator</div>
           <div class="page-sub">จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ต้นทุนและราคาขายต่อบอร์ด</div>
         </div>
       </div>
@@ -312,17 +323,16 @@ html.embed .content{padding-top:14px}
 
       <!-- TABS -->
       <div class="tabs" id="tabs">
-        <button class="tab" data-t="shocks">เงื่อนไข</button>
-        <button class="tab on" data-t="results">ผลลัพธ์</button>
+        <button class="tab on" data-t="shocks">เงื่อนไข</button>
+        <button class="tab" data-t="results">ผลลัพธ์</button>
       </div>
 
       <!-- ═══ เงื่อนไข ═══ -->
-      <div id="p-shocks" style="display:none">
+      <div id="p-shocks">
         <div class="ctlrow">
-          <label>GP ขั้นต่ำ (%)</label>
-          <input class="inp" style="width:80px;text-align:right" value="10" onchange="setGP(this.value)" />
+          <label>เตือนเมื่อกำไรต่ำกว่า (%)</label>
+          <input id="gpMin" class="inp" style="width:80px;text-align:right" type="number" min="0" max="100" step="0.5" value="10" onchange="setGP(this.value)" />
           <button class="btn btn-p" onclick="drawAll();toastS('คำนวณใหม่จาก '+SHOCKS.length+' เงื่อนไขเรียบร้อย')">จำลอง</button>
-          <button class="btn" onclick="openSens()" title="driver ไหนกระทบเงินมากสุด — ขยับทีละตัวเท่าๆ กันแล้วเทียบ">วิเคราะห์ความไว</button>
           <span class="right" id="shCount">4/20</span>
         </div>
         <table class="shocktbl">
@@ -340,7 +350,7 @@ html.embed .content{padding-top:14px}
       </div>
 
       <!-- ═══ ผลลัพธ์ ═══ -->
-      <div id="p-results">
+      <div id="p-results" style="display:none">
         <div class="ctlrow">
           <span style="font-size:12.5px;color:var(--mut)">ขอบเขต:</span>
           <div class="seg" id="scope">
@@ -365,6 +375,7 @@ html.embed .content{padding-top:14px}
               <th class="r" style="width:165px" title="วัตถุดิบขึ้นได้อีกกี่ % ก่อน GP = 0">Break-even วัตถุดิบ +%</th>
             </tr></thead>
             <tbody id="tbRes"></tbody>
+            <tfoot id="tfRes"></tfoot>
           </table>
         </div>
       </div>
@@ -425,9 +436,9 @@ ITEMS.forEach(it=>{ it.base=baseCost(it); it.price=Math.round(it.base/(1-it.gp)*
 
 /* ── ฐานต้นทุน/ราคา ต่อ 1 บอร์ด อ้างอิง Standard Cost Book STD2026-Q3 — แก้ที่ SCB แล้วต้อง regen ตารางนี้ ── */
 const SCB_TOT={'A048T-168BJ':1343.79,'A188D-023A':1476.32,'B491V-072D':2077.16,'D617P-140S':872.66,
-               'F903C-055H':506.50,'K129B-036A':1864.61,'M205L-088Q':1229.37,'R806N-115K':1077.88,'G120A-017A':1058.85};
+               'F903C-055H':506.50,'K129B-036A':723.57,'M205L-088Q':1229.37,'R806N-115K':1077.88,'G120A-017A':1058.85};
 const SCB_PRICE={'A048T-168BJ':1481.54,'A188D-023A':1359.65,'B491V-072D':2704.65,'D617P-140S':1239.60,
-                 'F903C-055H':736.20,'K129B-036A':1147.15,'M205L-088Q':1686.40,'R806N-115K':1505.40,'G120A-017A':1364.50};
+                 'F903C-055H':736.20,'K129B-036A':761.65,'M205L-088Q':1686.40,'R806N-115K':1505.40,'G120A-017A':1364.50};
 ITEMS.forEach(it=>{
   const k=SCB_TOT[it.c]/it.base;   /* คูณทุกองค์ประกอบด้วย k เดียวกัน — โครงสร้างสัดส่วนคงเดิม */
   GRP.forEach(g=>{ it.dm[g]*=k; });
@@ -486,11 +497,15 @@ function calcRow(it,SH){
 }
 
 /* ── สถานะหน้าจอ ── */
+/* เปิดหน้ามาให้มีเงื่อนไขตั้งต้น 4 ข้อ (สถานการณ์ราคาวัตถุดิบขึ้นจริงของไตรมาสนี้)
+   ผู้ใช้จึงเห็นตัวเลขผลกระทบทันทีโดยไม่ต้องกรอกอะไรก่อน แล้วต่อด้วยแถวว่างอีก 6 แถว
+   รวมเป็น 10 แถว สำหรับเพิ่มเงื่อนไขเอง — แถวว่าง (d=null) ถูกข้ามตอนคำนวณอยู่แล้วใน apply() */
 let SHOCKS=[
  {d:1,t:'Copper mat',u:'%',v:'15',rf:true},
  {d:1,t:'CCL mat',u:'%',v:'5.2',rf:true},
  {d:3,t:'—',u:'%',v:'5',rf:false},
  {d:5,t:'JPY',u:'%',v:'8',rf:false},
+ ...Array.from({length:6},()=>({d:null,t:'',u:'%',v:'',rf:false})),
 ];
 let GPMIN=10, SCOPE=1;
 const SCEN={
@@ -511,25 +526,28 @@ function targets(d){
 }
 function drawShocks(){
   document.getElementById('tbShock').innerHTML=SHOCKS.map((s,i)=>{
-    const dis = s.d===0||s.d===3;
+    const none = s.d==null;                      /* ยังไม่ได้เลือกตัวขับ */
+    const dis = none||s.d===0||s.d===3;
     const opts = targets(s.d);
     const tgt = dis
-      ? `<select class="sel" style="width:100%" disabled><option>ทั้งหมด</option></select>`
+      ? `<select class="sel" style="width:100%" disabled><option>${none?'— เลือกตัวขับก่อน —':'ทั้งหมด'}</option></select>`
       : `<select class="sel" style="width:100%" onchange="shSet(${i},'t',this.value)">
            ${opts.map(o=>`<option ${o===s.t?'selected':''}>${o}</option>`).join('')}</select>`;
     const po = PCTONLY.includes(s.d);
     return `<tr>
       <td style="text-align:center;color:var(--mut);font-size:12.5px">${i+1}</td>
-      <td><select class="sel" style="width:100%" onchange="shSet(${i},'d',+this.selectedIndex)">
+      <td><select class="sel" style="width:100%" onchange="shSet(${i},'d',this.selectedIndex-1)">
+        <option ${none?'selected':''}>— เลือกตัวขับ —</option>
         ${DRV.map((d,k)=>`<option ${k===s.d?'selected':''}>${d}</option>`).join('')}</select></td>
       <td>${tgt}</td>
       <td><div class="seg">
-        <button class="${s.u==='%'?'on':''}" onclick="shSet(${i},'u','%')">%</button>
-        <button ${po?'disabled title="driver นี้รองรับเฉพาะ %"':`onclick="shSet(${i},'u','บาท')"`}
+        <button ${none?'disabled':''} class="${s.u==='%'?'on':''}" onclick="shSet(${i},'u','%')">%</button>
+        <button ${none?'disabled':po?'disabled title="driver นี้รองรับเฉพาะ %"':`onclick="shSet(${i},'u','บาท')"`}
           class="${s.u==='บาท'?'on':''}">บาท</button></div></td>
       <td><input class="inp" style="width:100%;text-align:right" value="${s.v}"
+          placeholder="${none?'—':''}" ${none?'disabled':''}
           onchange="shSet(${i},'v',this.value)" /></td>
-      <td>${s.d<=2?`<label class="chk"><input type="checkbox" ${s.rf?'checked':''}
+      <td>${(!none&&s.d<=2)?`<label class="chk"><input type="checkbox" ${s.rf?'checked':''}
           onchange="shSet(${i},'rf',this.checked)"/> ราคาเศษขยับตาม</label>`:''}</td>
       <td style="text-align:center"><button class="delb" title="ลบ shock" onclick="shDel(${i})">🗑</button></td>
     </tr>`;}).join('');
@@ -537,21 +555,30 @@ function drawShocks(){
 }
 function shSet(i,f,v){
   const s=SHOCKS[i];
-  if(f==='d'){ s.d=v; s.t=targets(v)[0]; if(PCTONLY.includes(v)) s.u='%'; }
+  if(f==='d'){
+    if(v<0){ s.d=null; s.t=''; s.v=''; s.rf=false; s.u='%'; }   /* เลือกกลับเป็นค่าว่าง = ล้างแถว */
+    else { s.d=v; s.t=targets(v)[0]; if(PCTONLY.includes(v)) s.u='%'; }
+  }
   else s[f]=v;
   drawAll();
 }
 function shDel(i){ SHOCKS.splice(i,1); drawAll(); }
 function shAdd(){
   if(SHOCKS.length>=20) return;
-  SHOCKS.push({d:1,t:GRP[0],u:'%',v:'5',rf:true}); drawAll();
+  SHOCKS.push({d:null,t:'',u:'%',v:'',rf:false}); drawAll();
 }
 function loadScen(name){
   if(!SCEN[name]) return;
   SHOCKS=JSON.parse(JSON.stringify(SCEN[name])); drawAll();
   toastS(`โหลด Scenario “${name}” — ${SHOCKS.length} เงื่อนไข คำนวณใหม่แล้ว`);
 }
-function setGP(v){ GPMIN=parseFloat(v)||0; drawAll(); }
+/* ลบจนว่างหรือพิมพ์ตัวอักษร เดิมกลายเป็น 0 เงียบ ๆ แล้วจำนวนรายการเปลี่ยนโดยไม่มีใครรู้ตัว
+   ตอนนี้ถ้าค่าใช้ไม่ได้จะคืนค่าเดิมกลับเข้าช่อง · 0 ยังใส่ได้ แปลว่า "เตือนเฉพาะตัวที่ขาดทุน" */
+function setGP(v){
+  const n=parseFloat(v);
+  if(!isFinite(n)||n<0||n>100){ document.getElementById('gpMin').value=nf(GPMIN,0); return; }
+  GPMIN=n; drawAll();
+}
 function setScope(i){ SCOPE=i; drawAll(); }
 function toastS(m,c=''){
   const o=document.querySelector('.stoast'); if(o)o.remove();
@@ -573,19 +600,45 @@ function drawRes(){
   const rev=ALL.reduce((a,x)=>a+x.it.price*x.it.qty,0);
   const gpo=(rev-wOld)/rev*100, gpn=(rev-wNew)/rev*100;
   const risk=ALL.filter(x=>x.gpn<GPMIN).length;
-  document.getElementById('resSum').innerHTML=`
-    <div class="rk"><div class="l">ต้นทุนรวมต่อเดือน</div>
+  /* ── แถบการ์ดสรุปด้านบน ถอดออกทั้งแถบตามที่เจ้าของงานสั่ง ──
+     ตัวเลขทุกตัวยังคำนวณอยู่เหมือนเดิม (wOld · wNew · totImp · rev · gpo · gpn · risk)
+     ตารางรายสินค้า หน้าต่างเปรียบเทียบ และรายงานที่สั่งพิมพ์ ยังใช้ค่าพวกนี้อยู่
+     จะเอาการ์ดกลับ ให้คืนบล็อกที่คอมเมนต์ไว้ข้างล่างนี้กลับมาเป็นโค้ดจริง */
+  document.getElementById('resSum').innerHTML='';
+/*    <div class="rk"><div class="l">ต้นทุนรวมต่อเดือน</div>
       <div class="v">${nf(wNew,0)}<span class="u">฿</span></div>
       <div class="s">เดิม ${nf(wOld,0)} ฿</div></div>
     <div class="rk ${totImp>0?'bad':'good'}"><div class="l">ผลกระทบรวม</div>
       <div class="v">${sg(totImp,0)}<span class="u">฿/เดือน</span></div>
       <div class="s">จากยอดขาย ${nf(rev,0)} ฿</div></div>
-    <div class="rk ${gpn<gpo?'bad':'good'}"><div class="l">GP% เฉลี่ยถ่วงน้ำหนัก</div>
+    <!-- การ์ด "กำไรรวมทั้งเล่ม" ถอดออกตามที่เจ้าของงานสั่ง — ใส่กลับได้ด้วยการคืนสามบรรทัดนี้
+    <div class="rk ${gpn<gpo?'bad':'good'}"><div class="l">กำไรรวมทั้งเล่ม</div>
       <div class="v">${nf(gpn,1)}<span class="u">%</span></div>
-      <div class="s">เดิม ${nf(gpo,1)}% · ${sg(gpn-gpo,1)} จุด</div></div>
-    <div class="rk ${risk?'bad':'good'}"><div class="l">รายการต่ำกว่า GP ขั้นต่ำ</div>
+      <div class="s">เดิม ${nf(gpo,1)}% · ${gpn<gpo?"หายไป":"เพิ่ม"} ${nf(Math.abs(gpn-gpo),1)} จุด</div></div>
+    -->
+    <div class="rk ${risk?'bad':'good'}"><div class="l">รายการที่กำไรต่ำกว่าเกณฑ์</div>
       <div class="v">${risk}<span class="u">/ ${ITEMS.length}</span></div>
-      <div class="s">เกณฑ์ GP ≥ ${nf(GPMIN,0)}%</div></div>`;
+      <div class="s">เกณฑ์ กำไรไม่ต่ำกว่า ${nf(GPMIN,0)}%</div></div>`;
+*/
+
+  /* ── แถวรวมท้ายตาราง ── คิดจากรายการที่กำลังแสดงอยู่จริง ไม่ใช่ทั้งเล่ม
+     ช่องต้นทุนสองช่องเป็นยอด "ต่อเดือน" ไม่ใช่ต่อบอร์ดเหมือนแถวข้างบน จึงกำกับหน่วยไว้ให้ชัด
+     ราคาแนะนำกับ Break-even รวมกันไม่ได้ ปล่อยเป็นขีด */
+  const fOld=R.reduce((a,x)=>a+x.o*x.it.qty,0), fNew=R.reduce((a,x)=>a+x.nw*x.it.qty,0);
+  const fRev=R.reduce((a,x)=>a+x.it.price*x.it.qty,0), fQty=R.reduce((a,x)=>a+x.it.qty,0);
+  const fImp=R.reduce((a,x)=>a+x.imp,0);
+  const fGpo=fRev?(fRev-fOld)/fRev*100:0, fGpn=fRev?(fRev-fNew)/fRev*100:0;
+  const fDp=fOld?(fNew-fOld)/fOld*100:0;
+  document.getElementById('tfRes').innerHTML = R.length ? `<tr>
+    <td colspan="3">รวม ${R.length} รายการที่แสดงอยู่</td>
+    <td class="r mono">${nf(fOld,0)}<small>฿/เดือน</small></td>
+    <td class="r mono b">${nf(fNew,0)}<small>฿/เดือน</small></td>
+    <td class="r mono ${fDp>0?'up':''}">${sg(fDp,1)}%</td>
+    <td class="r mono">${nf(fGpo,1)}%</td>
+    <td class="r mono ${fGpn<GPMIN?'up':''}">${nf(fGpn,1)}%</td>
+    <td class="r mono">${nf(fQty,0)}</td>
+    <td class="r mono ${fImp>0?'up':''}"><b>${sg(fImp,0)}</b></td>
+    <td class="r">—</td><td class="r">—</td></tr>` : '';
 
   document.getElementById('tbRes').innerHTML = R.length ? R.map((x,i)=>{
     const rk=x.gpn<GPMIN, up=x.dp>0.005, dn=x.dp<-0.005;
@@ -601,13 +654,16 @@ function drawRes(){
       <td class="r mono" style="color:#3a5773">${nf(x.req)}</td>
       <td class="r mono ${x.be<10?'up':''}">${sg(x.be,1)}%</td></tr>`;}).join('')
    : `<tr><td colspan="12" style="text-align:center;padding:34px;color:var(--mut)">
-        ไม่มีรายการในขอบเขตนี้ — ลองเปลี่ยนขอบเขต หรือปรับ GP ขั้นต่ำ</td></tr>`;
+        ไม่มีรายการในขอบเขตนี้ — ลองเปลี่ยนขอบเขต หรือปรับเกณฑ์กำไร</td></tr>`;
   document.getElementById('resCnt').textContent=`แสดง ${R.length} จาก ${ITEMS.length} รายการ`;
   document.querySelectorAll('#scope button').forEach((b,i)=>b.classList.toggle('on',i===SCOPE));
 }
 function drawAll(){ drawShocks(); drawRes(); }
 
-/* ── วิเคราะห์ความไว ── */
+/* ── วิเคราะห์ความไว ──
+   ถอดปุ่มออกจากแถบเครื่องมือตามที่เจ้าของงานสั่ง ตัวสร้างหน้าต่างยังอยู่ครบ
+   จะเปิดกลับ ใส่ปุ่มนี้คืนในแถบเครื่องมือของแท็บเงื่อนไขได้เลย:
+   <button class="btn" onclick="openSens()">วิเคราะห์ความไว</button>            */
 function openSens(){
   const DR=[[1,'Copper mat','ทองแดง'],[1,'CCL mat','CCL'],[1,'PP mat','Prepreg'],
             [1,'Precious metal','โลหะมีค่า'],[1,'Non-market mat','เคมี / ฟิล์ม'],
@@ -707,13 +763,13 @@ function drawCompare(){
   const K=[['ผลกระทบต่อต้นทุนรวม (฿/เดือน)',A.imp,B.imp,0],
            ['ต้นทุนรวมต่อเดือน (฿)',A.cost,B.cost,0],
            ['GP% เฉลี่ยถ่วงน้ำหนัก',A.gp,B.gp,1],
-           [`รายการที่ GP ต่ำกว่า ${nf(GPMIN,0)}%`,A.risk,B.risk,0]];
+           [`รายการที่กำไรต่ำกว่า ${nf(GPMIN,0)}%`,A.risk,B.risk,0]];
   const D=ITEMS.map((it,i)=>({c:it.c,n:it.n,a:A.R[i],b:B.R[i],
       d:B.R[i].imp-A.R[i].imp})).sort((p,q)=>Math.abs(q.d)-Math.abs(p.d)).slice(0,10);
   const mx=Math.max(...D.map(x=>Math.abs(x.d)))||1;
   const opts=v=>Object.keys(SCEN).map(k=>`<option ${k===v?'selected':''}>${k}</option>`).join('');
   document.getElementById('dlgRoot').innerHTML=`
-  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg">
+  <div class="mask full" onclick="if(event.target===this)closeDlg()"><div class="dlg full">
     <div class="dlg-hd"><h3>เปรียบเทียบ Scenario
       <small>เลือกได้ทั้งสองฝั่ง ระบบคำนวณใหม่ทันทีจากสินค้า ${ITEMS.length} รายการในเล่มนี้</small></h3>
       <button class="dlg-x" onclick="closeDlg()">×</button></div>
@@ -755,7 +811,7 @@ function drawCompare(){
             background:${r.d>0?'#d93838':'#1e9e50'};width:${Math.abs(r.d)/mx*100}%"></span></span></td>
       </tr>`).join('')}</tbody></table>
     </div>
-    <div class="dlg-ft"><span>เกณฑ์ GP ขั้นต่ำ ${nf(GPMIN,0)}%</span>
+    <div class="dlg-ft"><span>เกณฑ์ กำไรไม่ต่ำกว่า ${nf(GPMIN,0)}%</span>
       <button class="btn btn-p" onclick="closeDlg()">ปิด</button></div>
   </div></div>`;
 }
@@ -824,7 +880,7 @@ function openShockReport(){
     title:'รายงานผลการจำลองราคา',
     titleEn:'Price Shock Simulation Report — What-if Repricing',
     meta:[['เลขที่รายงาน','SIM-260803-01'],['เล่มต้นทุนอ้างอิง','STD2026-Q3 · ไตรมาส 3/2569'],
-          ['เงื่อนไขช็อก',SHOCKS.length+' รายการ'],['GP ขั้นต่ำ',GPMIN+'%']],
+          ['เงื่อนไขช็อก',SHOCKS.length+' รายการ'],['เกณฑ์ กำไรไม่ต่ำกว่า',GPMIN+'%']],
     meta2:[['จำนวนสินค้า',res.length+' รายการ'],['GP หลังช็อกต่ำกว่าเกณฑ์',risk+' รายการ'],
            ['วันที่จำลอง','03-08-2026'],['ผู้จัดทำ','อาทิตย์ สุดชาติ']],
     cols:[{t:'#',a:'c',w:'34px'},{t:'รหัสสินค้า'},{t:'ชื่อสินค้า'},{t:'ต้นทุนเดิม',a:'r'},{t:'ต้นทุนใหม่',a:'r'},
@@ -839,6 +895,18 @@ function openShockReport(){
 }
 </script>
 <script id="apexI18nDict">window.APEX_I18N_PAGE = {
+"รวม":"Total of",
+"รายการที่แสดงอยู่":"item(s) shown",
+"฿/เดือน":"THB/month",
+"กำไรรวมทั้งเล่ม":"Overall GP for the book",
+"หายไป":"down",
+"เพิ่ม":"up",
+"เตือนเมื่อกำไรต่ำกว่า (%)":"Flag when GP falls below (%)",
+"รายการที่กำไรต่ำกว่าเกณฑ์":"Items below the GP threshold",
+"เกณฑ์ กำไรไม่ต่ำกว่า":"Threshold: GP not below",
+"รายการที่กำไรต่ำกว่า":"Items with GP below",
+"— เลือกตัวขับ —":"— Select driver —",
+"— เลือกตัวขับก่อน —":"— Select a driver first —",
 "อาทิตย์ สุดชาติ":"Arthit Sudchat",
 "จำลองราคา — what-if ต้นทุนมาตรฐานทั้ง cost book · ต้นทุนและราคาขายต่อบอร์ด":"Price what-if across the standard cost book · cost and selling price per board",
 "ต้นทุน/ราคาขายต่อบอร์ด":"Cost/selling price per board",
@@ -915,7 +983,7 @@ function openShockReport(){
 "รายการต่ำกว่า GP ขั้นต่ำ":"Items Below Min GP",
 "เกณฑ์ GP ≥":"Threshold: GP ≥",
 "เสี่ยง":"At Risk",
-"ไม่มีรายการในขอบเขตนี้ — ลองเปลี่ยนขอบเขต หรือปรับ GP ขั้นต่ำ":"No items in this scope — try another scope or adjust the min GP",
+"ไม่มีรายการในขอบเขตนี้ — ลองเปลี่ยนขอบเขต หรือปรับเกณฑ์กำไร":"No items in this scope — try another scope or adjust the GP threshold",
 "แสดง":"Showing",
 "จาก":"of",
 "ทองแดง":"Copper",

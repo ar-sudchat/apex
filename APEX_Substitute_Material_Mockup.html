@@ -114,6 +114,7 @@ td.r{text-align:right} td.c{text-align:center}
 .ib svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .ib-e{color:var(--blue)} .ib-e:hover{background:var(--p-blue)}
 .ib-g{color:var(--green)} .ib-g:hover{background:var(--p-green)}
+.ib-d{color:var(--red)} .ib-d:hover{background:var(--p-red)}
 .bar{display:inline-block;width:78px;height:8px;background:#f2f6fa;border-radius:4px;overflow:hidden;vertical-align:-1px;margin-right:7px}
 .bar i{display:block;height:100%;border-radius:4px}
 .pager{display:flex;align-items:center;justify-content:space-between;padding:9px 2px 0;font-size:12.5px;color:var(--mut)}
@@ -216,14 +217,18 @@ html.embed .content{padding-top:14px}
           <div class="page-sub">กำหนดตัวแทนของวัตถุดิบหลัก พร้อมลำดับ อัตราแปลง และเงื่อนไขการอนุมัติ — MRP จะหยิบไปใช้เองเมื่อของหลักไม่พอ</div></div>
         <div style="display:flex;gap:8px">
           <button class="btn" onclick="openSubReport()">พิมพ์รายงาน</button>
-          <button class="btn btn-p" onclick="toast('เปิดฟอร์มเพิ่มคู่ทดแทนใหม่')">+ เพิ่มคู่ทดแทน</button>
+          <button class="btn btn-p" onclick="openAddPair()">+ เพิ่มคู่ทดแทน</button>
         </div>
       </div>
 
       <div class="tabs" id="tabs">
         <button class="tab on" data-t="pair"><svg viewBox="0 0 24 24"><path d="M4 8h12l-3-3M20 16H8l3 3"/></svg>คู่วัตถุดิบทดแทน</button>
         <button class="tab" data-t="short"><svg viewBox="0 0 24 24"><path d="M12 4l8.5 15h-17z"/><path d="M12 10v4M12 17h0"/></svg>ของขาด — หาตัวแทน<span class="bdg" id="bdgShort">0</span></button>
+        <!-- แท็บ ประวัติการใช้ตัวแทน ถอดออกจากหน้าจอตามคำสั่ง
+             แผง #p-log กับ renderLog() ยังอยู่ครบ ลบบรรทัดเปิดกับปิดคอมเมนต์นี้ออก แท็บกลับมาทันที
+             ถ้าเปิดกลับ ให้ใส่ท้ายบรรทัด note ของรายงานคืนด้วย (ดู "ประวัติการใช้จริง..." ที่ถอดคู่กัน)
         <button class="tab" data-t="log"><svg viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 4v4h4"/><path d="M12 8v4.5l3 1.8"/></svg>ประวัติการใช้ตัวแทน</button>
+        -->
       </div>
 
       <!-- ═══ คู่วัตถุดิบทดแทน ═══ -->
@@ -254,7 +259,7 @@ html.embed .content{padding-top:14px}
             <th class="r" style="width:120px">สต็อกตัวแทน</th>
             <th style="width:150px">เงื่อนไขอนุมัติ</th>
             <th class="c" style="width:115px">สถานะ</th>
-            <th class="c" style="width:64px">แก้ไข</th>
+            <th class="c" style="width:96px">จัดการ</th>
           </tr></thead><tbody id="tbPair"></tbody></table></div>
         <div class="pager"><span id="pgPair"></span><span>คลิกแถวเพื่อดูสายทดแทนทั้งหมดของวัตถุดิบหลัก</span></div>
       </div>
@@ -313,6 +318,7 @@ html.embed .content{padding-top:14px}
 const nf=(n,d=0)=>n==null?'—':n.toLocaleString('th-TH',{minimumFractionDigits:d,maximumFractionDigits:d});
 const sg=(n,d=2)=>(n>0?'+':'')+nf(n,d);
 const IC_EDIT='<svg viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14.5 6.5l3 3"/></svg>';
+const IC_DEL='<svg viewBox="0 0 24 24"><path d="M4 7h16M10 7V4.5h4V7M6 7l1 13h10l1-13"/><path d="M10.5 10.5v6M13.5 10.5v6"/></svg>';
 
 /* ═════════ วัตถุดิบหลักของ APEX ═════════ */
 const M={
@@ -444,7 +450,9 @@ function renderPair(){
       <td><span class="chip ${AP[ap][1]}">${AP[ap][0]}</span></td>
       <td class="c"><span class="chip ${ST[st][1]}">${ST[st][0]}</span></td>
       <td class="c"><button class="ib ib-e" title="แก้ไขคู่ทดแทน"
-        onclick="event.stopPropagation();openEditPair('${mc}','${sc}')">${IC_EDIT}</button></td>
+        onclick="event.stopPropagation();openEditPair('${mc}','${sc}')">${IC_EDIT}</button><button
+        class="ib ib-d" title="ลบคู่ทดแทน"
+        onclick="event.stopPropagation();openDelPair('${mc}','${sc}')">${IC_DEL}</button></td>
     </tr>`;}).join('') : `<tr><td colspan="14" style="text-align:center;padding:36px;color:var(--mut)">ไม่พบคู่ทดแทนตามเงื่อนไข</td></tr>`;
   const mains=new Set(l.map(p=>p[0]));
   g('cnt').innerHTML=`<b>${l.length}</b> คู่ · ครอบคลุมวัตถุดิบหลัก <b>${mains.size}</b> รายการ`;
@@ -674,6 +682,95 @@ function savePair(mc,sc){
   closeDlg(); renderPair(); renderShort();
   toast(`บันทึกคู่ทดแทน ${mc} → ${sc} แล้ว`,'ok');
 }
+/* ═════════ เพิ่มคู่ทดแทนใหม่ ═════════
+   ลำดับตั้งต้น = ต่อท้ายสายของวัตถุดิบหลักที่เลือก ผู้ใช้จึงไม่ต้องไปไล่ดูเองว่าสายนั้นมีกี่ตัวแล้ว */
+const MCODES=Object.keys(M).sort();
+const optList=(sel)=>MCODES.map(c=>`<option value="${c}" ${c===sel?'selected':''}>${c} — ${nm(c)}</option>`).join('');
+function nextPri(mc){return PAIRS.filter(x=>x[0]===mc).length+1;}
+function openAddPair(){
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg sm">
+    <div class="dlg-hd"><h3>เพิ่มคู่วัตถุดิบทดแทน<small>กำหนดว่าตัวไหนใช้แทนตัวไหนได้</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="tw" style="max-height:none"><table>
+        <thead><tr><th class="c" style="width:48px">#</th><th style="width:190px">ค่า</th><th>กำหนด</th></tr></thead>
+        <tbody>
+          <tr><td class="c seq">1</td><td>วัตถุดิบหลัก</td>
+            <td><select class="sel" id="apMain" style="width:100%" onchange="apSyncPri()">
+              ${optList('')}</select></td></tr>
+          <tr><td class="c seq">2</td><td>วัตถุดิบตัวแทน</td>
+            <td><select class="sel" id="apSub" style="width:100%">${optList('')}</select></td></tr>
+          <tr><td class="c seq">3</td><td>ลำดับความสำคัญ</td>
+            <td><input class="inp" id="apPri" type="number" min="1" value="1" style="width:90px" />
+              <span style="color:var(--mut);font-size:12px;margin-left:8px">เลขน้อย = หยิบก่อน</span></td></tr>
+          <tr><td class="c seq">4</td><td>อัตราแปลง (ตัวแทน : หลัก)</td>
+            <td><input class="inp" id="apRat" type="number" step="0.001" min="0.001" value="1.000" style="width:110px" />
+              <span style="color:var(--mut);font-size:12px;margin-left:8px" id="apRatU">ตัวแทนกี่หน่วย ต่อของหลัก 1 หน่วย</span></td></tr>
+          <tr><td class="c seq">5</td><td>เงื่อนไขอนุมัติ</td>
+            <td><select class="sel" id="apAp" style="width:220px">
+              ${Object.entries(AP).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('')}
+            </select></td></tr>
+          <tr><td class="c seq">6</td><td>สถานะ</td>
+            <td><select class="sel" id="apSt" style="width:180px">
+              ${Object.entries(ST).map(([k,v])=>`<option value="${k}" ${k==='wait'?'selected':''}>${v[0]}</option>`).join('')}
+            </select></td></tr>
+          <tr><td class="c seq">7</td><td>หมายเหตุ</td>
+            <td><input class="inp" id="apNote" placeholder="เหตุผลที่ใช้แทนกันได้ เช่น ผลทดสอบหรือข้อตกลงกับลูกค้า" style="width:100%" /></td></tr>
+        </tbody></table></div>
+      <div class="hint">คู่ที่เพิ่มใหม่ตั้งต้นเป็น <b>รออนุมัติ</b> — MRP จะยังไม่หยิบไปใช้จนกว่าจะเปลี่ยนเป็นเปิดใช้งาน</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">ตอนนี้มีอยู่ ${PAIRS.length} คู่</span>
+      <span><button class="btn" onclick="closeDlg()">ยกเลิก</button>
+      <button class="btn btn-p" onclick="createPair()">เพิ่มคู่ทดแทน</button></span></div>
+  </div></div>`;
+  apSyncPri();
+}
+/* เลือกของหลักแล้วเลื่อนลำดับกับหน่วยให้ตรงสายนั้นทันที */
+function apSyncPri(){
+  const mc=g('apMain').value;
+  g('apPri').value=nextPri(mc);
+  g('apRatU').textContent=`ตัวแทนกี่ ${un(mc)||'หน่วย'} ต่อของหลัก 1 ${un(mc)||'หน่วย'}`;
+}
+function createPair(){
+  const mc=g('apMain').value, sc=g('apSub').value;
+  const pri=+g('apPri').value, rat=+g('apRat').value;
+  if(mc===sc){toast('วัตถุดิบหลักกับตัวแทนต้องไม่ใช่ตัวเดียวกัน','warn');return;}
+  if(PAIRS.some(x=>x[0]===mc&&x[1]===sc)){toast(`มีคู่ทดแทนนี้อยู่แล้ว ${mc} → ${sc}`,'warn');return;}
+  if(!(rat>0)){toast('อัตราแปลงต้องมากกว่า 0','warn');return;}
+  PAIRS.push([mc,sc,pri>0?pri:1,rat,g('apAp').value,g('apSt').value,g('apNote').value.trim()]);
+  closeDlg(); renderPair(); renderShort();
+  toast(`เพิ่มคู่ทดแทนแล้ว ${mc} → ${sc}`,'ok');
+}
+
+/* ═════════ ลบคู่ทดแทน ═════════
+   ถามยืนยันก่อนเสมอ และบอกด้วยว่าเคยถูกใช้จริงไปแล้วกี่ครั้ง — ประวัติที่ผ่านมาไม่ถูกลบตาม */
+function openDelPair(mc,sc){
+  const used=LOG.filter(l=>l[2]===mc&&l[3]===sc).length;
+  g('dlgRoot').innerHTML=`
+  <div class="mask" onclick="if(event.target===this)closeDlg()"><div class="dlg sm">
+    <div class="dlg-hd"><h3>ลบคู่วัตถุดิบทดแทน<small>${mc} → ${sc}</small></h3>
+      <button class="dlg-x" onclick="closeDlg()">×</button></div>
+    <div class="dlg-bd">
+      <div class="chain">
+        <span class="node main"><b>${mc}</b><div class="m">${nm(mc)}</div></span>
+        <span class="arw">→</span>
+        <span class="node"><b>${sc}</b><div class="m">${nm(sc)}</div></span>
+      </div>
+      <div class="hint">${used?`คู่นี้เคยถูกใช้จริงไปแล้ว <b>${used} ครั้ง</b> — ประวัติเดิมยังอยู่ครบ ลบแล้วแค่ MRP รอบถัดไปจะไม่หยิบตัวนี้มาใช้อีก`
+        :'คู่นี้ยังไม่เคยถูกใช้จริง ลบแล้ว MRP รอบถัดไปจะไม่หยิบตัวนี้มาใช้อีก'}</div>
+    </div>
+    <div class="dlg-ft"><span style="font-size:12.5px;color:var(--mut)">${nm(mc)} → ${nm(sc)}</span>
+      <span><button class="btn" onclick="closeDlg()">ยกเลิก</button>
+      <button class="btn btn-p" onclick="doDelPair('${mc}','${sc}')">ลบคู่ทดแทน</button></span></div>
+  </div></div>`;
+}
+function doDelPair(mc,sc){
+  const i=PAIRS.findIndex(x=>x[0]===mc&&x[1]===sc);
+  if(i>=0) PAIRS.splice(i,1);
+  closeDlg(); renderPair(); renderShort();
+  toast(`ลบคู่ทดแทนแล้ว ${mc} → ${sc}`,'ok');
+}
 function closeDlg(){g('dlgRoot').innerHTML='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();});
 
@@ -728,7 +825,7 @@ function openSubReport(){
             ['ต้องผ่าน QA',cnt(4,'qa')+' คู่'],
             ['ต้องให้ลูกค้าอนุมัติ',cnt(4,'cust')+' คู่'],
             ['รวมคู่ทดแทนทั้งหมด',PAIRS.length+' คู่','b']],
-    note:'MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว) · ประวัติการใช้จริงดูจากแท็บประวัติของหน้าจอ',
+    note:'MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว)',
     signs:[['ผู้จัดทำ','Prepared by'],['ฝ่ายวางแผน','Planning'],['QA อนุมัติ','QA Approved by']]
   });
 }
@@ -826,6 +923,26 @@ function openSubReport(){
 "เท่ากัน":"Equal",
 "ไม่มีของ":"Out of stock",
 "แก้ไขคู่ทดแทน":"Edit substitute pair",
+"ลบคู่ทดแทน":"Delete substitute pair",
+"จัดการ":"Actions",
+"เพิ่มคู่วัตถุดิบทดแทน":"Add Substitute Material Pair",
+"กำหนดว่าตัวไหนใช้แทนตัวไหนได้":"Define which material can stand in for which",
+"วัตถุดิบตัวแทน":"Substitute material",
+"เหตุผลที่ใช้แทนกันได้ เช่น ผลทดสอบหรือข้อตกลงกับลูกค้า":"Why they are interchangeable — a test result or an agreement with the customer",
+"คู่ที่เพิ่มใหม่ตั้งต้นเป็น":"A new pair starts as",
+"— MRP จะยังไม่หยิบไปใช้จนกว่าจะเปลี่ยนเป็นเปิดใช้งาน":"— MRP will not pick it up until you switch it to active",
+"ตอนนี้มีอยู่":"Currently",
+"เพิ่มคู่ทดแทน":"Add Substitute Pair",
+"วัตถุดิบหลักกับตัวแทนต้องไม่ใช่ตัวเดียวกัน":"The primary and the substitute cannot be the same material",
+"มีคู่ทดแทนนี้อยู่แล้ว":"This substitute pair already exists",
+"อัตราแปลงต้องมากกว่า 0":"Conversion ratio must be greater than 0",
+"เพิ่มคู่ทดแทนแล้ว":"Substitute pair added",
+"ลบคู่วัตถุดิบทดแทน":"Delete Substitute Material Pair",
+"คู่นี้เคยถูกใช้จริงไปแล้ว":"This pair has already been used",
+"— ประวัติเดิมยังอยู่ครบ ลบแล้วแค่ MRP รอบถัดไปจะไม่หยิบตัวนี้มาใช้อีก":"— the history stays intact; deleting only stops the next MRP run from picking it again",
+"คู่นี้ยังไม่เคยถูกใช้จริง ลบแล้ว MRP รอบถัดไปจะไม่หยิบตัวนี้มาใช้อีก":"This pair has never been used. Once deleted, the next MRP run will not pick it again.",
+"ลบคู่ทดแทนแล้ว":"Substitute pair deleted",
+"ตัวแทนกี่หน่วย ต่อของหลัก 1 หน่วย":"Substitute units per 1 unit of the primary",
 "ไม่พบคู่ทดแทนตามเงื่อนไข":"No substitute pairs match the filters",
 "คู่ · ครอบคลุมวัตถุดิบหลัก":"pairs · covering",
 "ครอบคลุมวัตถุดิบหลัก":"covering",
@@ -930,7 +1047,7 @@ function openSubReport(){
 "วันที่พิมพ์":"Print Date",
 "ผู้พิมพ์":"Printed by",
 "รวมคู่ทดแทนทั้งหมด":"Total Substitute Pairs",
-"MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว) · ประวัติการใช้จริงดูจากแท็บประวัติของหน้าจอ":"MRP applies substitutes automatically in priority order when the primary runs short (only pairs that are active with approval conditions already met) · actual usage history is on the History tab of this screen",
+"MRP จะหยิบตัวแทนไปใช้เองตามลำดับเมื่อของหลักไม่พอ (เฉพาะคู่สถานะเปิดใช้งาน + เงื่อนไขอนุมัติผ่านแล้ว)":"MRP applies substitutes automatically in priority order when the primary runs short (only pairs that are active with approval conditions already met)",
 "ฝ่ายวางแผน":"Planning",
 "QA อนุมัติ":"QA Approved by"
 };</script>
